@@ -859,7 +859,7 @@ we usually mean I can have one program
 
 174
 00:07:01,690 --> 00:07:04,090
-已经启动并且通过 RPC 
+已经启动并且通过 RPC
 that has launched, remote procedure
 
 175
@@ -870,7 +870,7 @@ calls requests to different servers on
 176
 00:07:06,010 --> 00:07:08,140
 然后同时在等待多个回复
-the network and is waiting for many replies at the same time 
+the network and is waiting for many replies at the same time
 
 177
 00:07:08,140 --> 00:07:10,570
@@ -1070,7 +1070,7 @@ be... it's rare that we'll sort of think
 225
 00:08:57,440 --> 00:08:59,480
 放在这一类并行化上
-specifically about this kind of parallelism 
+specifically about this kind of parallelism
 
 226
 00:08:59,480 --> 00:09:01,640
@@ -1255,7 +1255,7 @@ sleeps for a second again and so in the
 265
 00:10:28,700 --> 00:10:31,400
 在后面的 lab 里，你最后将会创建这样的线程
-labs you'll end up firing off these kind of threads quite a bit 
+labs you'll end up firing off these kind of threads quite a bit
 
 266
 00:10:31,400 --> 00:10:36,560
@@ -1425,13 +1425,12 @@ or we'd for some reason we didn't want
 301
 00:12:15,089 --> 00:12:16,800
 那么我们如何写程序？
-to use threads like how would we be able to write a program 
+to use threads like how would we be able to write a program
 
 302
 00:12:16,800 --> 00:12:21,209
 你知道服务器
-that could you know a server 
-
+that could you know a server
 
 304
 00:12:21,209 --> 00:12:23,339
@@ -1683,7 +1682,6 @@ like to keep you know 32 cores busy on a big server machine
 使用一个单一循环的话，你知道，它相当的不自然
 you know a single loop is you know it's it's not a very
 
-
 363
 00:14:49,149 --> 00:14:50,620
 也很难获得多核的性能
@@ -1782,7 +1780,7 @@ this could be expensive
 386
 00:15:39,370 --> 00:15:46,060
 如果使用事件驱动编程，花点时间的话
-and it's easier to write a very you know at some expense in programmer time 
+and it's easier to write a very you know at some expense in programmer time
 
 388
 00:15:46,060 --> 00:15:47,440
@@ -1862,7 +1860,7 @@ just you know sort of one event loop per core and
 405
 00:16:49,660 --> 00:16:54,700
 对于 IO 并发来说，这是一种获得并行化的方式
-that you know that would be a way to get both parallelism and to the I/O concurrency concurrency 
+that you know that would be a way to get both parallelism and to the I/O concurrency concurrency
 
 407
 00:16:54,700 --> 00:16:59,160
@@ -1897,7 +1895,7 @@ space a single bunch of memory for the
 414
 00:17:18,690 --> 00:17:22,109
 在这个进程里你可能同时会有好多个线程
-process and inside a process you might have multiple threads 
+process and inside a process you might have multiple threads
 
 415
 00:17:22,109 --> 00:17:25,290
@@ -1917,7 +1915,7 @@ and then when your go process creates go
 420
 00:17:35,880 --> 00:17:37,380
 它们实际上都是在同一个进程里的
-routines those are so sitting inside that one process 
+routines those are so sitting inside that one process
 
 421
 00:17:37,380 --> 00:17:42,990
@@ -2092,7 +2090,7 @@ so when the hardware timer ticks and the
 463
 00:19:35,950 --> 00:19:38,950
 操作系统就判断是时候把 CPU 从当前正在运行的进程剥夺
-operating systems decides it's time to take away the CPU from the currently running process 
+operating systems decides it's time to take away the CPU from the currently running process
 
 465
 00:19:38,950 --> 00:19:40,480
@@ -2142,7 +2140,7 @@ situation like this the operating system
 475
 00:20:08,620 --> 00:20:11,560
 这儿有两个线程在这个进程中，有三个线程在那个进程
-might know that there are two threads here in this process and three threads in this process 
+might know that there are two threads here in this process and three threads in this process
 
 477
 00:20:11,560 --> 00:20:13,600
@@ -2152,7 +2150,7 @@ and when the timer ticks
 478
 00:20:13,600 --> 00:20:16,870
 操作系统会基于一些调度算法选择一个不同的线程来运行
-the operating system will based on some scheduling algorithm pick a different thread thread to run 
+the operating system will based on some scheduling algorithm pick a different thread thread to run
 
 480
 00:20:16,870 --> 00:20:18,730
@@ -2167,7 +2165,7 @@ in addition go cleverly multiplex as
 484
 00:20:25,690 --> 00:20:29,860
 在上面运行尽可能多的 goroutine 以节省开支
-many go routines on top of single operating system threads to reduce overhead 
+many go routines on top of single operating system threads to reduce overhead
 
 486
 00:20:29,860 --> 00:20:32,590
@@ -2192,7 +2190,7 @@ all right okay so threads are convenient
 492
 00:20:53,409 --> 00:20:55,919
 大多数时候，使用它
-because a lot of times they allow you to write the code for each thread 
+because a lot of times they allow you to write the code for each thread
 
 493
 00:20:55,409 --> 00:20:59,919
@@ -2362,7 +2360,7 @@ that some other thread may be looking at the data
 535
 00:22:37,259 --> 00:22:39,549
 或是修改这个共享数据
-or modifying the data at the same time 
+or modifying the data at the same time
 
 536
 00:22:39,549 --> 00:22:41,739
@@ -2492,7 +2490,7 @@ the programmer wanted but chances are
 565
 00:23:47,289 --> 00:23:49,149
 碰巧程序想要的结果不是 1
-not right chances are the programmer wanted to not 1 
+not right chances are the programmer wanted to not 1
 
 566
 00:23:49,149 --> 00:24:02,710
@@ -2527,7 +2525,7 @@ in the sense that if 2 processors store
 574
 00:24:25,440 --> 00:24:27,960
 同时在相同的内存地址上执行 store 一个 32 位值
-at the same time to the same memory address 32-bit values 
+at the same time to the same memory address 32-bit values
 
 575
 00:24:27,960 --> 00:24:30,169
@@ -3507,7 +3505,7 @@ final piece of damage that comes up with
 795
 00:34:16,059 --> 00:34:23,619
 死锁是一个一般性问题
-threads deadlock the deadlock refers to the general problem 
+threads deadlock the deadlock refers to the general problem
 
 796
 00:34:23,619 --> 00:34:29,219
@@ -3555,7 +3553,7 @@ T2 也可能正在等着 T1 做一些事情
 two is waiting for thread thread one to
 
 808
-00:34:55,210 --> 00:35:00,069 
+00:34:55,210 --> 00:35:00,069
 在锁中这种情况特别常见
 do something and this is particularly common in the case of locks
 
@@ -4001,7 +3999,7 @@ and there is sort of one moderately
 
 901
 00:39:02,870 --> 00:39:04,490
-它会使用一个 map 类型的变量 fetched 
+它会使用一个 map 类型的变量 fetched
 interesting thing about it it keeps this
 
 902
@@ -4201,13 +4199,13 @@ most lazy thing because why so I'm gonna
 
 941
 00:40:51,440 --> 00:40:54,950
-为啥我非得这么改代码…… 
+为啥我非得这么改代码……
 just modify the code to run the
 
 942
 00:40:54,950 --> 00:40:57,470
 其实就是想把每个 crawl 子调用
-subsidiary crawls each in its own 
+subsidiary crawls each in its own
 
 943
 00:40:57,470 --> 00:41:00,470
@@ -4281,7 +4279,7 @@ fetch these webpages in parallel for
 
 957
 00:41:37,880 --> 00:41:42,800
-达到更高的性能 好的 
+达到更高的性能 好的
 higher performance so okay so you're
 
 958
@@ -4317,7 +4315,7 @@ right through that loop I was gonna
 964
 00:42:02,450 --> 00:42:04,849
 当最开始的那个网页被抓取（第22行）
-fetch 1 page when the very first webpage at 
+fetch 1 page when the very first webpage at
 
 965
 00:42:04,849 --> 00:42:07,039
@@ -4571,7 +4569,7 @@ they're all sharing this table of state
 
 1015
 00:44:30,400 --> 00:44:32,859
-记录已爬取URL的表格 
+记录已爬取URL的表格
 this table of fetched URLs because if one
 
 1016
@@ -4586,7 +4584,7 @@ another goroutine to accidentally
 
 1018
 00:44:36,970 --> 00:44:40,420
-意外地爬取同一个URL 
+意外地爬取同一个URL
 fetch the same URL and as you can see
 
 1019
@@ -4646,12 +4644,12 @@ two different web pages if we didn't
 
 1030
 00:45:13,930 --> 00:45:17,559
-如果我们没有锁 
+如果我们没有锁
 have the lock they'd both access the
 
 1031
 00:45:17,559 --> 00:45:18,819
-它们都将访问表格 
+它们都将访问表格
 math table to see if the threaded and
 
 1032
@@ -4736,7 +4734,7 @@ interfering and so that's what the locks
 
 1048
 00:45:57,309 --> 00:46:01,150
-为我们做到的事情 对于这里使用锁的策略 
+为我们做到的事情 对于这里使用锁的策略
 are doing for us okay so so actually any
 
 1049
@@ -4755,7 +4753,7 @@ all right once we check the URLs entry
 
 1052
 00:46:10,760 --> 00:46:13,670
-在51行 
+在51行
 in the table at line 51 it just crawls
 
 1053
@@ -4780,7 +4778,7 @@ of the threads yes so the question is
 
 1057
 00:46:35,450 --> 00:46:43,970
-关于F. 不 
+关于F. 不
 what's with the F dot no no the mu it is
 
 1058
@@ -4880,12 +4878,12 @@ associates the mu with that structure or
 
 1077
 00:47:28,880 --> 00:47:30,950
-或是和fetch表联系在一起 
+或是和fetch表联系在一起
 with the fetch map or anything it's just
 
 1078
 00:47:30,950 --> 00:47:33,710
-它只是个锁的对象 
+它只是个锁的对象
 a lock objects and just has a Lock
 
 1079
@@ -5064,7 +5062,7 @@ because there's some curious things
 
 1114
 00:49:09,430 --> 00:49:15,819
-好的 好的 我们爬取网页 
+好的 好的 我们爬取网页
 about it okay good okay so we fetch the
 
 1115
@@ -5084,7 +5082,7 @@ page we just fetch so that's done in
 
 1118
 00:49:23,170 --> 00:49:26,440
-在第56行 
+在第56行
 line 56 on line 56 just loops over
 
 1119
@@ -5095,7 +5093,7 @@ the URLs that the fetch function
 1120
 00:49:29,890 --> 00:49:32,950
 第58行 对每个URL
-returned and for each one fires off a 
+returned and for each one fires off a
 
 1121
 00:49:32,950 --> 00:49:35,740
@@ -5149,7 +5147,7 @@ give the body and that's a clears and so
 
 1131
 00:50:08,930 --> 00:50:12,500
-现在这是一个对象 
+现在这是一个对象
 this is an object now this is like it's
 
 1132
@@ -5304,7 +5302,7 @@ function returns so that brings us to
 
 1162
 00:51:24,920 --> 00:51:27,380
-引入了WaitGroup 第55行的WaitGroup 
+引入了WaitGroup 第55行的WaitGroup
 the the wait group the WaitGroup at
 
 1163
@@ -5504,7 +5502,7 @@ and so really the white right way to I'm
 
 1202
 00:53:12,130 --> 00:53:13,660
-我确定你其实知道这个 
+我确定你其实知道这个
 sure you had this in mind and asking the
 
 1203
@@ -5549,7 +5547,7 @@ finished yes
 
 1211
 00:53:53,559 --> 00:53:58,789
-是的 提问说的是 
+是的 提问说的是
 and yes yeah so the question is how come
 
 1212
@@ -5669,7 +5667,7 @@ wondering why u is passed as a
 
 1235
 00:55:48,550 --> 00:55:54,780
-传递给58行这个函数 
+传递给58行这个函数
 parameter to the function at 58 okay
 
 1236
@@ -5884,7 +5882,7 @@ we launched would see a different
 
 1278
 00:57:48,910 --> 00:57:51,400
-不同的值 
+不同的值
 value in the u variable after the outer
 
 1279
@@ -6074,7 +6072,7 @@ value so when you if you have a string
 
 1316
 01:00:03,320 --> 01:00:06,590
-里面含有一个字母‘a’ 
+里面含有一个字母‘a’
 variable that has has a in it and then
 
 1317
@@ -6099,7 +6097,7 @@ a different string and and because the
 
 1321
 01:00:15,950 --> 01:00:18,680
-由于for循环改变了变量u 
+由于for循环改变了变量u
 for loop changes the u variable to point
 
 1322
@@ -6168,7 +6166,7 @@ this is just like a horrible detail but
 
 1335
 01:01:46,440 --> 01:01:47,700
-但是不幸的 
+但是不幸的
 it is unfortunately one that you'll run
 
 1336
@@ -6233,7 +6231,7 @@ to anymore since the outer function is
 
 1348
 01:02:30,030 --> 01:02:32,460
-答案是 
+答案是
 as returned and the answer is that go
 
 1349
@@ -6303,7 +6301,7 @@ on the stack as you might expect it's
 
 1362
 01:03:01,590 --> 01:03:03,180
-如果编译器看到闭包 
+如果编译器看到闭包
 moved to the heap if if the compiler
 
 1363
@@ -6423,7 +6421,7 @@ what would happen if we hadn't locked
 
 1386
 01:03:57,949 --> 01:04:00,689
-好的 我认为 你懂的  
+好的 我认为 你懂的
 right I'm claiming oh you know you don't
 
 1387
@@ -6463,7 +6461,7 @@ see a url called twice or I fetch
 
 1394
 01:04:26,459 --> 01:04:28,589
-是的 你会想 
+是的 你会想
 twice yeah that's yeah that would be the
 
 1395
@@ -6478,7 +6476,7 @@ run it without locks and we're looking
 
 1397
 01:04:34,799 --> 01:04:36,269
-我们看ConcurrentMutex 
+我们看ConcurrentMutex
 at the ConcurrentMutex the one in the
 
 1398
@@ -6493,7 +6491,7 @@ fetched anything twice it's only five
 
 1400
 01:04:40,369 --> 01:04:49,139
-再运行一次 天哪 
+再运行一次 天哪
 run again gosh so far genius so maybe
 
 1401
@@ -6523,12 +6521,12 @@ it will fail okay the problem is that
 
 1406
 01:05:03,329 --> 01:05:04,559
-你懂的 
+你懂的
 you know this is only a couple of
 
 1407
 01:05:04,559 --> 01:05:06,179
-这里只是几个指令 
+这里只是几个指令
 instructions here and so the chances of
 
 1408
@@ -6548,8 +6546,7 @@ stumble on this you know the same couple
 
 1411
 01:05:12,269 --> 01:05:14,489
-
-of instructions at the same time is
+ 
 
 1412
 01:05:14,489 --> 01:05:17,729
@@ -6588,7 +6585,7 @@ what do we you know it it can be in
 
 1419
 01:05:32,940 --> 01:05:34,920
-复杂的程序里 
+复杂的程序里
 complex programs quite difficult to
 
 1420
@@ -6608,12 +6605,12 @@ looks completely reasonable that is in
 
 1423
 01:05:41,910 --> 01:05:44,610
-但实际上有某些你未知的race 
+但实际上有某些你未知的race
 fact sort of unknown to you using shared
 
 1424
 01:05:44,610 --> 01:05:47,970
-是使用共享变量导致的  
+是使用共享变量导致的
 variables and the answer is you really
 
 1425
@@ -6633,7 +6630,7 @@ go actually gives us this pretty good
 
 1428
 01:05:55,890 --> 01:06:00,119
-内置于go 
+内置于go
 race detector built-in to go and you
 
 1429
@@ -6743,7 +6740,7 @@ that means that one thread did a write
 
 1450
 01:06:58,170 --> 01:07:00,869
-执行了写入 
+执行了写入
 at line 44 and then without any
 
 1451
@@ -6843,7 +6840,7 @@ and if the race detector ever sees a
 
 1470
 01:07:40,980 --> 01:07:42,450
-有内存位置被写入 
+有内存位置被写入
 ha there was a memory location that was
 
 1471
@@ -6973,7 +6970,7 @@ and you just have to use it for your 824
 
 1496
 01:09:01,620 --> 01:09:07,830
-这是这里的race 
+这是这里的race
 labs okay so this is race here and
 
 1497
@@ -7082,7 +7079,7 @@ on the number of simultaneous threads
 
 1518
 01:10:28,719 --> 01:10:30,580
-数量界限 你懂的 
+数量界限 你懂的
 that might create you know with the test
 
 1519
@@ -7122,7 +7119,7 @@ accidentally create billions of threads
 
 1526
 01:10:43,380 --> 01:10:46,119
-因为 你懂的 几千个线程 
+因为 你懂的 几千个线程
 because you know thousands of threads
 
 1527
@@ -7217,7 +7214,7 @@ implemented in a significantly
 
 1545
 01:11:25,600 --> 01:11:28,780
-使用了channel 
+使用了channel
 different way using channels instead of
 
 1546
@@ -7298,7 +7295,7 @@ the exploration of the graph which the
 1561
 01:12:13,330 --> 01:12:17,940
 这个版本
-previous crawler did this one fires off just 
+previous crawler did this one fires off just
 
 1562
 01:12:17,940 --> 01:12:21,880
@@ -7447,7 +7444,7 @@ hasn't already been fetched it fires off
 
 1591
 01:13:39,969 --> 01:13:42,190
-启动一个新的worker去爬取那个URL 
+启动一个新的worker去爬取那个URL
 a new worker at line 94 to fetch that
 
 1592
@@ -7617,7 +7614,7 @@ the channels internal data to ensure
 
 1625
 01:15:22,449 --> 01:15:24,190
-来保证 
+来保证
 that it doesn't actually have any
 
 1626
@@ -7662,7 +7659,7 @@ about when the crawl has completely
 
 1634
 01:16:00,590 --> 01:16:03,160
-我们爬取了每个URL 
+我们爬取了每个URL
 finished and we fetched every single URL
 
 1635
@@ -7712,7 +7709,7 @@ workers is finished and when the number
 
 1644
 01:16:24,920 --> 01:16:29,060
-降为0 
+降为0
 of outstanding workers goes to zero then
 
 1645
@@ -7777,7 +7774,7 @@ can you say that again
 
 1657
 01:17:09,749 --> 01:17:12,219
-问题说的是 
+问题说的是
 so the question is alright so you can
 
 1658
@@ -7852,7 +7849,7 @@ observation is gosh you know wouldn't it
 
 1672
 01:17:56,289 --> 01:17:57,510
-写出的代码 
+写出的代码
 be nice to be able to write code that
 
 1673
@@ -7947,7 +7944,7 @@ contents of the channel and then quit
 
 1691
 01:19:49,190 --> 01:19:54,230
-89行的for循环将会读 
+89行的for循环将会读
 that is the for loop at 89 is going to
 
 1692
@@ -7991,6 +7988,7 @@ this actually we have a presentation
 scheduled by the TAs which will talk
 
 1700
-01:20:16,260 --> 001:20:18,260
+01:20:16,260 --> 01:20:18,260
 在那儿会聊更多关于go的话题
 more about go
+

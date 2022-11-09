@@ -111,7 +111,7 @@ the rules in Figure two say that an
 23
 00:01:16,459 --> 00:01:18,920
 AppendEntries RPC请求的步骤2
-AppendEntries RPC actually at step 2 
+AppendEntries RPC actually at step 2
 
 24
 00:01:18,920 --> 00:01:22,099
@@ -176,7 +176,7 @@ out so in this case the log index
 36
 00:01:57,169 --> 00:02:02,029
 日志索引previousLogIndex是12
-of the previous entry is 12 
+of the previous entry is 12
 
 37
 00:02:02,029 --> 00:02:06,709
@@ -336,7 +336,7 @@ had a different log so instead of
 68
 00:03:28,799 --> 00:03:30,299
 所以服务#2没有接受这个日志条目
-accepting log entry 
+accepting log entry
 
 69
 00:03:30,299 --> 00:03:33,440
@@ -540,7 +540,7 @@ whatever's in the AppendEntries so
 
 109
 00:05:28,340 --> 00:05:32,360
-所以服务#2将这样做 
+所以服务#2将这样做
 server 2 is going to do that now it's
 
 110
@@ -669,7 +669,7 @@ followers starting from that point that
 a complete remainder of the server's log
 
 135
-00:06:47,280 --> 00:06:49,810 
+00:06:47,280 --> 00:06:49,810
 这之后 它们在最后一个位置的日志是相同的
 After that last point at which they were
 
@@ -700,7 +700,7 @@ here which are now su erase that I
 
 141
 00:07:11,740 --> 00:07:15,010
-4 和 5 
+4 和 5
 forget what they were 4 & 5 so there
 
 142
@@ -881,7 +881,7 @@ clients gonna resend it by-and-by yes
 177
 00:08:58,440 --> 00:09:05,460
 它总是会删除跟随者日志的后缀
-Well it's always deleting suffix of the followers log 
+Well it's always deleting suffix of the followers log
 
 178
 00:09:05,460 --> 00:09:10,750
@@ -896,7 +896,7 @@ the leader has a complete log so all of its fails
 180
 00:09:13,840 --> 00:09:17,510
 它可以发送完整的日志给跟随者
-it can just send us complete log to the follower 
+it can just send us complete log to the follower
 
 181
 00:09:17,510 --> 00:09:19,270
@@ -930,7 +930,7 @@ tests for lab two you may end up backing up
 
 187
 00:09:28,780 --> 00:09:31,330
-你可能要结束备份第一个条目 
+你可能要结束备份第一个条目
 to the very first entry
 
 188
@@ -966,12 +966,12 @@ okay all right so in this example which I guess are now erased
 194
 00:09:55,800 --> 00:09:57,850
 我们选举S3作为领导者
-we elected s3 as the leader 
+we elected s3 as the leader
 
 195
 00:09:57,850 --> 00:10:02,680
 问题是哪些节点允许成为领导者
-and the question is could we you know 
+and the question is could we you know
 
 196
 00:10:02,680 --> 00:10:04,870

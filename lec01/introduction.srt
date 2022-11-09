@@ -2017,7 +2017,7 @@ infrastructure that tend to come up a
 
 404
 00:17:58,950 --> 00:18:13,620
-涉及许多储存 通信 
+涉及许多储存 通信
 lot our storage communication and
 
 405
@@ -2777,7 +2777,7 @@ you have to be careful about the design
 
 556
 00:25:12,040 --> 00:25:13,450
-才能获得这样的性能 
+才能获得这样的性能
 in order to actually get that
 
 557
@@ -2872,7 +2872,7 @@ you've you know 100 million people sign
 
 575
 00:26:08,580 --> 00:26:13,500
-注册你网站的账户 
+注册你网站的账户
 up your service ID how do you how do you
 
 576
@@ -4012,7 +4012,7 @@ both of which are agonizingly slow on
 
 803
 00:36:00,920 --> 00:36:04,220
-现在3GHz的微处理器 
+现在3GHz的微处理器
 the scale of you know three gigahertz
 
 804
@@ -6270,6 +6270,7 @@ we're just gonna emit and emit takes two
 emit，只调用Map，
 arguments emit you know call only Map can
 
+None
 00:56:36,890 --> 00:56:38,420
 make emit provided by the MapReduce
 emit，只调用Map，
