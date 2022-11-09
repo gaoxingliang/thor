@@ -1,0 +1,5052 @@
+1
+00:00:00,860 --> 00:00:05,120
+okay so we're in the middle of
+
+2
+00:00:05,629 --> 00:00:08,790
+explaining Bitcoin design and I've
+
+3
+00:00:08,790 --> 00:00:11,639
+gotten to the point of ask of wanting
+
+4
+00:00:11,639 --> 00:00:16,710
+there to be a global published record of
+
+5
+00:00:16,710 --> 00:00:24,060
+all the transactions all right okay and
+
+6
+00:00:24,060 --> 00:00:27,990
+this is this requirement is very similar
+
+7
+00:00:27,990 --> 00:00:29,550
+to the requirement for certificate
+
+8
+00:00:29,550 --> 00:00:31,430
+transparency from last week and the
+
+9
+00:00:31,430 --> 00:00:34,170
+solution is somewhat reminiscent
+
+10
+00:00:34,170 --> 00:00:37,770
+although more sophisticated then
+
+11
+00:00:37,770 --> 00:00:40,230
+certificate transparency solution and a
+
+12
+00:00:40,230 --> 00:00:42,480
+name we want a public log this is often
+
+13
+00:00:42,480 --> 00:00:46,020
+also called a public ledger okay so how
+
+14
+00:00:46,020 --> 00:00:47,190
+are we going to build ourselves a public
+
+15
+00:00:47,190 --> 00:00:49,980
+ledger so that everybody agrees on all
+
+16
+00:00:49,980 --> 00:00:51,120
+the transactions that have already
+
+17
+00:00:51,120 --> 00:00:53,190
+happened and further when they agree on
+
+18
+00:00:53,190 --> 00:00:55,680
+the order of the transactions because if
+
+19
+00:00:55,680 --> 00:00:59,940
+Y tries to send this coin to both Z and
+
+20
+00:00:59,940 --> 00:01:01,559
+Q at the same time you know we want the
+
+21
+00:01:01,559 --> 00:01:02,850
+first one to win and the second one to
+
+22
+00:01:02,850 --> 00:01:03,359
+be ignored
+
+23
+00:01:03,359 --> 00:01:06,060
+whatever Yellin which one want which
+
+24
+00:01:06,060 --> 00:01:08,760
+transaction was came first and which
+
+25
+00:01:08,760 --> 00:01:10,860
+came second and should be ignored okay
+
+26
+00:01:10,860 --> 00:01:15,570
+so how to make a ledger so here's a bad
+
+27
+00:01:15,570 --> 00:01:17,960
+idea
+
+28
+00:01:19,100 --> 00:01:21,780
+well a good idea actually have the most
+
+29
+00:01:21,780 --> 00:01:23,670
+simplest idea is to just pick somebody
+
+30
+00:01:23,670 --> 00:01:25,290
+who everybody trusts and have that
+
+31
+00:01:25,290 --> 00:01:27,810
+somebody maintain the ledger for you
+
+32
+00:01:27,810 --> 00:01:29,280
+every time you want to do transaction
+
+33
+00:01:29,280 --> 00:01:31,320
+you tell the trusted entity what the
+
+34
+00:01:31,320 --> 00:01:33,090
+transaction is it just accumulates a log
+
+35
+00:01:33,090 --> 00:01:35,130
+and it's willing to give a copy of that
+
+36
+00:01:35,130 --> 00:01:37,049
+log to anyone so anyone can inspect it
+
+37
+00:01:37,049 --> 00:01:38,930
+and see if coins already been spent and
+
+38
+00:01:38,930 --> 00:01:41,759
+that actually is a good idea and if you
+
+39
+00:01:41,759 --> 00:01:44,369
+could possibly do it you should for
+
+40
+00:01:44,369 --> 00:01:46,350
+various reasons the Bitcoin designers
+
+41
+00:01:46,350 --> 00:01:47,820
+rejected this very obvious
+
+42
+00:01:47,820 --> 00:01:51,420
+straightforward idea and the fundamental
+
+43
+00:01:51,420 --> 00:01:54,060
+reason is that in a big system in a
+
+44
+00:01:54,060 --> 00:01:57,090
+worldwide system there's unlikely to be
+
+45
+00:01:57,090 --> 00:02:00,090
+any single entity that everyone trusts
+
+46
+00:02:00,090 --> 00:02:01,890
+and that is indeed trustworthy and has
+
+47
+00:02:01,890 --> 00:02:05,729
+no corrupt employees for example and in
+
+48
+00:02:05,729 --> 00:02:07,110
+a global system you know that means that
+
+49
+00:02:07,110 --> 00:02:09,209
+we can't have the United States you know
+
+50
+00:02:09,209 --> 00:02:10,470
+government
+
+51
+00:02:10,470 --> 00:02:12,390
+I'm the trusted entity because there's
+
+52
+00:02:12,390 --> 00:02:13,650
+plenty of governments in the world to
+
+53
+00:02:13,650 --> 00:02:15,240
+don't necessarily trust the United
+
+54
+00:02:15,240 --> 00:02:18,120
+States similarly for any other
+
+55
+00:02:18,120 --> 00:02:20,070
+individual government so really for a
+
+56
+00:02:20,070 --> 00:02:23,040
+global system there's no it's it's easy
+
+57
+00:02:23,040 --> 00:02:24,990
+to argue against the idea of having a
+
+58
+00:02:24,990 --> 00:02:27,840
+single central trusted entity so that
+
+59
+00:02:27,840 --> 00:02:29,430
+leaves us way as well we want to run the
+
+60
+00:02:29,430 --> 00:02:31,340
+system make a system that's built out of
+
+61
+00:02:31,340 --> 00:02:36,360
+mutually untrusting participants where
+
+62
+00:02:36,360 --> 00:02:41,190
+we can survive malice by you know by
+
+63
+00:02:41,190 --> 00:02:43,740
+their participants okay so here's a
+
+64
+00:02:43,740 --> 00:02:48,120
+here's a bad possibility let's just let
+
+65
+00:02:48,120 --> 00:02:50,610
+anybody let's build a system on which
+
+66
+00:02:50,610 --> 00:02:52,650
+anybody can join so it's gonna have
+
+67
+00:02:52,650 --> 00:02:54,570
+thousands maybe if computers will call
+
+68
+00:02:54,570 --> 00:02:55,950
+them peers they're scattered all over
+
+69
+00:02:55,950 --> 00:02:56,880
+the Internet
+
+70
+00:02:56,880 --> 00:02:58,530
+and each one of them is going to be
+
+71
+00:02:58,530 --> 00:03:03,210
+running the software to for our new
+
+72
+00:03:03,210 --> 00:03:07,770
+cryptocurrency system anytime somebody
+
+73
+00:03:07,770 --> 00:03:10,590
+wants to have a new transaction like Y
+
+74
+00:03:10,590 --> 00:03:19,950
+wants to send a coin to Z Y floods their
+
+75
+00:03:19,950 --> 00:03:21,510
+new transaction sends their new
+
+76
+00:03:21,510 --> 00:03:23,970
+transaction to all the peers to send
+
+77
+00:03:23,970 --> 00:03:26,670
+them directly or another design which is
+
+78
+00:03:26,670 --> 00:03:28,200
+actually what Bitcoin uses is that Y
+
+79
+00:03:28,200 --> 00:03:30,030
+sends a new transaction to a couple the
+
+80
+00:03:30,030 --> 00:03:33,060
+peers and then the peers afford it sort
+
+81
+00:03:33,060 --> 00:03:38,280
+of over individual TCP links to the
+
+82
+00:03:38,280 --> 00:03:39,780
+entire rest of the system so in every
+
+83
+00:03:39,780 --> 00:03:41,459
+transaction ends up being sent to all
+
+84
+00:03:41,459 --> 00:03:43,440
+the peers and the peers what they're
+
+85
+00:03:43,440 --> 00:03:46,350
+trying to do is each of them maintain a
+
+86
+00:03:46,350 --> 00:03:48,209
+complete copy of the log of all
+
+87
+00:03:48,209 --> 00:03:50,730
+transactions and what we really want is
+
+88
+00:03:50,730 --> 00:03:54,060
+for all the peers used all the honest
+
+89
+00:03:54,060 --> 00:03:56,850
+peers for their transaction logs to be
+
+90
+00:03:56,850 --> 00:03:58,739
+identical they'll agree on which
+
+91
+00:03:58,739 --> 00:04:01,140
+transactions exist and just as important
+
+92
+00:04:01,140 --> 00:04:03,269
+on the order of those transactions so
+
+93
+00:04:03,269 --> 00:04:05,580
+how can we arrange for all these peers
+
+94
+00:04:05,580 --> 00:04:09,990
+to end up processing the heading
+
+95
+00:04:09,990 --> 00:04:11,400
+transactions they're logs in the same
+
+96
+00:04:11,400 --> 00:04:13,890
+order remember of course why may have
+
+97
+00:04:13,890 --> 00:04:16,680
+sent the transaction to Z you know to
+
+98
+00:04:16,680 --> 00:04:19,290
+these peers and at the same time sent
+
+99
+00:04:19,290 --> 00:04:22,320
+its transaction to Q to some other set
+
+100
+00:04:22,320 --> 00:04:25,650
+of peers and we want to make sure that
+
+101
+00:04:25,650 --> 00:04:30,630
+despite that the peers end up with the
+
+102
+00:04:30,630 --> 00:04:32,400
+same with identical logs even if Y is
+
+103
+00:04:32,400 --> 00:04:36,450
+trying to treat well I actually don't
+
+104
+00:04:36,450 --> 00:04:39,930
+know how to design this one possibility
+
+105
+00:04:39,930 --> 00:04:43,920
+that you can imagine is that the peers
+
+106
+00:04:43,920 --> 00:04:45,690
+would somehow talk to each other about
+
+107
+00:04:45,690 --> 00:04:48,030
+each new transaction and for each new
+
+108
+00:04:48,030 --> 00:04:50,910
+slot in the log would vote on what
+
+109
+00:04:50,910 --> 00:04:54,440
+transaction should fill that slot and
+
+110
+00:04:54,440 --> 00:04:56,700
+have the majority you know since they
+
+111
+00:04:56,700 --> 00:04:58,110
+may disagree legitimately if they
+
+112
+00:04:58,110 --> 00:05:00,060
+received different transactions we have
+
+113
+00:05:00,060 --> 00:05:02,040
+a majority rule that says well we're
+
+114
+00:05:02,040 --> 00:05:03,300
+gonna all the peers are gonna look at
+
+115
+00:05:03,300 --> 00:05:05,970
+all the votes and the transaction that
+
+116
+00:05:05,970 --> 00:05:07,950
+gets the most votes is the one that will
+
+117
+00:05:07,950 --> 00:05:09,630
+go in the next slot in the log and then
+
+118
+00:05:09,630 --> 00:05:15,020
+they'll vote again on the next slide and
+
+119
+00:05:15,620 --> 00:05:17,550
+you know maybe you could get this to
+
+120
+00:05:17,550 --> 00:05:19,440
+work you'd have to know who all the
+
+121
+00:05:19,440 --> 00:05:21,000
+other peers are in order to know what a
+
+122
+00:05:21,000 --> 00:05:22,530
+majority is you don't have to know how
+
+123
+00:05:22,530 --> 00:05:25,230
+many peers there are and you really want
+
+124
+00:05:25,230 --> 00:05:27,000
+to make sure that you never count any
+
+125
+00:05:27,000 --> 00:05:30,150
+peer more than once but in a completely
+
+126
+00:05:30,150 --> 00:05:33,240
+open system like Bitcoin actually we
+
+127
+00:05:33,240 --> 00:05:34,920
+can't do either of those things we don't
+
+128
+00:05:34,920 --> 00:05:36,480
+know how many participants there are in
+
+129
+00:05:36,480 --> 00:05:38,670
+Bitcoin and furthermore the number
+
+130
+00:05:38,670 --> 00:05:41,010
+changes all the time as people peers
+
+131
+00:05:41,010 --> 00:05:43,410
+join and leave the system so we don't
+
+132
+00:05:43,410 --> 00:05:44,790
+know how many peers are so we don't know
+
+133
+00:05:44,790 --> 00:05:47,700
+what a majority would be furthermore we
+
+134
+00:05:47,700 --> 00:05:50,370
+don't have a way to reliably count votes
+
+135
+00:05:50,370 --> 00:05:52,980
+such that each participant only gets one
+
+136
+00:05:52,980 --> 00:05:56,060
+vote even assuming that was desirable
+
+137
+00:05:56,060 --> 00:05:59,900
+for example so we can't use IP addresses
+
+138
+00:05:59,900 --> 00:06:03,090
+in order to decide it's distinct votes
+
+139
+00:06:03,090 --> 00:06:04,980
+we can't say well each IP address gets
+
+140
+00:06:04,980 --> 00:06:07,380
+one vote or at most one vote because it
+
+141
+00:06:07,380 --> 00:06:09,870
+turns out to be extremely easy to either
+
+142
+00:06:09,870 --> 00:06:12,900
+forge I P addresses or by breaking into
+
+143
+00:06:12,900 --> 00:06:15,930
+people's computers to accumulate tens of
+
+144
+00:06:15,930 --> 00:06:18,479
+thousands of real computers that you can
+
+145
+00:06:18,479 --> 00:06:21,090
+control and you of course would you can
+
+146
+00:06:21,090 --> 00:06:24,890
+get them all to vote on your
+
+147
+00:06:25,840 --> 00:06:28,130
+and you can get them all to vote in the
+
+148
+00:06:28,130 --> 00:06:29,630
+system so an attacker could probably
+
+149
+00:06:29,630 --> 00:06:31,460
+accumulate a majority of votes
+
+150
+00:06:31,460 --> 00:06:34,250
+relatively easily in a sort of
+
+151
+00:06:34,250 --> 00:06:36,320
+straightforward design like this and if
+
+152
+00:06:36,320 --> 00:06:38,750
+an attacker can can get a majority of
+
+153
+00:06:38,750 --> 00:06:44,000
+the votes then it can use this majority
+
+154
+00:06:44,000 --> 00:06:47,600
+to sit to sort of say different things
+
+155
+00:06:47,600 --> 00:06:49,760
+conflicting things but with the majority
+
+156
+00:06:49,760 --> 00:06:53,720
+each time so if Z asks the system oh you
+
+157
+00:06:53,720 --> 00:06:57,280
+know with which which of the two
+
+158
+00:06:57,280 --> 00:06:59,510
+transactions came first cuz you know
+
+159
+00:06:59,510 --> 00:07:02,180
+that remember the problem were worried
+
+160
+00:07:02,180 --> 00:07:03,889
+about is that y is gonna double spend
+
+161
+00:07:03,889 --> 00:07:06,470
+some coin so it's gonna spend the same
+
+162
+00:07:06,470 --> 00:07:09,590
+coin - Q wants you to believe that and
+
+163
+00:07:09,590 --> 00:07:13,130
+it's gonna send that same Q's coin to Z
+
+164
+00:07:13,130 --> 00:07:15,290
+and 1c to believe that so maybe when Q
+
+165
+00:07:15,290 --> 00:07:17,270
+asks what's the next transaction to log
+
+166
+00:07:17,270 --> 00:07:19,310
+the majority controlled by the attacker
+
+167
+00:07:19,310 --> 00:07:21,560
+can say oh you know wise transfer to Q
+
+168
+00:07:21,560 --> 00:07:22,970
+is the very next one in the log and that
+
+169
+00:07:22,970 --> 00:07:26,570
+comes before this transaction and when Z
+
+170
+00:07:26,570 --> 00:07:28,520
+asks maybe the attackers majority will
+
+171
+00:07:28,520 --> 00:07:30,169
+say well you know the transfer Z comes
+
+172
+00:07:30,169 --> 00:07:33,140
+first and this other transaction to Q
+
+173
+00:07:33,140 --> 00:07:36,979
+comes second and that would mean the
+
+174
+00:07:36,979 --> 00:07:40,570
+attacker can trick q + Z into X into
+
+175
+00:07:40,570 --> 00:07:43,669
+accepting the same coin that's a double
+
+176
+00:07:43,669 --> 00:07:48,110
+spend and that's a disaster so without
+
+177
+00:07:48,110 --> 00:07:50,990
+some very clever idea it's very hard to
+
+178
+00:07:50,990 --> 00:07:52,580
+build an open system
+
+179
+00:07:52,580 --> 00:07:54,580
+you know without a controlled
+
+180
+00:07:54,580 --> 00:07:56,479
+memberships very hard to build an open
+
+181
+00:07:56,479 --> 00:08:01,270
+system in which you have reliable voting
+
+182
+00:08:01,270 --> 00:08:06,289
+okay but in fact Bitcoin doesn't quite
+
+183
+00:08:06,289 --> 00:08:09,139
+use voting but it nevertheless manages
+
+184
+00:08:09,139 --> 00:08:13,190
+to solve this problem of how to get
+
+185
+00:08:13,190 --> 00:08:14,930
+agreement on a single ledger
+
+186
+00:08:14,930 --> 00:08:18,260
+despite malice so this is the Bitcoin
+
+187
+00:08:18,260 --> 00:08:20,530
+blockchain
+
+188
+00:08:26,379 --> 00:08:29,350
+and at this point there's a lot of diff
+
+189
+00:08:29,350 --> 00:08:31,900
+chain systems out there so actually I'm
+
+190
+00:08:31,900 --> 00:08:33,970
+not even sure what blockchain as a term
+
+191
+00:08:33,970 --> 00:08:36,940
+refers to but I'm only talking about
+
+192
+00:08:36,940 --> 00:08:41,320
+Bitcoin right now okay so the goal is we
+
+193
+00:08:41,320 --> 00:08:43,570
+want agreement on a single transaction
+
+194
+00:08:43,570 --> 00:08:46,450
+log again because we want to prevent
+
+195
+00:08:46,450 --> 00:08:50,980
+double spending and this we're going to
+
+196
+00:08:50,980 --> 00:08:52,300
+be building Bitcoin builds this thing
+
+197
+00:08:52,300 --> 00:08:55,840
+called the blockchain that contains all
+
+198
+00:08:55,840 --> 00:08:57,490
+the transactions on all the coins so
+
+199
+00:08:57,490 --> 00:09:00,820
+it's a single a single blockchain that
+
+200
+00:09:00,820 --> 00:09:02,980
+describes all the transactions in the
+
+201
+00:09:02,980 --> 00:09:06,630
+system again as with the previous system
+
+202
+00:09:06,630 --> 00:09:08,860
+there's going to be many peers so we
+
+203
+00:09:08,860 --> 00:09:10,920
+still have this kind of overlay network
+
+204
+00:09:10,920 --> 00:09:15,610
+appears each peer is kind of building a
+
+205
+00:09:15,610 --> 00:09:18,280
+copy of the log and a complete copy of
+
+206
+00:09:18,280 --> 00:09:21,120
+the transaction log in its own memory
+
+207
+00:09:21,120 --> 00:09:25,450
+and we don't know how many peers they
+
+208
+00:09:25,450 --> 00:09:27,930
+are or how many there are who they are
+
+209
+00:09:27,930 --> 00:09:30,220
+but they form a sort of in one of these
+
+210
+00:09:30,220 --> 00:09:32,950
+overlay networks spotted with TCP
+
+211
+00:09:32,950 --> 00:09:35,230
+connections and anytime a peer hears
+
+212
+00:09:35,230 --> 00:09:37,270
+about a new transaction like when Y
+
+213
+00:09:37,270 --> 00:09:39,640
+wants to submit a payment transaction to
+
+214
+00:09:39,640 --> 00:09:41,920
+Z or Q it's gonna send it to one or more
+
+215
+00:09:41,920 --> 00:09:43,780
+peers and that peers gonna flood the
+
+216
+00:09:43,780 --> 00:09:47,800
+transaction over the whole system the
+
+217
+00:09:47,800 --> 00:09:50,170
+way the log is built up the way that
+
+218
+00:09:50,170 --> 00:09:52,270
+blockchain is built up is that each of
+
+219
+00:09:52,270 --> 00:09:54,550
+the peers accumulates transactions and
+
+220
+00:09:54,550 --> 00:09:57,280
+PACs many transactions thousands into a
+
+221
+00:09:57,280 --> 00:10:01,240
+block and then it's entire new blocks of
+
+222
+00:10:01,240 --> 00:10:03,190
+transactions that are really appended to
+
+223
+00:10:03,190 --> 00:10:06,670
+the ledger again by flooding new blocks
+
+224
+00:10:06,670 --> 00:10:08,680
+over the whole system so that at least
+
+225
+00:10:08,680 --> 00:10:10,540
+in theory every peer sees every new
+
+226
+00:10:10,540 --> 00:10:17,050
+blocks so the blockchain model
+
+227
+00:10:17,050 --> 00:10:19,150
+blockchains consists of blocks what each
+
+228
+00:10:19,150 --> 00:10:26,500
+block looks like is the hash of the
+
+229
+00:10:26,500 --> 00:10:31,260
+previous block it's a bit like my
+
+230
+00:10:32,829 --> 00:10:35,449
+previous transaction broken transaction
+
+231
+00:10:35,449 --> 00:10:36,559
+system so we have the hash of the
+
+232
+00:10:36,559 --> 00:10:42,379
+previous block like cryptographic hash
+
+233
+00:10:42,379 --> 00:10:44,179
+of the previous block there's a set of
+
+234
+00:10:44,179 --> 00:10:46,639
+transactions so these are individual
+
+235
+00:10:46,639 --> 00:10:51,259
+spans from you know why is trying to pay
+
+236
+00:10:51,259 --> 00:10:54,519
+queue or whatever it happens to be a
+
+237
+00:10:54,519 --> 00:10:56,420
+couple hundred of whole thousand
+
+238
+00:10:56,420 --> 00:10:57,920
+individual transactions and each
+
+239
+00:10:57,920 --> 00:11:00,050
+transaction is actually much as I
+
+240
+00:11:00,050 --> 00:11:04,040
+described before it has the hash of the
+
+241
+00:11:04,040 --> 00:11:06,110
+previous transaction for that coin which
+
+242
+00:11:06,110 --> 00:11:07,429
+is going to exist in a previous block
+
+243
+00:11:07,429 --> 00:11:10,490
+typically it has deprived a signature by
+
+244
+00:11:10,490 --> 00:11:13,160
+the private key of the previous owner of
+
+245
+00:11:13,160 --> 00:11:14,990
+that coin and it is the public key of
+
+246
+00:11:14,990 --> 00:11:16,939
+the new owner so this transaction would
+
+247
+00:11:16,939 --> 00:11:20,059
+have that transfers money from why the
+
+248
+00:11:20,059 --> 00:11:24,110
+queue would contain Hugh's public key
+
+249
+00:11:24,110 --> 00:11:27,619
+and a signature by with wise private key
+
+250
+00:11:27,619 --> 00:11:30,649
+plus a hash of a previous transaction in
+
+251
+00:11:30,649 --> 00:11:34,160
+a previous block as well as these
+
+252
+00:11:34,160 --> 00:11:38,000
+transactions there's a nonce
+
+253
+00:11:38,000 --> 00:11:39,889
+which I'll talk about in a moment it's
+
+254
+00:11:39,889 --> 00:11:43,100
+just a 32-bit number and then the
+
+255
+00:11:43,100 --> 00:11:49,459
+current time roughly the way the system
+
+256
+00:11:49,459 --> 00:11:52,490
+works is that the peers accumulate new
+
+257
+00:11:52,490 --> 00:11:53,959
+transactions and roughly every 10
+
+258
+00:11:53,959 --> 00:11:56,300
+minutes one of them produces a new block
+
+259
+00:11:56,300 --> 00:11:58,100
+that should be the successor block
+
+260
+00:11:58,100 --> 00:12:00,350
+containing all the transactions that
+
+261
+00:12:00,350 --> 00:12:01,730
+have been sort of sent into the system
+
+262
+00:12:01,730 --> 00:12:03,699
+in the ten minutes roughly since the
+
+263
+00:12:03,699 --> 00:12:08,800
+previous block was created and if you're
+
+264
+00:12:08,800 --> 00:12:11,120
+if somebody tells you they're paying you
+
+265
+00:12:11,120 --> 00:12:14,089
+Bitcoin then before you accept that
+
+266
+00:12:14,089 --> 00:12:16,160
+they've really done it you need to watch
+
+267
+00:12:16,160 --> 00:12:18,410
+the blockchain as it evolves and you
+
+268
+00:12:18,410 --> 00:12:19,670
+know blocks new blocks are signs
+
+269
+00:12:19,670 --> 00:12:21,139
+everywhere so the blockchain is quite
+
+270
+00:12:21,139 --> 00:12:24,019
+public if you think somebody claims to
+
+271
+00:12:24,019 --> 00:12:26,089
+have paid you you need to watch the
+
+272
+00:12:26,089 --> 00:12:28,490
+blockchain until you see a new block
+
+273
+00:12:28,490 --> 00:12:32,110
+that contains the transaction that
+
+274
+00:12:32,110 --> 00:12:35,269
+you're expecting from the person that
+
+275
+00:12:35,269 --> 00:12:37,819
+claimed to sent you money and with your
+
+276
+00:12:37,819 --> 00:12:39,889
+public key at them that looks a valid
+
+277
+00:12:39,889 --> 00:12:42,579
+you know correctly signed okay so
+
+278
+00:12:42,579 --> 00:12:45,559
+everybody everybody has to watch the
+
+279
+00:12:45,559 --> 00:12:52,009
+blockchain for payments to them all
+
+280
+00:12:52,009 --> 00:12:55,660
+right so who creates each block this
+
+281
+00:12:55,660 --> 00:12:57,620
+action of creating a new block is called
+
+282
+00:12:57,620 --> 00:13:00,949
+mining and the technique that's used to
+
+283
+00:13:00,949 --> 00:13:02,540
+produce a new block is often also called
+
+284
+00:13:02,540 --> 00:13:05,180
+proof of work in the sense that it
+
+285
+00:13:05,180 --> 00:13:08,059
+requires a lot of CPU time to produce a
+
+286
+00:13:08,059 --> 00:13:09,559
+new block and so the production of a new
+
+287
+00:13:09,559 --> 00:13:12,050
+block essentially proves that you
+
+288
+00:13:12,050 --> 00:13:14,720
+control a real live CPU and you're not
+
+289
+00:13:14,720 --> 00:13:18,170
+just mining new blocks on a fake
+
+290
+00:13:18,170 --> 00:13:25,269
+computer the new block
+
+291
+00:13:25,960 --> 00:13:29,500
+in order to be valid a new block when
+
+292
+00:13:29,500 --> 00:13:32,650
+you hash it has to have a certain number
+
+293
+00:13:32,650 --> 00:13:35,830
+of zeros at the beginning of the hash of
+
+294
+00:13:35,830 --> 00:13:39,070
+the block now of course if you just take
+
+295
+00:13:39,070 --> 00:13:41,020
+a bunch of arbitrary transactions and
+
+296
+00:13:41,020 --> 00:13:43,270
+you do a cryptographic hash on it it's
+
+297
+00:13:43,270 --> 00:13:45,760
+highly unlikely that the hash of some
+
+298
+00:13:45,760 --> 00:13:48,580
+just whatever data is gonna have more
+
+299
+00:13:48,580 --> 00:13:52,480
+than one or two or three zeros at the
+
+300
+00:13:52,480 --> 00:13:54,880
+beginning of the cryptographic hash
+
+301
+00:13:54,880 --> 00:14:00,370
+however the computer that's mining the
+
+302
+00:14:00,370 --> 00:14:02,320
+block can put any value it likes here
+
+303
+00:14:02,320 --> 00:14:04,960
+for the knots and so what the mining
+
+304
+00:14:04,960 --> 00:14:07,240
+computers do is that they try different
+
+305
+00:14:07,240 --> 00:14:09,180
+by different random values for the nonce
+
+306
+00:14:09,180 --> 00:14:11,080
+just pick one with a random number
+
+307
+00:14:11,080 --> 00:14:13,450
+generator that'll stick it in there copy
+
+308
+00:14:13,450 --> 00:14:14,890
+of the block they're trying to mine and
+
+309
+00:14:14,890 --> 00:14:16,000
+then they'll compute the hash on the
+
+310
+00:14:16,000 --> 00:14:16,480
+block
+
+311
+00:14:16,480 --> 00:14:18,430
+and they'll check how many zeros how
+
+312
+00:14:18,430 --> 00:14:20,740
+many leading zeros are in the hash with
+
+313
+00:14:20,740 --> 00:14:22,900
+this particular knots if it's enough
+
+314
+00:14:22,900 --> 00:14:24,550
+leading zeros I don't know how many it
+
+315
+00:14:24,550 --> 00:14:26,080
+is but it's you know sort of on the
+
+316
+00:14:26,080 --> 00:14:28,839
+order of dozens if there's enough
+
+317
+00:14:28,839 --> 00:14:30,610
+leading zeros and it's a valid mine a
+
+318
+00:14:30,610 --> 00:14:34,600
+valid block and the whatever peer it was
+
+319
+00:14:34,600 --> 00:14:36,670
+that found this nonce that caused the
+
+320
+00:14:36,670 --> 00:14:38,709
+block hash to have lots of leading zeros
+
+321
+00:14:38,709 --> 00:14:40,660
+can flood this block over the network
+
+322
+00:14:40,660 --> 00:14:43,330
+and you know all that's being equal
+
+323
+00:14:43,330 --> 00:14:45,400
+that'll be the new next block and the
+
+324
+00:14:45,400 --> 00:14:51,070
+chain but typically the the hash of the
+
+325
+00:14:51,070 --> 00:14:52,660
+block with any given nonce you know
+
+326
+00:14:52,660 --> 00:14:55,270
+won't have enough leading zeros and the
+
+327
+00:14:55,270 --> 00:14:57,310
+mining the peer will have to try another
+
+328
+00:14:57,310 --> 00:14:59,350
+nonce another random nonce keep doing
+
+329
+00:14:59,350 --> 00:15:01,510
+that until it gets uh a block that
+
+330
+00:15:01,510 --> 00:15:03,850
+hashes to a hash with enough leading
+
+331
+00:15:03,850 --> 00:15:05,589
+zeros and so this takes a lot of CPU
+
+332
+00:15:05,589 --> 00:15:07,630
+time it takes oh you know it's a random
+
+333
+00:15:07,630 --> 00:15:11,890
+process but the system is sort of tuned
+
+334
+00:15:11,890 --> 00:15:13,930
+and the number of zeros that are
+
+335
+00:15:13,930 --> 00:15:16,089
+required to exist at the beginning of
+
+336
+00:15:16,089 --> 00:15:19,720
+the hash of the block is set so that it
+
+337
+00:15:19,720 --> 00:15:22,029
+takes about ten minutes you know with
+
+338
+00:15:22,029 --> 00:15:23,800
+all the different peers hundreds of
+
+339
+00:15:23,800 --> 00:15:25,150
+thousands appears out there who are
+
+340
+00:15:25,150 --> 00:15:28,000
+doing Bitcoin mining the average amount
+
+341
+00:15:28,000 --> 00:15:29,650
+of time before the first one of them
+
+342
+00:15:29,650 --> 00:15:33,459
+finds a nonce for a block that has
+
+343
+00:15:33,459 --> 00:15:36,490
+enough feeding zeros is set up to be ten
+
+344
+00:15:36,490 --> 00:15:38,640
+minutes
+
+345
+00:15:38,640 --> 00:15:44,620
+okay so question how do peers or new
+
+346
+00:15:44,620 --> 00:15:46,120
+peers discover other peers to
+
+347
+00:15:46,120 --> 00:15:48,399
+communicate with yeah it's a great
+
+348
+00:15:48,399 --> 00:15:50,320
+question so this is sort of a reference
+
+349
+00:15:50,320 --> 00:15:54,970
+to the this network of Bitcoin peers if
+
+350
+00:15:54,970 --> 00:15:57,399
+I'm a new peer you know I've install a
+
+351
+00:15:57,399 --> 00:15:58,930
+new computer I get Bitcoin software
+
+352
+00:15:58,930 --> 00:16:00,790
+installed on my my computer and I want
+
+353
+00:16:00,790 --> 00:16:03,519
+to join the Bitcoin network how do I
+
+354
+00:16:03,519 --> 00:16:06,880
+know who to talk to and how do I know
+
+355
+00:16:06,880 --> 00:16:09,100
+well so the straightforward answer to
+
+356
+00:16:09,100 --> 00:16:11,350
+that is that the Bitcoin software has
+
+357
+00:16:11,350 --> 00:16:15,070
+built into it on the IP addresses of a
+
+358
+00:16:15,070 --> 00:16:17,769
+whole bunch of current peers and so your
+
+359
+00:16:17,769 --> 00:16:19,990
+software when you first fire it up into
+
+360
+00:16:19,990 --> 00:16:21,760
+the binary the source whatever the
+
+361
+00:16:21,760 --> 00:16:24,040
+Bitcoin software you know has a whole
+
+362
+00:16:24,040 --> 00:16:25,480
+bunch of IP addresses and you try to
+
+363
+00:16:25,480 --> 00:16:30,670
+make TCP connections to those existing
+
+364
+00:16:30,670 --> 00:16:32,170
+peers and if all goes well you'll be
+
+365
+00:16:32,170 --> 00:16:33,279
+able to connect to them and you'll say
+
+366
+00:16:33,279 --> 00:16:34,899
+look I'm new please give me a copy of
+
+367
+00:16:34,899 --> 00:16:37,480
+the blockchain as it exists now and
+
+368
+00:16:37,480 --> 00:16:40,110
+they'll send you the current block team
+
+369
+00:16:40,110 --> 00:16:42,550
+which is about a couple hundred
+
+370
+00:16:42,550 --> 00:16:46,180
+gigabytes right now so that's if all
+
+371
+00:16:46,180 --> 00:16:50,199
+goes well if all doesn't go well then
+
+372
+00:16:50,199 --> 00:16:52,240
+you may run into problems like for
+
+373
+00:16:52,240 --> 00:16:54,519
+example if your copy of the software has
+
+374
+00:16:54,519 --> 00:16:56,529
+been modified by somebody malicious to
+
+375
+00:16:56,529 --> 00:16:59,440
+have a list of IP addresses that are all
+
+376
+00:16:59,440 --> 00:17:02,829
+controlled by the attacker or the
+
+377
+00:17:02,829 --> 00:17:05,049
+attacker controls your computer network
+
+378
+00:17:05,049 --> 00:17:07,240
+so that regardless of who you try to
+
+379
+00:17:07,240 --> 00:17:09,520
+connect to you end up actually talking
+
+380
+00:17:09,520 --> 00:17:11,679
+to the attackers machines it may be that
+
+381
+00:17:11,679 --> 00:17:13,599
+the attacker is running you know their
+
+382
+00:17:13,599 --> 00:17:17,799
+own isolated network and that you know
+
+383
+00:17:17,799 --> 00:17:19,630
+you think your newly installed software
+
+384
+00:17:19,630 --> 00:17:21,069
+thinks it's made a bunch of connections
+
+385
+00:17:21,069 --> 00:17:23,589
+the Bitcoin knows but whoops they're all
+
+386
+00:17:23,589 --> 00:17:25,780
+attackers nodes in that case a
+
+387
+00:17:25,780 --> 00:17:28,000
+blockchain you'll get will be watching
+
+388
+00:17:28,000 --> 00:17:29,020
+controlled by the attacker
+
+389
+00:17:29,020 --> 00:17:31,980
+and you may well you will be in trouble
+
+390
+00:17:31,980 --> 00:17:36,429
+and you know there's pick one of some
+
+391
+00:17:36,429 --> 00:17:41,799
+defenses against this may be the main
+
+392
+00:17:41,799 --> 00:17:44,540
+well he
+
+393
+00:17:44,540 --> 00:17:48,500
+loaded correct Bitcoin software the
+
+394
+00:17:48,500 --> 00:17:50,680
+correct Bitcoin software has built-in
+
+395
+00:17:50,680 --> 00:17:52,850
+hashes of recent blocks in the
+
+396
+00:17:52,850 --> 00:17:54,800
+blockchain and that means that if you
+
+397
+00:17:54,800 --> 00:17:56,270
+connect to some attackers in your
+
+398
+00:17:56,270 --> 00:17:59,540
+running proper Bitcoin software at least
+
+399
+00:17:59,540 --> 00:18:05,150
+the Bakhtin has to start with the first
+
+400
+00:18:05,150 --> 00:18:07,100
+however many thousand blocks in the box
+
+401
+00:18:07,100 --> 00:18:09,470
+beam have to be correct if you download
+
+402
+00:18:09,470 --> 00:18:11,210
+it absolutely wrong software modified by
+
+403
+00:18:11,210 --> 00:18:13,490
+the attacker then there's just nothing
+
+404
+00:18:13,490 --> 00:18:16,970
+Bitcoin can do to help you then this is
+
+405
+00:18:16,970 --> 00:18:19,820
+a potential weakness in the system I
+
+406
+00:18:19,820 --> 00:18:20,990
+haven't necessarily heard of anybody
+
+407
+00:18:20,990 --> 00:18:26,000
+exploiting this but it's definitely
+
+408
+00:18:26,000 --> 00:18:28,150
+something to think about
+
+409
+00:18:28,150 --> 00:18:33,110
+ok back to mining ok so the if you want
+
+410
+00:18:33,110 --> 00:18:34,370
+to create a new block you gotta find a
+
+411
+00:18:34,370 --> 00:18:38,000
+nonce that causes the new block you're
+
+412
+00:18:38,000 --> 00:18:40,280
+trying to produce causes hash to have
+
+413
+00:18:40,280 --> 00:18:43,460
+lots of leading zeros for an individual
+
+414
+00:18:43,460 --> 00:18:47,030
+machine you know the amount of time for
+
+415
+00:18:47,030 --> 00:18:48,680
+an individual ordinary computer to find
+
+416
+00:18:48,680 --> 00:18:50,930
+a nonce that satisfies this requirement
+
+417
+00:18:50,930 --> 00:18:54,010
+is like at least in a months of CPU time
+
+418
+00:18:54,010 --> 00:18:57,620
+but there's a very large number of
+
+419
+00:18:57,620 --> 00:19:00,200
+Bitcoin miners out there and so even
+
+420
+00:19:00,200 --> 00:19:01,340
+though any one of them would take a very
+
+421
+00:19:01,340 --> 00:19:04,490
+long time to find a new block or we
+
+422
+00:19:04,490 --> 00:19:05,960
+really care about is the time for the
+
+423
+00:19:05,960 --> 00:19:07,490
+very first one of them to find a block
+
+424
+00:19:07,490 --> 00:19:09,200
+and since they're all making these sort
+
+425
+00:19:09,200 --> 00:19:12,530
+of random choices of nonce one of them
+
+426
+00:19:12,530 --> 00:19:17,330
+is gonna find a a nonce that fulfills
+
+427
+00:19:17,330 --> 00:19:20,390
+the requirements relatively soon and the
+
+428
+00:19:20,390 --> 00:19:22,520
+number a Bitcoin adjusts the number of
+
+429
+00:19:22,520 --> 00:19:24,590
+leading required leading zeros in the
+
+430
+00:19:24,590 --> 00:19:29,720
+hash in response to how fast new blocks
+
+431
+00:19:29,720 --> 00:19:32,150
+seemed to be appearing and so if new
+
+432
+00:19:32,150 --> 00:19:33,910
+blocks are appearing much faster than
+
+433
+00:19:33,910 --> 00:19:36,530
+once every 10 minutes Bitcoin will
+
+434
+00:19:36,530 --> 00:19:38,300
+automatically increase the number of
+
+435
+00:19:38,300 --> 00:19:39,890
+leading zeros that's required and
+
+436
+00:19:39,890 --> 00:19:41,900
+that'll make it correspondingly harder
+
+437
+00:19:41,900 --> 00:19:44,840
+and take longer for the miners to find a
+
+438
+00:19:44,840 --> 00:19:47,270
+a new block Nana blocks are of course
+
+439
+00:19:47,270 --> 00:19:48,800
+arriving slower than every 10 minutes
+
+440
+00:19:48,800 --> 00:19:50,570
+over a sustained period of time then
+
+441
+00:19:50,570 --> 00:19:52,790
+Bitcoin will adjust the required number
+
+442
+00:19:52,790 --> 00:19:54,230
+of leading zeroes in the hash to be
+
+443
+00:19:54,230 --> 00:19:56,540
+smaller and that means it'll be easier
+
+444
+00:19:56,540 --> 00:19:57,580
+quicker
+
+445
+00:19:57,580 --> 00:19:59,080
+to find you blocks to the sort of an
+
+446
+00:19:59,080 --> 00:20:04,360
+adaptive scheme there to us blocks to
+
+447
+00:20:04,360 --> 00:20:05,980
+new boxes show up run once every ten
+
+448
+00:20:05,980 --> 00:20:09,539
+minutes roughly okay so this is the
+
+449
+00:20:09,539 --> 00:20:14,610
+proof-of-work scheme and this is
+
+450
+00:20:14,610 --> 00:20:17,619
+essentially a solution and all in a
+
+451
+00:20:17,619 --> 00:20:21,220
+funny way to the that voting problem I
+
+452
+00:20:21,220 --> 00:20:23,019
+mentioned a few minutes ago where you
+
+453
+00:20:23,019 --> 00:20:25,029
+can't really have some practice I have
+
+454
+00:20:25,029 --> 00:20:28,389
+majority votes because we're not sure
+
+455
+00:20:28,389 --> 00:20:30,159
+who the participants are or how many
+
+456
+00:20:30,159 --> 00:20:32,590
+there are because people may sort of
+
+457
+00:20:32,590 --> 00:20:35,590
+create fake computers fake IP addresses
+
+458
+00:20:35,590 --> 00:20:39,249
+whatever it will here you have to use
+
+459
+00:20:39,249 --> 00:20:41,049
+CPU time which is a sort of real
+
+460
+00:20:41,049 --> 00:20:44,919
+resource that cannot be faked in order
+
+461
+00:20:44,919 --> 00:20:47,320
+to contribute a new block and that means
+
+462
+00:20:47,320 --> 00:20:50,169
+that um you know while it's not really a
+
+463
+00:20:50,169 --> 00:20:53,019
+voting scheme the what it's essentially
+
+464
+00:20:53,019 --> 00:20:57,190
+doing is the new block gets to come from
+
+465
+00:20:57,190 --> 00:21:01,149
+a reactively random choice over the
+
+466
+00:21:01,149 --> 00:21:03,279
+different computers that are involved in
+
+467
+00:21:03,279 --> 00:21:08,470
+in mining so this scheme is it's a sort
+
+468
+00:21:08,470 --> 00:21:10,840
+of a random sort of cryptographically
+
+469
+00:21:10,840 --> 00:21:12,850
+reasonably strong random selection
+
+470
+00:21:12,850 --> 00:21:15,489
+process for who gets to choose the next
+
+471
+00:21:15,489 --> 00:21:17,289
+block and so if there's a small number
+
+472
+00:21:17,289 --> 00:21:19,869
+of attackers they're highly unlikely to
+
+473
+00:21:19,869 --> 00:21:23,019
+be selected by this process in order to
+
+474
+00:21:23,019 --> 00:21:25,090
+contribute the next block now what that
+
+475
+00:21:25,090 --> 00:21:26,379
+means is that if most of the
+
+476
+00:21:26,379 --> 00:21:28,899
+participants or most of the CPU power in
+
+477
+00:21:28,899 --> 00:21:31,539
+the system is controlled by non
+
+478
+00:21:31,539 --> 00:21:34,119
+malicious people then most of the new
+
+479
+00:21:34,119 --> 00:21:35,980
+blocks will be found by non malicious
+
+480
+00:21:35,980 --> 00:21:37,929
+people and that's not an immediate
+
+481
+00:21:37,929 --> 00:21:39,970
+solution to double spending but we'll
+
+482
+00:21:39,970 --> 00:21:44,529
+see that it that it's the key to the
+
+483
+00:21:44,529 --> 00:21:52,049
+double spending defense okay
+
+484
+00:21:52,630 --> 00:21:54,910
+all right so let's go back to our
+
+485
+00:21:54,910 --> 00:21:59,800
+example we have a blockchain that maybe
+
+486
+00:21:59,800 --> 00:22:02,940
+looks like we currently block five
+
+487
+00:22:02,940 --> 00:22:06,310
+o'clock fine has been published to
+
+488
+00:22:06,310 --> 00:22:11,980
+everybody the mmm them all the peers are
+
+489
+00:22:11,980 --> 00:22:14,710
+working on mining a potential block six
+
+490
+00:22:14,710 --> 00:22:15,940
+and we don't know what's going to be yet
+
+491
+00:22:15,940 --> 00:22:21,430
+because because the miners are still
+
+492
+00:22:21,430 --> 00:22:23,260
+working on finding about knots but you
+
+493
+00:22:23,260 --> 00:22:24,850
+know we know that it has a bunch of
+
+494
+00:22:24,850 --> 00:22:26,530
+transactions in it well if at this point
+
+495
+00:22:26,530 --> 00:22:30,640
+why broadcasts you know say it's payment
+
+496
+00:22:30,640 --> 00:22:33,370
+to Z well the the miner is already
+
+497
+00:22:33,370 --> 00:22:35,650
+working on this block so wise new
+
+498
+00:22:35,650 --> 00:22:37,150
+transaction and even if it sends it out
+
+499
+00:22:37,150 --> 00:22:38,110
+so now probably not going to be
+
+500
+00:22:38,110 --> 00:22:40,000
+incorporated in the block has been
+
+501
+00:22:40,000 --> 00:22:42,160
+currently mind but all the miners will
+
+502
+00:22:42,160 --> 00:22:44,740
+kind of keep this new transaction and a
+
+503
+00:22:44,740 --> 00:22:46,690
+buffer on the side and when one of them
+
+504
+00:22:46,690 --> 00:22:51,730
+does find a new block for block 6 then
+
+505
+00:22:51,730 --> 00:22:53,650
+wise transaction will be incorporated
+
+506
+00:22:53,650 --> 00:22:59,410
+into the attempts to mine block seven as
+
+507
+00:22:59,410 --> 00:23:01,140
+soon as somebody does mind box seven
+
+508
+00:23:01,140 --> 00:23:04,930
+this Y arrow Z will actually be really
+
+509
+00:23:04,930 --> 00:23:14,470
+in the blockchain alright so so one
+
+510
+00:23:14,470 --> 00:23:17,110
+question is could there be two different
+
+511
+00:23:17,110 --> 00:23:20,140
+successors to walk six could there be
+
+512
+00:23:20,140 --> 00:23:23,590
+sort of a block seven and a block seven
+
+513
+00:23:23,590 --> 00:23:31,600
+prime right what prevents this structure
+
+514
+00:23:31,600 --> 00:23:33,250
+from arising and of course the reason
+
+515
+00:23:33,250 --> 00:23:35,140
+why we're interested in this is that if
+
+516
+00:23:35,140 --> 00:23:38,910
+the structure could arise then
+
+517
+00:23:39,240 --> 00:23:43,950
+then these two maybe seven prime B seven
+
+518
+00:23:43,950 --> 00:23:46,920
+double prime then these two different b7
+
+519
+00:23:46,920 --> 00:23:48,840
+s two different successive successors to
+
+520
+00:23:48,840 --> 00:23:51,690
+b6 might have different transfers from Y
+
+521
+00:23:51,690 --> 00:23:54,570
+and so if you were aware of just b7
+
+522
+00:23:54,570 --> 00:23:57,540
+prime you'd think why paid it's Bitcoin
+
+523
+00:23:57,540 --> 00:23:59,940
+to see if you were we're only a b7 prime
+
+524
+00:23:59,940 --> 00:24:01,920
+prime you this would click a totally
+
+525
+00:24:01,920 --> 00:24:05,100
+legitimate payment from wide acute my
+
+526
+00:24:05,100 --> 00:24:07,440
+question is can there be two different
+
+527
+00:24:07,440 --> 00:24:11,940
+successors to a block it turns out the
+
+528
+00:24:11,940 --> 00:24:14,370
+answer is yes and it's actually does
+
+529
+00:24:14,370 --> 00:24:17,220
+happen reasonably frequently and the
+
+530
+00:24:17,220 --> 00:24:18,780
+reason is that there's you know
+
+531
+00:24:18,780 --> 00:24:22,140
+thousands of peers out there Mining away
+
+532
+00:24:22,140 --> 00:24:24,330
+trying to find the successors to block
+
+533
+00:24:24,330 --> 00:24:27,900
+six and they're likely mining it's you
+
+534
+00:24:27,900 --> 00:24:29,100
+know trying to produce somewhat
+
+535
+00:24:29,100 --> 00:24:30,420
+different blocks with different sets of
+
+536
+00:24:30,420 --> 00:24:32,040
+transactions in them so it's easy to
+
+537
+00:24:32,040 --> 00:24:34,140
+imagine a situation in which some of the
+
+538
+00:24:34,140 --> 00:24:37,110
+peers you know they happen to see just
+
+539
+00:24:37,110 --> 00:24:38,520
+because of the way the transactions move
+
+540
+00:24:38,520 --> 00:24:40,200
+through the network they happen to see
+
+541
+00:24:40,200 --> 00:24:42,390
+why it's transferred to Z first and
+
+542
+00:24:42,390 --> 00:24:44,040
+incorporated in to block their mining
+
+543
+00:24:44,040 --> 00:24:46,380
+and other peers you know for sort of the
+
+544
+00:24:46,380 --> 00:24:49,650
+same successors but the their version of
+
+545
+00:24:49,650 --> 00:24:51,210
+the block their mining as a successor to
+
+546
+00:24:51,210 --> 00:24:53,340
+six just happen to have seen this
+
+547
+00:24:53,340 --> 00:24:54,809
+transaction first and included that in
+
+548
+00:24:54,809 --> 00:24:57,150
+the block so we can easily get different
+
+549
+00:24:57,150 --> 00:24:59,460
+miners trying to work in a way trying to
+
+550
+00:24:59,460 --> 00:25:01,200
+produce different successors to be six
+
+551
+00:25:01,200 --> 00:25:03,900
+if two of them happen to find a nonce
+
+552
+00:25:03,900 --> 00:25:06,809
+that satisfies the leading zeros in the
+
+553
+00:25:06,809 --> 00:25:10,260
+hash rule at the same time that means we
+
+554
+00:25:10,260 --> 00:25:11,700
+have two different blocks to tumor
+
+555
+00:25:11,700 --> 00:25:13,980
+totally valid blocks produced at the
+
+556
+00:25:13,980 --> 00:25:17,309
+same time and they're both going to send
+
+557
+00:25:17,309 --> 00:25:18,920
+those blocks out into the network and
+
+558
+00:25:18,920 --> 00:25:20,970
+they'll be seeing that you know on
+
+559
+00:25:20,970 --> 00:25:22,530
+roughly the same time by all the other
+
+560
+00:25:22,530 --> 00:25:25,080
+peers so it could easily be the case
+
+561
+00:25:25,080 --> 00:25:29,600
+that two different two quite different
+
+562
+00:25:29,600 --> 00:25:34,470
+successors to block six may arise and
+
+563
+00:25:34,470 --> 00:25:37,160
+it's called the fork
+
+564
+00:25:40,940 --> 00:25:43,440
+and so we're very interested in what
+
+565
+00:25:43,440 --> 00:25:46,110
+happens to Forks because this can and
+
+566
+00:25:46,110 --> 00:25:49,200
+does arise well the most immediate rule
+
+567
+00:25:49,200 --> 00:25:53,430
+is that as soon as any peer sees a
+
+568
+00:25:53,430 --> 00:25:56,250
+successor oh you know all the peers are
+
+569
+00:25:56,250 --> 00:25:59,010
+trying to mine a successor to block six
+
+570
+00:25:59,010 --> 00:26:02,220
+as soon as than ever any of them any of
+
+571
+00:26:02,220 --> 00:26:05,040
+them sees a new successor block be
+
+572
+00:26:05,040 --> 00:26:06,570
+flooded from some peer that did
+
+573
+00:26:06,570 --> 00:26:08,280
+successfully mine
+
+574
+00:26:08,280 --> 00:26:10,950
+it'll stop working on six and
+
+575
+00:26:10,950 --> 00:26:12,810
+immediately switch to trying to work on
+
+576
+00:26:12,810 --> 00:26:16,470
+a successor from b737 so initially every
+
+577
+00:26:16,470 --> 00:26:19,590
+peer as soon as it sees a successor
+
+578
+00:26:19,590 --> 00:26:22,080
+block switches to mining a successor for
+
+579
+00:26:22,080 --> 00:26:24,120
+that successor block so in this
+
+580
+00:26:24,120 --> 00:26:26,340
+situation some of the peers will see b7
+
+581
+00:26:26,340 --> 00:26:28,290
+Prime first and start working on a
+
+582
+00:26:28,290 --> 00:26:30,720
+successor to that then other peers will
+
+583
+00:26:30,720 --> 00:26:33,120
+start mine will see b7 prime prime for
+
+584
+00:26:33,120 --> 00:26:35,100
+it's just depending on you know what
+
+585
+00:26:35,100 --> 00:26:37,110
+they happen to see first if the if these
+
+586
+00:26:37,110 --> 00:26:39,420
+two are mined at the same time and
+
+587
+00:26:39,420 --> 00:26:40,710
+they'll start working on a successor to
+
+588
+00:26:40,710 --> 00:26:43,200
+b7 prime prime so now we got some of the
+
+589
+00:26:43,200 --> 00:26:45,840
+peers working on sort of extending this
+
+590
+00:26:45,840 --> 00:26:48,690
+fork in the blockchain and the other
+
+591
+00:26:48,690 --> 00:26:51,360
+peers working on extending this fork in
+
+592
+00:26:51,360 --> 00:26:59,730
+the blockchain however another critical
+
+593
+00:26:59,730 --> 00:27:08,550
+rule is that if a if somebody's mining
+
+594
+00:27:08,550 --> 00:27:11,190
+away on this trying to make one of these
+
+595
+00:27:11,190 --> 00:27:14,760
+blocks and it sees a new block for a
+
+596
+00:27:14,760 --> 00:27:18,930
+different fork that's longer then
+
+597
+00:27:18,930 --> 00:27:21,540
+anybody working on extending this fork
+
+598
+00:27:21,540 --> 00:27:23,730
+will switch to extending this longer
+
+599
+00:27:23,730 --> 00:27:27,150
+fork so that's a rule in the software
+
+600
+00:27:27,150 --> 00:27:30,390
+that everybody is supposed to favor the
+
+601
+00:27:30,390 --> 00:27:33,000
+longest chain so at least initially if
+
+602
+00:27:33,000 --> 00:27:35,130
+we have some of the peers mining a way
+
+603
+00:27:35,130 --> 00:27:38,220
+on one fork and the other and there's
+
+604
+00:27:38,220 --> 00:27:40,140
+the same length and others mining on the
+
+605
+00:27:40,140 --> 00:27:42,780
+other fork it turns out the variance in
+
+606
+00:27:42,780 --> 00:27:45,150
+how long it takes to produce a valid
+
+607
+00:27:45,150 --> 00:27:47,420
+knots is pretty high
+
+608
+00:27:47,420 --> 00:27:50,750
+so it's even if there's equal number of
+
+609
+00:27:50,750 --> 00:27:53,180
+peers mining both Forks it's highly
+
+610
+00:27:53,180 --> 00:27:56,510
+likely that one of them will find a
+
+611
+00:27:56,510 --> 00:27:58,340
+successor significantly before the other
+
+612
+00:27:58,340 --> 00:28:00,980
+and so this successor will be flooded to
+
+613
+00:28:00,980 --> 00:28:02,660
+a bunch of nodes appears that were
+
+614
+00:28:02,660 --> 00:28:04,100
+working on this successor and they'll
+
+615
+00:28:04,100 --> 00:28:07,190
+all switch to the longer Fork and so
+
+616
+00:28:07,190 --> 00:28:09,560
+that means that there's sort of an
+
+617
+00:28:09,560 --> 00:28:16,070
+asymmetry here that causes us a slight
+
+618
+00:28:16,070 --> 00:28:19,580
+you know with if this Fork itza gets
+
+619
+00:28:19,580 --> 00:28:21,170
+extended by the minor slightly before
+
+620
+00:28:21,170 --> 00:28:24,080
+this fork then that'll contract miners
+
+621
+00:28:24,080 --> 00:28:26,240
+over onto this fork it'll be more and
+
+622
+00:28:26,240 --> 00:28:29,110
+more miners mining on this Fork and so
+
+623
+00:28:29,110 --> 00:28:32,120
+the new blocks will be found more and
+
+624
+00:28:32,120 --> 00:28:34,310
+more rapidly on the winning fork so
+
+625
+00:28:34,310 --> 00:28:36,110
+there's a tendency sort of reinforced
+
+626
+00:28:36,110 --> 00:28:39,080
+success that's the longer fork gets
+
+627
+00:28:39,080 --> 00:28:42,020
+longer and pretty soon once all the
+
+628
+00:28:42,020 --> 00:28:43,490
+miners have heard about this longer fork
+
+629
+00:28:43,490 --> 00:28:44,930
+nobody will be left the mining on this
+
+630
+00:28:44,930 --> 00:28:46,820
+fork everybody will ignore it and
+
+631
+00:28:46,820 --> 00:28:49,580
+everybody will only treat this longest
+
+632
+00:28:49,580 --> 00:28:55,970
+fork as the real as the real chain okay
+
+633
+00:28:55,970 --> 00:29:00,620
+so this is it's highly likely that one
+
+634
+00:29:00,620 --> 00:29:02,270
+of the there's a fork that one of the
+
+635
+00:29:02,270 --> 00:29:06,800
+two Forks will see an x-block first will
+
+636
+00:29:06,800 --> 00:29:08,390
+be longer everybody all the peers will
+
+637
+00:29:08,390 --> 00:29:10,220
+switch to mining on it and that
+
+638
+00:29:10,220 --> 00:29:12,050
+everybody will rapidly agree that one of
+
+639
+00:29:12,050 --> 00:29:15,530
+the other is the longest fork of course
+
+640
+00:29:15,530 --> 00:29:19,750
+the transactions on the abandoned fork
+
+641
+00:29:19,750 --> 00:29:21,890
+you know usually most of the trend
+
+642
+00:29:21,890 --> 00:29:24,920
+usually these two competing blogs have
+
+643
+00:29:24,920 --> 00:29:26,960
+you know pretty much pretty similar set
+
+644
+00:29:26,960 --> 00:29:28,490
+of transactions but there may well be
+
+645
+00:29:28,490 --> 00:29:30,470
+transact a few transactions here that
+
+646
+00:29:30,470 --> 00:29:31,430
+were not there and certainly if
+
+647
+00:29:31,430 --> 00:29:34,130
+somebody's trying that will spend or but
+
+648
+00:29:34,130 --> 00:29:35,270
+if there are transactions in the
+
+649
+00:29:35,270 --> 00:29:37,280
+abandoned fork that didn't happen also
+
+650
+00:29:37,280 --> 00:29:39,770
+to be in the winning fork then these
+
+651
+00:29:39,770 --> 00:29:42,350
+transactions they just go away there's
+
+652
+00:29:42,350 --> 00:29:44,420
+no attempt in the sort of blockchain
+
+653
+00:29:44,420 --> 00:29:47,200
+system itself to try to carry over these
+
+654
+00:29:47,200 --> 00:29:50,810
+transactions now with it or there's no
+
+655
+00:29:50,810 --> 00:29:52,460
+attempt to kind of directly merge the
+
+656
+00:29:52,460 --> 00:29:54,860
+two forks now in fact you know if you
+
+657
+00:29:54,860 --> 00:29:56,360
+don't see your transaction show up you
+
+658
+00:29:56,360 --> 00:29:58,710
+maybe issue it
+
+659
+00:29:58,710 --> 00:30:00,880
+and you know because the blockchain is
+
+660
+00:30:00,880 --> 00:30:02,830
+public it'll become apparent that your
+
+661
+00:30:02,830 --> 00:30:04,210
+transaction needs to be reassured
+
+662
+00:30:04,210 --> 00:30:05,800
+because it wasn't incorporated more in
+
+663
+00:30:05,800 --> 00:30:10,870
+the winning fork however it is also the
+
+664
+00:30:10,870 --> 00:30:13,860
+case that for a brief period of time
+
+665
+00:30:13,860 --> 00:30:17,320
+both of these transactions were in the
+
+666
+00:30:17,320 --> 00:30:21,040
+blockchain right so for a brief period
+
+667
+00:30:21,040 --> 00:30:23,050
+of time there was a double spending of
+
+668
+00:30:23,050 --> 00:30:28,180
+wise coin in the blockchain and that you
+
+669
+00:30:28,180 --> 00:30:29,530
+know that's like a little bit of a
+
+670
+00:30:29,530 --> 00:30:30,910
+dangerous situation in fact you know
+
+671
+00:30:30,910 --> 00:30:32,020
+it's an extremely dangerous situation
+
+672
+00:30:32,020 --> 00:30:34,090
+right since the whole point was to avoid
+
+673
+00:30:34,090 --> 00:30:35,710
+block chains right until one of these
+
+674
+00:30:35,710 --> 00:30:38,620
+two chains got longer now it was totally
+
+675
+00:30:38,620 --> 00:30:40,870
+unclear which of these two chains to
+
+676
+00:30:40,870 --> 00:30:42,790
+believe and then these some of the peers
+
+677
+00:30:42,790 --> 00:30:44,290
+may only know about one of them or the
+
+678
+00:30:44,290 --> 00:30:47,740
+other of them so this raises a sort of
+
+679
+00:30:47,740 --> 00:30:51,250
+unhappy question about how Q or Z you
+
+680
+00:30:51,250 --> 00:30:53,260
+know what procedure should they use to
+
+681
+00:30:53,260 --> 00:30:54,940
+be sure that they've actually been paid
+
+682
+00:30:54,940 --> 00:30:58,030
+right apparently it's not enough for Z
+
+683
+00:30:58,030 --> 00:31:01,030
+to say well as soon as the transaction
+
+684
+00:31:01,030 --> 00:31:02,800
+appears in the blockchain then I'm sure
+
+685
+00:31:02,800 --> 00:31:04,600
+I didn't paint because that's not true
+
+686
+00:31:04,600 --> 00:31:07,720
+right maybe the maybe this bar chain
+
+687
+00:31:07,720 --> 00:31:09,250
+would end up being a shorter one and the
+
+688
+00:31:09,250 --> 00:31:12,700
+wipies Q blockchain will win similarly P
+
+689
+00:31:12,700 --> 00:31:14,800
+you can't just look at oh you know my
+
+690
+00:31:14,800 --> 00:31:18,250
+transaction showed up in this block and
+
+691
+00:31:18,250 --> 00:31:19,630
+the blockchain therefore it's a valid
+
+692
+00:31:19,630 --> 00:31:21,130
+transaction because it may end up being
+
+693
+00:31:21,130 --> 00:31:22,840
+abandoned due to being on a shorter fork
+
+694
+00:31:22,840 --> 00:31:24,730
+and so this is the reason for the rule
+
+695
+00:31:24,730 --> 00:31:28,720
+in that people who care don't really
+
+696
+00:31:28,720 --> 00:31:30,970
+believe in transactions until there's a
+
+697
+00:31:30,970 --> 00:31:33,100
+couple of blocks after them in the
+
+698
+00:31:33,100 --> 00:31:37,210
+blockchain and as a as the longer chain
+
+699
+00:31:37,210 --> 00:31:39,640
+gets longer and longer or as what you
+
+700
+00:31:39,640 --> 00:31:41,170
+think is the longer chain gets longer
+
+701
+00:31:41,170 --> 00:31:43,750
+and longer the chances that there might
+
+702
+00:31:43,750 --> 00:31:46,180
+be some other chain that will become
+
+703
+00:31:46,180 --> 00:31:48,250
+longer in it longer than it could
+
+704
+00:31:48,250 --> 00:31:50,770
+vanishingly small because if you're on a
+
+705
+00:31:50,770 --> 00:31:52,750
+slightly longer chain that's going to
+
+706
+00:31:52,750 --> 00:31:55,510
+attract miners to mining on it so no
+
+707
+00:31:55,510 --> 00:31:58,240
+other chain can grow very rapidly and of
+
+708
+00:31:58,240 --> 00:31:59,680
+course the you know the rate in which a
+
+709
+00:31:59,680 --> 00:32:03,040
+chain a particular fork can grow is
+
+710
+00:32:03,040 --> 00:32:06,280
+proportional to the number of peers that
+
+711
+00:32:06,280 --> 00:32:09,660
+are mining on that chain
+
+712
+00:32:10,060 --> 00:32:14,870
+all right so this is this is the
+
+713
+00:32:14,870 --> 00:32:18,740
+mechanism that prevents with it makes it
+
+714
+00:32:18,740 --> 00:32:21,080
+so that if Y sends out two conflicting
+
+715
+00:32:21,080 --> 00:32:24,170
+transaction that's at the same time even
+
+716
+00:32:24,170 --> 00:32:25,790
+though there can be a brief double spend
+
+717
+00:32:25,790 --> 00:32:28,270
+if there's a fork it will rapidly be
+
+718
+00:32:28,270 --> 00:32:30,680
+only one or the other of the two
+
+719
+00:32:30,680 --> 00:32:32,330
+transactions will be in the longest
+
+720
+00:32:32,330 --> 00:32:34,760
+chain and so one of them will win in the
+
+721
+00:32:34,760 --> 00:32:39,110
+sort of official chain now and you know
+
+722
+00:32:39,110 --> 00:32:41,840
+indeed if if this second transaction
+
+723
+00:32:41,840 --> 00:32:44,990
+shows up is sent to peers later on after
+
+724
+00:32:44,990 --> 00:32:47,990
+the Y transfer disease in the chain then
+
+725
+00:32:47,990 --> 00:32:52,580
+all the peers will ignore trend newly
+
+726
+00:32:52,580 --> 00:32:55,070
+arriving transactions that for coins
+
+727
+00:32:55,070 --> 00:32:57,410
+that have already been spent in a
+
+728
+00:32:57,410 --> 00:32:59,300
+transaction on the chain on the fork
+
+729
+00:32:59,300 --> 00:33:02,510
+that they're mining for so why can't you
+
+730
+00:33:02,510 --> 00:33:04,730
+know send out this transaction again
+
+731
+00:33:04,730 --> 00:33:07,670
+after the first transactions shows up in
+
+732
+00:33:07,670 --> 00:33:15,260
+the chain in the blockchain okay okay so
+
+733
+00:33:15,260 --> 00:33:17,210
+you know there's some other attacks you
+
+734
+00:33:17,210 --> 00:33:20,060
+might wonder about one question is
+
+735
+00:33:20,060 --> 00:33:25,310
+whether you know let's suppose that this
+
+736
+00:33:25,310 --> 00:33:30,620
+is the this is the chain if Y is
+
+737
+00:33:30,620 --> 00:33:33,320
+colluding with some peers and this is
+
+738
+00:33:33,320 --> 00:33:36,350
+the official b7 and we have a b8 etc you
+
+739
+00:33:36,350 --> 00:33:36,620
+know
+
+740
+00:33:36,620 --> 00:33:38,720
+supposing why isn't League with some of
+
+741
+00:33:38,720 --> 00:33:41,360
+the peers could appear take this block
+
+742
+00:33:41,360 --> 00:33:43,490
+seven it's now you know in the middle of
+
+743
+00:33:43,490 --> 00:33:47,960
+the chain and change it to produce just
+
+744
+00:33:47,960 --> 00:33:50,240
+a different block that doesn't have this
+
+745
+00:33:50,240 --> 00:33:52,070
+transaction in it and just sort of
+
+746
+00:33:52,070 --> 00:33:56,660
+substitute this new block for the old
+
+747
+00:33:56,660 --> 00:33:58,280
+block seven and sort of pretend that
+
+748
+00:33:58,280 --> 00:34:00,860
+block e refers to it and now block this
+
+749
+00:34:00,860 --> 00:34:03,410
+new block seven doesn't have a
+
+750
+00:34:03,410 --> 00:34:05,840
+transaction and so that sort of very
+
+751
+00:34:05,840 --> 00:34:07,700
+straightforward changing of a single
+
+752
+00:34:07,700 --> 00:34:10,730
+block doesn't work and the reason is
+
+753
+00:34:10,730 --> 00:34:13,969
+that these arrows here are really really
+
+754
+00:34:13,969 --> 00:34:15,560
+means that there's a cryptographic hash
+
+755
+00:34:15,560 --> 00:34:17,690
+and blog ate that
+
+756
+00:34:17,690 --> 00:34:19,969
+is the hash of the block seven it refers
+
+757
+00:34:19,969 --> 00:34:23,270
+to and so this hashing blockade you know
+
+758
+00:34:23,270 --> 00:34:25,250
+for for a block seven that already
+
+759
+00:34:25,250 --> 00:34:26,989
+exists this hashman block eight is a
+
+760
+00:34:26,989 --> 00:34:29,299
+hash of the original block seven if
+
+761
+00:34:29,299 --> 00:34:31,039
+someone changes this content it's gonna
+
+762
+00:34:31,039 --> 00:34:33,799
+have a different hash and so this
+
+763
+00:34:33,799 --> 00:34:37,010
+blockade hash if you try to pawn off
+
+764
+00:34:37,010 --> 00:34:38,569
+this modified block on somebody who
+
+765
+00:34:38,569 --> 00:34:39,589
+knows about block eight they're gonna
+
+766
+00:34:39,589 --> 00:34:41,418
+say we didn't have our keys you know
+
+767
+00:34:41,418 --> 00:34:43,969
+hash doesn't hash to the same no block
+
+768
+00:34:43,969 --> 00:34:45,559
+this block seven prime doesn't hash to
+
+769
+00:34:45,559 --> 00:34:47,239
+the same value that's embedded in Block
+
+770
+00:34:47,239 --> 00:34:50,449
+E so you can't trick anybody who knows
+
+771
+00:34:50,449 --> 00:34:52,219
+about subsequent blocks into accepting a
+
+772
+00:34:52,219 --> 00:34:55,069
+modified intermediate block alright
+
+773
+00:34:55,069 --> 00:34:55,668
+question
+
+774
+00:34:55,668 --> 00:35:00,109
+I see why is a Q store by his coffee it
+
+775
+00:35:00,109 --> 00:35:03,640
+shows up in one of the blocks
+
+776
+00:35:03,860 --> 00:35:08,030
+oh I see ok so this is a let me just
+
+777
+00:35:08,030 --> 00:35:10,610
+back up a little bit so I think the
+
+778
+00:35:10,610 --> 00:35:12,440
+scenario we have is that you know there
+
+779
+00:35:12,440 --> 00:35:16,000
+was a blockchain and then a brief fork
+
+780
+00:35:16,000 --> 00:35:20,360
+and in that brief fork why pay the same
+
+781
+00:35:20,360 --> 00:35:28,790
+coin to two different two different
+
+782
+00:35:28,790 --> 00:35:33,080
+parties and let's say this is block 7
+
+783
+00:35:33,080 --> 00:35:37,700
+prime prime and it's block 7 that wins
+
+784
+00:35:37,700 --> 00:35:40,640
+and is on the main chain and block 7
+
+785
+00:35:40,640 --> 00:35:43,880
+prime prime is it's just forgotten and
+
+786
+00:35:43,880 --> 00:35:45,530
+ignored and the question is jeez you
+
+787
+00:35:45,530 --> 00:35:48,410
+know for briefly at least Q saw this
+
+788
+00:35:48,410 --> 00:35:49,820
+transaction show up in the chain and
+
+789
+00:35:49,820 --> 00:35:51,770
+gave the cup of coffee to why and then
+
+790
+00:35:51,770 --> 00:35:53,660
+why I left the store but then you know
+
+791
+00:35:53,660 --> 00:35:55,550
+this part of the chain is discarded and
+
+792
+00:35:55,550 --> 00:35:57,500
+Q is left with no money they've given
+
+793
+00:35:57,500 --> 00:35:59,390
+away some coffee but they did not get
+
+794
+00:35:59,390 --> 00:36:01,970
+paid and that just is what happens in
+
+795
+00:36:01,970 --> 00:36:05,650
+this scenario all right if Q was willing
+
+796
+00:36:05,650 --> 00:36:07,880
+to handle with a cup of coffee after
+
+797
+00:36:07,880 --> 00:36:10,040
+seeing the transaction in just the last
+
+798
+00:36:10,040 --> 00:36:12,110
+block in the blockchain then they'd risk
+
+799
+00:36:12,110 --> 00:36:13,910
+this scenario and there's nothing they
+
+800
+00:36:13,910 --> 00:36:15,890
+can do about it and they can't get the
+
+801
+00:36:15,890 --> 00:36:17,420
+money back I mean unless you run down
+
+802
+00:36:17,420 --> 00:36:20,270
+the street catch up with the person and
+
+803
+00:36:20,270 --> 00:36:23,330
+take the cup of coffee away and that is
+
+804
+00:36:23,330 --> 00:36:25,330
+the reason why for high-value
+
+805
+00:36:25,330 --> 00:36:27,740
+transactions your Starbucks trolley
+
+806
+00:36:27,740 --> 00:36:29,810
+doesn't care very much right that cup of
+
+807
+00:36:29,810 --> 00:36:32,030
+coffee really only cost like you know 50
+
+808
+00:36:32,030 --> 00:36:33,800
+cents to make like if they occasionally
+
+809
+00:36:33,800 --> 00:36:35,780
+you know these Forks don't happen that
+
+810
+00:36:35,780 --> 00:36:37,370
+often they occasionally lose a cup of
+
+811
+00:36:37,370 --> 00:36:40,910
+coffee well they can probably willing to
+
+812
+00:36:40,910 --> 00:36:44,090
+deal with that but if if why was buying
+
+813
+00:36:44,090 --> 00:36:47,330
+a car from Q for you know $20,000
+
+814
+00:36:47,330 --> 00:36:49,490
+Bitcoin thank you probably would rather
+
+815
+00:36:49,490 --> 00:36:53,810
+not let Y walk off with this level of
+
+816
+00:36:53,810 --> 00:36:56,480
+assurance that being paid and that's the
+
+817
+00:36:56,480 --> 00:36:59,330
+reason why if you care you'll wait until
+
+818
+00:36:59,330 --> 00:37:02,630
+multiple blocks show up after the block
+
+819
+00:37:02,630 --> 00:37:05,360
+in which in which your transaction was
+
+820
+00:37:05,360 --> 00:37:08,930
+in so Z won't actually him if it's a
+
+821
+00:37:08,930 --> 00:37:10,430
+high-value transactions he won't hand
+
+822
+00:37:10,430 --> 00:37:12,590
+over the goods until there's at least
+
+823
+00:37:12,590 --> 00:37:15,530
+some number five six blocks showing up
+
+824
+00:37:15,530 --> 00:37:17,090
+after the block
+
+825
+00:37:17,090 --> 00:37:22,160
+Action Shooting open and it's very
+
+826
+00:37:22,160 --> 00:37:26,870
+unlikely that a a fork could be extended
+
+827
+00:37:26,870 --> 00:37:28,760
+at five or six times like over a period
+
+828
+00:37:28,760 --> 00:37:30,470
+of an hour now ken block's show up only
+
+829
+00:37:30,470 --> 00:37:32,510
+every ten minutes and then turn out to
+
+830
+00:37:32,510 --> 00:37:35,030
+be the shortest not the longest chain
+
+831
+00:37:35,030 --> 00:37:36,770
+because that means that there was some
+
+832
+00:37:36,770 --> 00:37:43,370
+other fork that was extending faster and
+
+833
+00:37:43,370 --> 00:37:44,390
+the only way some other before could
+
+834
+00:37:44,390 --> 00:37:46,130
+extend faster is that if a majority of
+
+835
+00:37:46,130 --> 00:37:47,840
+the cpu power was working on it and
+
+836
+00:37:47,840 --> 00:37:49,610
+we're assuming that a majority the cpu
+
+837
+00:37:49,610 --> 00:37:52,640
+power is islam malicious and is
+
+838
+00:37:52,640 --> 00:37:55,820
+therefore switching to the current
+
+839
+00:37:55,820 --> 00:38:01,700
+longest chain all right so this is you
+
+840
+00:38:01,700 --> 00:38:03,200
+have to be if you're doing large value
+
+841
+00:38:03,200 --> 00:38:05,390
+transactions you have to be careful and
+
+842
+00:38:05,390 --> 00:38:07,220
+wait till a chain goes long and after
+
+843
+00:38:07,220 --> 00:38:15,890
+your transaction shows up okay so okay
+
+844
+00:38:15,890 --> 00:38:17,810
+so I explained why you can't simply
+
+845
+00:38:17,810 --> 00:38:19,820
+modify a block in the middle of the
+
+846
+00:38:19,820 --> 00:38:22,280
+chain there's a related question which
+
+847
+00:38:22,280 --> 00:38:24,920
+is supposing there's an existing
+
+848
+00:38:24,920 --> 00:38:29,000
+blockchain you know that's something
+
+849
+00:38:29,000 --> 00:38:35,560
+that long and your transaction Y arrow
+
+850
+00:38:35,560 --> 00:38:37,850
+transaction why does he shows up here in
+
+851
+00:38:37,850 --> 00:38:41,000
+the blockchain and you want to get rid
+
+852
+00:38:41,000 --> 00:38:42,740
+you want to hide that transaction now
+
+853
+00:38:42,740 --> 00:38:45,380
+somehow make it so it doesn't exist well
+
+854
+00:38:45,380 --> 00:38:47,870
+gosh why don't you produce a new sort of
+
+855
+00:38:47,870 --> 00:38:52,040
+alternate chain that you know is mostly
+
+856
+00:38:52,040 --> 00:38:55,430
+identical to the main the real chain but
+
+857
+00:38:55,430 --> 00:39:00,350
+it's longer and just happens to omit Y
+
+858
+00:39:00,350 --> 00:39:03,320
+is transferred to Z and instead includes
+
+859
+00:39:03,320 --> 00:39:05,360
+Y is transferred to Q and if you do the
+
+860
+00:39:05,360 --> 00:39:07,070
+mining correctly for this and the hashes
+
+861
+00:39:07,070 --> 00:39:09,140
+work out your chains longer and it just
+
+862
+00:39:09,140 --> 00:39:10,700
+will be accepted under the rules of
+
+863
+00:39:10,700 --> 00:39:13,010
+Bitcoin which which everybody supposed
+
+864
+00:39:13,010 --> 00:39:15,920
+to switch to the longest chain so how
+
+865
+00:39:15,920 --> 00:39:18,700
+come you can't do this
+
+866
+00:39:20,350 --> 00:39:22,390
+and this you know this would also allow
+
+867
+00:39:22,390 --> 00:39:24,060
+you to double spend by essentially
+
+868
+00:39:24,060 --> 00:39:26,860
+unspent in a previous spent quantity and
+
+869
+00:39:26,860 --> 00:39:28,750
+my earlier comment about oh you're
+
+870
+00:39:28,750 --> 00:39:30,700
+supposed to wait you know zis was to
+
+871
+00:39:30,700 --> 00:39:32,860
+wait until the blockchain gets extended
+
+872
+00:39:32,860 --> 00:39:36,730
+you know this is now a way to defeat Z
+
+873
+00:39:36,730 --> 00:39:38,500
+waiting for the blockchain to extend it
+
+874
+00:39:38,500 --> 00:39:41,560
+so we're really because serious trouble
+
+875
+00:39:41,560 --> 00:39:46,780
+if you could make this work okay so and
+
+876
+00:39:46,780 --> 00:39:48,340
+somewhat well the answer is yes this can
+
+877
+00:39:48,340 --> 00:39:52,480
+be made to work and here's how to do it
+
+878
+00:39:52,480 --> 00:39:54,850
+you know the main blockchain is being
+
+879
+00:39:54,850 --> 00:39:56,620
+extended by the non malicious
+
+880
+00:39:56,620 --> 00:39:59,020
+participants at some rate right they
+
+881
+00:39:59,020 --> 00:40:00,550
+have enough CPU power to you know
+
+882
+00:40:00,550 --> 00:40:02,500
+produce a new block every 10 minutes if
+
+883
+00:40:02,500 --> 00:40:04,570
+you're the attacker and you have more
+
+884
+00:40:04,570 --> 00:40:07,870
+CPU power than the entire non-malicious
+
+885
+00:40:07,870 --> 00:40:10,390
+set appears then you're going to be able
+
+886
+00:40:10,390 --> 00:40:13,120
+to generate walks faster than the real
+
+887
+00:40:13,120 --> 00:40:15,790
+chain so your block makes your you know
+
+888
+00:40:15,790 --> 00:40:17,530
+chain may start out shorter and I may
+
+889
+00:40:17,530 --> 00:40:19,060
+take you a while to generate each block
+
+890
+00:40:19,060 --> 00:40:20,890
+but you know maybe you can generate two
+
+891
+00:40:20,890 --> 00:40:22,600
+blocks every ten minutes whereas the
+
+892
+00:40:22,600 --> 00:40:25,120
+main chain is only capable of generating
+
+893
+00:40:25,120 --> 00:40:26,710
+one block every ten minutes so that
+
+894
+00:40:26,710 --> 00:40:28,540
+means that for a while you'll have
+
+895
+00:40:28,540 --> 00:40:30,460
+caught up and exceeded the length of the
+
+896
+00:40:30,460 --> 00:40:34,300
+main chain the main fork and by the
+
+897
+00:40:34,300 --> 00:40:36,550
+rules of Bitcoin everyone you
+
+898
+00:40:36,550 --> 00:40:39,700
+non-malicious totally correct Bitcoin
+
+899
+00:40:39,700 --> 00:40:41,170
+peers they'll all switch to your longer
+
+900
+00:40:41,170 --> 00:40:42,670
+chain and that means they'll all
+
+901
+00:40:42,670 --> 00:40:45,130
+effectively forget this transaction and
+
+902
+00:40:45,130 --> 00:40:47,650
+except this other transaction this
+
+903
+00:40:47,650 --> 00:40:49,510
+second spend of the same coin so if
+
+904
+00:40:49,510 --> 00:40:51,460
+you're an attacker and you have more CPU
+
+905
+00:40:51,460 --> 00:40:53,500
+power than the entire rest of the
+
+906
+00:40:53,500 --> 00:40:53,830
+network
+
+907
+00:40:53,830 --> 00:40:56,590
+you can produce this chain and it means
+
+908
+00:40:56,590 --> 00:41:02,980
+you can double spend and you know that's
+
+909
+00:41:02,980 --> 00:41:05,830
+certainly you know something to think
+
+910
+00:41:05,830 --> 00:41:11,910
+about but the reason why you might hope
+
+911
+00:41:11,910 --> 00:41:14,350
+more be sort of somewhat confident that
+
+912
+00:41:14,350 --> 00:41:16,090
+it couldn't arise is that in a big
+
+913
+00:41:16,090 --> 00:41:18,880
+system with lots of participants it
+
+914
+00:41:18,880 --> 00:41:21,460
+might be very hard to assemble more CPU
+
+915
+00:41:21,460 --> 00:41:24,040
+power than the entire rest of the system
+
+916
+00:41:24,040 --> 00:41:28,630
+so once the buns Bitcoin grew big you
+
+917
+00:41:28,630 --> 00:41:31,610
+know people were somewhat confident that
+
+918
+00:41:31,610 --> 00:41:33,830
+the main sort of non-malicious system
+
+919
+00:41:33,830 --> 00:41:35,150
+had enough cpu power that it would be
+
+920
+00:41:35,150 --> 00:41:38,180
+expensive for an attacker to assemble
+
+921
+00:41:38,180 --> 00:41:40,610
+more CPU power than the rest of the
+
+922
+00:41:40,610 --> 00:41:43,190
+system of course for new
+
+923
+00:41:43,190 --> 00:41:45,700
+cryptocurrencies that don't yet have
+
+924
+00:41:45,700 --> 00:41:48,520
+very large mining operations going
+
+925
+00:41:48,520 --> 00:41:51,140
+they're actually easy to shoot down it's
+
+926
+00:41:51,140 --> 00:41:52,820
+easy for a new cryptocurrency like
+
+927
+00:41:52,820 --> 00:41:54,590
+Bitcoin it's easy for an attacker you
+
+928
+00:41:54,590 --> 00:41:56,540
+know for whatever reason to put it out
+
+929
+00:41:56,540 --> 00:41:59,930
+of business by getting more CPU power
+
+930
+00:41:59,930 --> 00:42:01,550
+but for a big system like Bitcoin it's
+
+931
+00:42:01,550 --> 00:42:05,140
+somewhat difficult now that said the
+
+932
+00:42:05,140 --> 00:42:07,610
+people who've looked into tried to
+
+933
+00:42:07,610 --> 00:42:13,160
+figure out who controls mining CPU power
+
+934
+00:42:13,160 --> 00:42:17,120
+and Bitcoin suspect that the biggest
+
+935
+00:42:17,120 --> 00:42:22,400
+players have fractions of the total that
+
+936
+00:42:22,400 --> 00:42:25,220
+are not that far from 50% and that
+
+937
+00:42:25,220 --> 00:42:27,170
+certainly if you know two or three of
+
+938
+00:42:27,170 --> 00:42:30,830
+the largest mining operations combined
+
+939
+00:42:30,830 --> 00:42:33,500
+forces that they would have a majority
+
+940
+00:42:33,500 --> 00:42:36,140
+of the mining power in Bitcoin and could
+
+941
+00:42:36,140 --> 00:42:38,560
+produce alternate Forks like this so
+
+942
+00:42:38,560 --> 00:42:45,400
+that's a somewhat troubling development
+
+943
+00:42:45,400 --> 00:42:47,660
+you know whether there'd be motivated to
+
+944
+00:42:47,660 --> 00:42:49,730
+do something bad especially since sort
+
+945
+00:42:49,730 --> 00:42:51,230
+of everything that's done in Bitcoin is
+
+946
+00:42:51,230 --> 00:42:53,630
+public that's what people would really
+
+947
+00:42:53,630 --> 00:42:55,660
+notice that oh gosh that was a long
+
+948
+00:42:55,660 --> 00:42:58,490
+chain and then we switch to a chain that
+
+949
+00:42:58,490 --> 00:43:00,800
+started way far back boy would people
+
+950
+00:43:00,800 --> 00:43:04,250
+ever notice that and that would you know
+
+951
+00:43:04,250 --> 00:43:06,350
+destroy confidence in Bitcoin and may
+
+952
+00:43:06,350 --> 00:43:08,330
+undermine anything that the malicious
+
+953
+00:43:08,330 --> 00:43:10,310
+parties were hoping to achieve
+
+954
+00:43:10,310 --> 00:43:11,930
+so since you know it is very expensive
+
+955
+00:43:11,930 --> 00:43:13,670
+actually you know the big players in
+
+956
+00:43:13,670 --> 00:43:15,590
+mining in Bitcoin I spent a huge amount
+
+957
+00:43:15,590 --> 00:43:19,340
+of money to buy the mining hardware that
+
+958
+00:43:19,340 --> 00:43:21,350
+they owned and so they probably wouldn't
+
+959
+00:43:21,350 --> 00:43:22,970
+want to undermine people's trust in
+
+960
+00:43:22,970 --> 00:43:25,010
+Bitcoin because that would destroy the
+
+961
+00:43:25,010 --> 00:43:29,040
+value of their vast collections partner
+
+962
+00:43:29,040 --> 00:43:31,690
+all right any questions about the
+
+963
+00:43:31,690 --> 00:43:40,470
+machinery here all right so I
+
+964
+00:43:40,470 --> 00:43:45,930
+questions that I can ask an answer one
+
+965
+00:43:45,930 --> 00:43:48,570
+question is that the ten minutes between
+
+966
+00:43:48,570 --> 00:43:50,400
+blocks is actually a serious annoyance
+
+967
+00:43:50,400 --> 00:43:52,760
+it means that if I want to buy something
+
+968
+00:43:52,760 --> 00:43:55,560
+it takes up to 10 minutes before the
+
+969
+00:43:55,560 --> 00:43:57,000
+transaction shows up in the blockchain
+
+970
+00:43:57,000 --> 00:43:57,780
+at all
+
+971
+00:43:57,780 --> 00:44:02,520
+even even in the first block and you
+
+972
+00:44:02,520 --> 00:44:04,020
+know either I have to wait around for 10
+
+973
+00:44:04,020 --> 00:44:06,180
+minutes to get my cup of coffee or the
+
+974
+00:44:06,180 --> 00:44:07,530
+store owner has to give me my cup of
+
+975
+00:44:07,530 --> 00:44:10,020
+coffee before the trans before the
+
+976
+00:44:10,020 --> 00:44:11,460
+transactions in the blockchain at all
+
+977
+00:44:11,460 --> 00:44:14,670
+thus having to trust me so why can't we
+
+978
+00:44:14,670 --> 00:44:21,450
+make the 10 minutes much shorter and you
+
+979
+00:44:21,450 --> 00:44:23,010
+know actually the 10 minutes probably
+
+980
+00:44:23,010 --> 00:44:24,960
+could be made shorter the practical
+
+981
+00:44:24,960 --> 00:44:28,470
+reasons why it isn't shorter is that it
+
+982
+00:44:28,470 --> 00:44:30,840
+actually it takes a while for new box to
+
+983
+00:44:30,840 --> 00:44:33,150
+be flooded over the system right after a
+
+984
+00:44:33,150 --> 00:44:35,790
+miner finds the next block it has to be
+
+985
+00:44:35,790 --> 00:44:38,730
+sent thousands of peers Bitcoin over
+
+986
+00:44:38,730 --> 00:44:41,640
+possibly slow network connections and it
+
+987
+00:44:41,640 --> 00:44:43,380
+may take quite a while before that block
+
+988
+00:44:43,380 --> 00:44:45,330
+is known to all the other peers and that
+
+989
+00:44:45,330 --> 00:44:47,810
+means that there's some period of time
+
+990
+00:44:47,810 --> 00:44:50,250
+in which other peers are mining on
+
+991
+00:44:50,250 --> 00:44:54,720
+blocks or wasting their time mining
+
+992
+00:44:54,720 --> 00:44:58,710
+blocks that are I've been superseded by
+
+993
+00:44:58,710 --> 00:45:02,869
+a block that hasn't yet beached them and
+
+994
+00:45:02,869 --> 00:45:07,369
+basically the fraction of time you spend
+
+995
+00:45:07,369 --> 00:45:09,810
+mining wasting of trying mining blocks
+
+996
+00:45:09,810 --> 00:45:11,990
+that have been superseded is related to
+
+997
+00:45:11,990 --> 00:45:15,109
+how long it takes to mine each block
+
+998
+00:45:15,109 --> 00:45:17,700
+compared to how long it takes to flood
+
+999
+00:45:17,700 --> 00:45:19,950
+the block and so if you make the inter
+
+1000
+00:45:19,950 --> 00:45:23,190
+block interval shorter and shorter then
+
+1001
+00:45:23,190 --> 00:45:25,470
+it starts to it gets small enough that
+
+1002
+00:45:25,470 --> 00:45:26,790
+it approaches the amount of time it
+
+1003
+00:45:26,790 --> 00:45:29,310
+takes the flood new blocks and that
+
+1004
+00:45:29,310 --> 00:45:32,190
+would cause most piers to waste most of
+
+1005
+00:45:32,190 --> 00:45:34,560
+their mining effort and since the miners
+
+1006
+00:45:34,560 --> 00:45:36,119
+are actually making money making Bitcoin
+
+1007
+00:45:36,119 --> 00:45:37,260
+by mining because there's a little
+
+1008
+00:45:37,260 --> 00:45:39,990
+reward to the successful miner of each
+
+1009
+00:45:39,990 --> 00:45:42,900
+block the miners are very uninterested
+
+1010
+00:45:42,900 --> 00:45:47,099
+in wasting resources mining for blocks
+
+1011
+00:45:47,099 --> 00:45:51,150
+that are have been superseded and so
+
+1012
+00:45:51,150 --> 00:45:53,110
+they're very uninterested in
+
+1013
+00:45:53,110 --> 00:45:55,210
+this 10-minutes be much shorter than it
+
+1014
+00:45:55,210 --> 00:45:57,570
+it's now and you know that's a
+
+1015
+00:45:57,570 --> 00:46:02,800
+significant constraint so there's a
+
+1016
+00:46:02,800 --> 00:46:04,660
+question what prevents why from double
+
+1017
+00:46:04,660 --> 00:46:07,450
+spending much in a much later block when
+
+1018
+00:46:07,450 --> 00:46:09,070
+piers might have forgotten about the
+
+1019
+00:46:09,070 --> 00:46:11,350
+first transaction and so you know the
+
+1020
+00:46:11,350 --> 00:46:14,290
+question is oh you know in a very early
+
+1021
+00:46:14,290 --> 00:46:17,410
+block why transferred according to Z and
+
+1022
+00:46:17,410 --> 00:46:20,620
+then there are thousand blocks later Y
+
+1023
+00:46:20,620 --> 00:46:24,280
+tries to transfer the same coin to Q you
+
+1024
+00:46:24,280 --> 00:46:26,790
+know like a year later or something and
+
+1025
+00:46:26,790 --> 00:46:29,910
+the answer to how this plays out is that
+
+1026
+00:46:29,910 --> 00:46:32,820
+all the peers remember this forever
+
+1027
+00:46:32,820 --> 00:46:36,720
+they absolutely remember every unspent
+
+1028
+00:46:36,720 --> 00:46:41,640
+transaction forever and that means that
+
+1029
+00:46:45,710 --> 00:46:47,920
+actually that can't be the first
+
+1030
+00:46:47,920 --> 00:46:51,370
+I think nominally to tell you the truth
+
+1031
+00:46:51,370 --> 00:46:52,690
+I don't understand all the ins and outs
+
+1032
+00:46:52,690 --> 00:46:54,430
+of this but one way the most
+
+1033
+00:46:54,430 --> 00:46:55,420
+straightforward way to solve this
+
+1034
+00:46:55,420 --> 00:46:57,250
+problem is for all peers to remember
+
+1035
+00:46:57,250 --> 00:46:59,530
+every transaction forever and every
+
+1036
+00:46:59,530 --> 00:47:02,500
+incoming transaction they check to make
+
+1037
+00:47:02,500 --> 00:47:05,380
+sure that the coin hasn't been spent yet
+
+1038
+00:47:05,380 --> 00:47:08,050
+they just the course create a database
+
+1039
+00:47:08,050 --> 00:47:11,050
+or index or something but allows them to
+
+1040
+00:47:11,050 --> 00:47:13,810
+essentially check every record to see if
+
+1041
+00:47:13,810 --> 00:47:17,080
+this coin has already been spent and I
+
+1042
+00:47:17,080 --> 00:47:19,240
+think you can although I don't fully
+
+1043
+00:47:19,240 --> 00:47:21,670
+understand this I think peers can
+
+1044
+00:47:21,670 --> 00:47:25,000
+discard a lot of though a lot of this
+
+1045
+00:47:25,000 --> 00:47:27,160
+information by only remembering
+
+1046
+00:47:27,160 --> 00:47:30,760
+information about unspent transactions
+
+1047
+00:47:30,760 --> 00:47:32,140
+so they keep a database of unspent
+
+1048
+00:47:32,140 --> 00:47:35,100
+transactions but it doesn't include
+
+1049
+00:47:35,100 --> 00:47:38,080
+spent coins and if a new transactions
+
+1050
+00:47:38,080 --> 00:47:40,150
+coin isn't in the database of unspent
+
+1051
+00:47:40,150 --> 00:47:43,990
+transactions then it's just ignored but
+
+1052
+00:47:43,990 --> 00:47:45,490
+this you know this database has to be
+
+1053
+00:47:45,490 --> 00:47:47,640
+every pair has to keep this database
+
+1054
+00:47:47,640 --> 00:47:52,240
+forever so you know just of course this
+
+1055
+00:47:52,240 --> 00:47:54,400
+is a in a way a very expensive system
+
+1056
+00:47:54,400 --> 00:47:56,740
+because what we're talking about is you
+
+1057
+00:47:56,740 --> 00:47:58,090
+know maintaining a record of every
+
+1058
+00:47:58,090 --> 00:48:01,090
+transaction essentially forever and you
+
+1059
+00:48:01,090 --> 00:48:01,960
+know if you think about how many
+
+1060
+00:48:01,960 --> 00:48:04,090
+transactions there are per second or per
+
+1061
+00:48:04,090 --> 00:48:05,950
+year on earth
+
+1062
+00:48:05,950 --> 00:48:09,580
+it's a vast number and so people really
+
+1063
+00:48:09,580 --> 00:48:11,200
+were serious about using Bitcoin they
+
+1064
+00:48:11,200 --> 00:48:12,820
+used it for everything in the way they
+
+1065
+00:48:12,820 --> 00:48:16,120
+use cash now it would you know it would
+
+1066
+00:48:16,120 --> 00:48:18,220
+be an enormous system and there would be
+
+1067
+00:48:18,220 --> 00:48:20,380
+enormous performance streams on the
+
+1068
+00:48:20,380 --> 00:48:22,750
+system and indeed Bitcoin is not really
+
+1069
+00:48:22,750 --> 00:48:27,220
+capable of supporting every transaction
+
+1070
+00:48:27,220 --> 00:48:30,490
+you couldn't run the entire financial
+
+1071
+00:48:30,490 --> 00:48:32,410
+system of the world on Bitcoin as it
+
+1072
+00:48:32,410 --> 00:48:34,980
+exists today and there's a bunch of
+
+1073
+00:48:34,980 --> 00:48:38,440
+there's a bunch of limits you know one
+
+1074
+00:48:38,440 --> 00:48:40,630
+limit is that the full Bitcoin database
+
+1075
+00:48:40,630 --> 00:48:41,860
+already consumes a couple hundred
+
+1076
+00:48:41,860 --> 00:48:43,690
+gigabytes yeah that's actually not so
+
+1077
+00:48:43,690 --> 00:48:46,480
+bad because you can fit it on a disk but
+
+1078
+00:48:46,480 --> 00:48:48,040
+if it was a thousand times larger it
+
+1079
+00:48:48,040 --> 00:48:49,570
+would start to be a serious problem to
+
+1080
+00:48:49,570 --> 00:48:51,580
+even store it let alone search for stuff
+
+1081
+00:48:51,580 --> 00:48:56,059
+in it the most immediate problem
+
+1082
+00:48:56,059 --> 00:48:57,769
+and we it turns out that processing that
+
+1083
+00:48:57,769 --> 00:48:59,509
+transactions it's not terribly expensive
+
+1084
+00:48:59,509 --> 00:49:01,789
+because for the peers it's mostly about
+
+1085
+00:49:01,789 --> 00:49:03,319
+hashing and these cryptographic hashes
+
+1086
+00:49:03,319 --> 00:49:07,699
+are pretty quick but the sort of most
+
+1087
+00:49:07,699 --> 00:49:11,509
+current you know ugly restriction is
+
+1088
+00:49:11,509 --> 00:49:14,269
+that these block cuz there's a limit to
+
+1089
+00:49:14,269 --> 00:49:16,009
+how big these blocks can be these blocks
+
+1090
+00:49:16,009 --> 00:49:18,229
+can only be a couple megabytes in size
+
+1091
+00:49:18,229 --> 00:49:22,430
+and new blocks appear only every ten
+
+1092
+00:49:22,430 --> 00:49:25,640
+minutes and so that means you only get
+
+1093
+00:49:25,640 --> 00:49:27,619
+you know less than a megabyte of new
+
+1094
+00:49:27,619 --> 00:49:30,140
+transactions per minute each transaction
+
+1095
+00:49:30,140 --> 00:49:35,150
+the sort of Val you know is very way
+
+1096
+00:49:35,150 --> 00:49:37,640
+various ways of abbreviating them but
+
+1097
+00:49:37,640 --> 00:49:39,170
+you know each transaction is at least
+
+1098
+00:49:39,170 --> 00:49:42,319
+dozens or a hundred bytes and that means
+
+1099
+00:49:42,319 --> 00:49:45,079
+that the system can really only because
+
+1100
+00:49:45,079 --> 00:49:46,939
+of this block size limit and the ten
+
+1101
+00:49:46,939 --> 00:49:49,539
+minute limit the system can only process
+
+1102
+00:49:49,539 --> 00:49:52,400
+sort of thousands or tens of thousands
+
+1103
+00:49:52,400 --> 00:49:57,109
+of transactions well I'm not sure I can
+
+1104
+00:49:57,109 --> 00:49:58,579
+divide properly but it's not nearly
+
+1105
+00:49:58,579 --> 00:50:03,670
+enough to run the current way that
+
+1106
+00:50:03,670 --> 00:50:05,869
+Bitcoin set up is not nearly
+
+1107
+00:50:05,869 --> 00:50:07,699
+high-capacity enough to run the world
+
+1108
+00:50:07,699 --> 00:50:09,439
+all the world's financial transactions
+
+1109
+00:50:09,439 --> 00:50:12,920
+are and so you know people change it it
+
+1110
+00:50:12,920 --> 00:50:18,229
+evolves but it's not really fast enough
+
+1111
+00:50:18,229 --> 00:50:20,059
+for everything of course nobody's really
+
+1112
+00:50:20,059 --> 00:50:22,880
+using it for commerce it's mostly used
+
+1113
+00:50:22,880 --> 00:50:24,380
+for speculation as far as anyone can
+
+1114
+00:50:24,380 --> 00:50:27,170
+tell so it's not yet a problem but from
+
+1115
+00:50:27,170 --> 00:50:29,059
+a design point that there needs to be
+
+1116
+00:50:29,059 --> 00:50:35,299
+some things fixed okay so I mentioned
+
+1117
+00:50:35,299 --> 00:50:38,390
+before that the Bitcoin software adjusts
+
+1118
+00:50:38,390 --> 00:50:40,609
+the hardness of finding nonces that is
+
+1119
+00:50:40,609 --> 00:50:42,529
+the number of required leading zeros in
+
+1120
+00:50:42,529 --> 00:50:45,849
+the block hash adjusts that dynamically
+
+1121
+00:50:45,849 --> 00:50:49,339
+to cause there to be ten minutes for
+
+1122
+00:50:49,339 --> 00:50:54,469
+block one thing that has to be the case
+
+1123
+00:50:54,469 --> 00:50:56,239
+though is that all the participants have
+
+1124
+00:50:56,239 --> 00:50:58,999
+to agree on the required number of
+
+1125
+00:50:58,999 --> 00:51:00,739
+leading zeros they actually all have to
+
+1126
+00:51:00,739 --> 00:51:02,689
+agree on the hardness of finding a knots
+
+1127
+00:51:02,689 --> 00:51:06,319
+and so if one peer sort of looks at the
+
+1128
+00:51:06,319 --> 00:51:07,939
+rate at which blocks have been produced
+
+1129
+00:51:07,939 --> 00:51:09,550
+and
+
+1130
+00:51:09,550 --> 00:51:12,830
+besides that it's too slow and it should
+
+1131
+00:51:12,830 --> 00:51:15,710
+make the require fewer leading zeros but
+
+1132
+00:51:15,710 --> 00:51:17,480
+the other peers haven't made the same
+
+1133
+00:51:17,480 --> 00:51:20,660
+decision then that first piers will be
+
+1134
+00:51:20,660 --> 00:51:22,640
+generating blocks that are rejected by
+
+1135
+00:51:22,640 --> 00:51:24,140
+the other peers because all the peers
+
+1136
+00:51:24,140 --> 00:51:26,660
+demand what they think is the correct
+
+1137
+00:51:26,660 --> 00:51:31,640
+number of leading zeros in the hash so
+
+1138
+00:51:31,640 --> 00:51:35,390
+there has to be agreement on on the
+
+1139
+00:51:35,390 --> 00:51:36,980
+hardness of finding a nots
+
+1140
+00:51:36,980 --> 00:51:39,260
+that the the peers have to agree exactly
+
+1141
+00:51:39,260 --> 00:51:40,970
+and what the current hardness is
+
+1142
+00:51:40,970 --> 00:51:42,230
+otherwise they'll reject each other's
+
+1143
+00:51:42,230 --> 00:51:44,119
+blocks so how do they reach that
+
+1144
+00:51:44,119 --> 00:51:48,880
+agreement it turns out actually to be
+
+1145
+00:51:48,880 --> 00:51:52,160
+totally straightforward they all are
+
+1146
+00:51:52,160 --> 00:51:54,589
+looking at the same blockchain after all
+
+1147
+00:51:54,589 --> 00:51:56,720
+that was the whole point is that you
+
+1148
+00:51:56,720 --> 00:51:58,580
+know except for temporary Forks there's
+
+1149
+00:51:58,580 --> 00:51:59,990
+just one blockchain everybody hasn't a
+
+1150
+00:51:59,990 --> 00:52:02,750
+copy of the exact same bits in the
+
+1151
+00:52:02,750 --> 00:52:05,720
+blockchain and so the Bitcoin just
+
+1152
+00:52:05,720 --> 00:52:09,670
+defines a deterministic function that
+
+1153
+00:52:09,670 --> 00:52:12,260
+takes the current blockchain as its
+
+1154
+00:52:12,260 --> 00:52:13,970
+argument and uses that to
+
+1155
+00:52:13,970 --> 00:52:16,750
+deterministically produce the current
+
+1156
+00:52:16,750 --> 00:52:19,760
+hardness of finding a nonce and the way
+
+1157
+00:52:19,760 --> 00:52:21,140
+it does that is basically it looks at
+
+1158
+00:52:21,140 --> 00:52:25,099
+the timestamps in the blocks to decide
+
+1159
+00:52:25,099 --> 00:52:27,349
+how fast the recent blocks have been
+
+1160
+00:52:27,349 --> 00:52:28,790
+produced but since everybody's looking
+
+1161
+00:52:28,790 --> 00:52:30,109
+at the same blocks in the same time
+
+1162
+00:52:30,109 --> 00:52:32,650
+stamps and is running the same function
+
+1163
+00:52:32,650 --> 00:52:35,660
+to adjust the hardness they all come to
+
+1164
+00:52:35,660 --> 00:52:38,030
+exactly the same conclusion about what
+
+1165
+00:52:38,030 --> 00:52:40,430
+the hardness ought to be for for each
+
+1166
+00:52:40,430 --> 00:52:42,890
+successive block in the blockchain so
+
+1167
+00:52:42,890 --> 00:52:45,020
+there's a kind of interesting agreement
+
+1168
+00:52:45,020 --> 00:52:46,910
+that's being enforced there because they
+
+1169
+00:52:46,910 --> 00:52:51,200
+all see the identical same laws all
+
+1170
+00:52:51,200 --> 00:52:52,359
+right
+
+1171
+00:52:52,359 --> 00:52:54,950
+another interesting question is that one
+
+1172
+00:52:54,950 --> 00:52:56,900
+of the motivations that some people have
+
+1173
+00:52:56,900 --> 00:52:58,099
+for being interested in new
+
+1174
+00:52:58,099 --> 00:53:00,650
+cryptocurrencies is that they might be
+
+1175
+00:53:00,650 --> 00:53:02,450
+more anonymous than credit cards and
+
+1176
+00:53:02,450 --> 00:53:03,650
+indeed credit cards are deeply
+
+1177
+00:53:03,650 --> 00:53:06,260
+non-anonymous since the credit card
+
+1178
+00:53:06,260 --> 00:53:08,030
+company knows exactly what you're up to
+
+1179
+00:53:08,030 --> 00:53:11,660
+I keeps a record of it whereas Bitcoin
+
+1180
+00:53:11,660 --> 00:53:13,310
+at least on the face of it you know
+
+1181
+00:53:13,310 --> 00:53:14,780
+Bitcoin there was nothing about a
+
+1182
+00:53:14,780 --> 00:53:17,150
+Bitcoin transaction that say had my name
+
+1183
+00:53:17,150 --> 00:53:18,099
+on it
+
+1184
+00:53:18,099 --> 00:53:20,450
+now you might think well each Bitcoin
+
+1185
+00:53:20,450 --> 00:53:22,850
+transaction has my public key in it
+
+1186
+00:53:22,850 --> 00:53:24,410
+man that's true if I don't change my
+
+1187
+00:53:24,410 --> 00:53:26,390
+public key and I always use the same
+
+1188
+00:53:26,390 --> 00:53:29,840
+public key then once somebody figures
+
+1189
+00:53:29,840 --> 00:53:31,310
+out my public key is just relatively
+
+1190
+00:53:31,310 --> 00:53:34,190
+easy since whenever I pay somebody they
+
+1191
+00:53:34,190 --> 00:53:36,350
+they get to know my public key then
+
+1192
+00:53:36,350 --> 00:53:38,270
+people can track my activities by
+
+1193
+00:53:38,270 --> 00:53:39,830
+looking for my public key or my
+
+1194
+00:53:39,830 --> 00:53:43,130
+signature in the Bitcoin lock and it's a
+
+1195
+00:53:43,130 --> 00:53:45,910
+public log so anybody can look now
+
+1196
+00:53:45,910 --> 00:53:49,310
+people everybody who cares and I think
+
+1197
+00:53:49,310 --> 00:53:51,110
+most Bitcoin wallets offer actually
+
+1198
+00:53:51,110 --> 00:53:53,840
+generates fresh public keys for each
+
+1199
+00:53:53,840 --> 00:53:56,390
+transaction I'm said anytime if somebody
+
+1200
+00:53:56,390 --> 00:53:58,490
+wants to pay me money my wallet will
+
+1201
+00:53:58,490 --> 00:54:00,500
+generate a new never used before public
+
+1202
+00:54:00,500 --> 00:54:01,370
+private key pair
+
+1203
+00:54:01,370 --> 00:54:03,470
+remember the private key then give the
+
+1204
+00:54:03,470 --> 00:54:05,360
+public key to the person who wants to
+
+1205
+00:54:05,360 --> 00:54:07,610
+send me money and that makes the
+
+1206
+00:54:07,610 --> 00:54:14,180
+tracking harder but it turns out that if
+
+1207
+00:54:14,180 --> 00:54:17,980
+you're up against determined sleuth
+
+1208
+00:54:17,980 --> 00:54:20,870
+there's you know there's enough clues if
+
+1209
+00:54:20,870 --> 00:54:25,130
+you make transactions often enough since
+
+1210
+00:54:25,130 --> 00:54:26,870
+the transactions are often tied to your
+
+1211
+00:54:26,870 --> 00:54:28,340
+real identity like if you buy something
+
+1212
+00:54:28,340 --> 00:54:31,550
+from Amazon with Bitcoin yeah maybe the
+
+1213
+00:54:31,550 --> 00:54:33,170
+Bitcoin transaction it's not clear it's
+
+1214
+00:54:33,170 --> 00:54:34,910
+you but it probably needs to be shipped
+
+1215
+00:54:34,910 --> 00:54:36,860
+to you by FedEx to your home address and
+
+1216
+00:54:36,860 --> 00:54:38,660
+that's a little piece of identifying
+
+1217
+00:54:38,660 --> 00:54:41,180
+information there and that will allow
+
+1218
+00:54:41,180 --> 00:54:42,950
+somebody to figure out it was you who
+
+1219
+00:54:42,950 --> 00:54:44,390
+spent that money and they'll be able to
+
+1220
+00:54:44,390 --> 00:54:46,040
+straight track backwards to see where
+
+1221
+00:54:46,040 --> 00:54:48,620
+that money came from to get another clue
+
+1222
+00:54:48,620 --> 00:54:50,300
+about who you are and what you're up to
+
+1223
+00:54:50,300 --> 00:54:57,380
+so in fact against amateurs Bitcoin is
+
+1224
+00:54:57,380 --> 00:54:59,900
+reasonably anonymous against serious
+
+1225
+00:54:59,900 --> 00:55:02,630
+adversaries a Bitcoin has turned out not
+
+1226
+00:55:02,630 --> 00:55:10,340
+to be particularly anonymous okay
+
+1227
+00:55:10,340 --> 00:55:12,260
+a little bit disappointing from a little
+
+1228
+00:55:12,260 --> 00:55:14,540
+bit disappointing for people who are
+
+1229
+00:55:14,540 --> 00:55:16,910
+interested in privacy or doing drug
+
+1230
+00:55:16,910 --> 00:55:21,850
+deals or financing illegal activity
+
+1231
+00:55:23,020 --> 00:55:24,880
+alright
+
+1232
+00:55:24,880 --> 00:55:28,520
+sum up the sort of key idea here is the
+
+1233
+00:55:28,520 --> 00:55:31,670
+blockchain like a public ledger that
+
+1234
+00:55:31,670 --> 00:55:34,250
+everybody agrees on and that has every
+
+1235
+00:55:34,250 --> 00:55:36,230
+transaction on it and all that has a lot
+
+1236
+00:55:36,230 --> 00:55:39,260
+of problems like with scalability if you
+
+1237
+00:55:39,260 --> 00:55:41,470
+can make it work it's a great idea
+
+1238
+00:55:41,470 --> 00:55:43,970
+another sort of key technical problem is
+
+1239
+00:55:43,970 --> 00:55:45,670
+how to do this without any
+
+1240
+00:55:45,670 --> 00:55:48,050
+centralization now whether the
+
+1241
+00:55:48,050 --> 00:55:50,330
+centralization or decentralization of
+
+1242
+00:55:50,330 --> 00:55:52,700
+valuable property is kind of not really
+
+1243
+00:55:52,700 --> 00:55:55,220
+a technical question but if you value it
+
+1244
+00:55:55,220 --> 00:55:57,560
+then it's just really cool and amazing
+
+1245
+00:55:57,560 --> 00:56:00,860
+but it's possible to have agreement on a
+
+1246
+00:56:00,860 --> 00:56:05,030
+single log with no central trust and I'm
+
+1247
+00:56:05,030 --> 00:56:06,830
+using participants many of whom are
+
+1248
+00:56:06,830 --> 00:56:09,590
+actively malicious and the final key
+
+1249
+00:56:09,590 --> 00:56:13,070
+idea is that is the idea of mining a
+
+1250
+00:56:13,070 --> 00:56:14,930
+proof-of-work where it too has problems
+
+1251
+00:56:14,930 --> 00:56:17,780
+but it's very surprising that a
+
+1252
+00:56:17,780 --> 00:56:21,170
+technique existed at all that allowed
+
+1253
+00:56:21,170 --> 00:56:24,620
+agreement in a way that can't be fooled
+
+1254
+00:56:24,620 --> 00:56:27,380
+by these sort of fake IP address attacks
+
+1255
+00:56:27,380 --> 00:56:29,420
+that doesn't suffer the same problems
+
+1256
+00:56:29,420 --> 00:56:31,910
+that voting suffers that was a very
+
+1257
+00:56:31,910 --> 00:56:33,850
+surprising and interesting development
+
+1258
+00:56:33,850 --> 00:56:37,370
+all right that's all I have to say the
+
+1259
+00:56:37,370 --> 00:56:40,850
+actually sent kind of continuing some of
+
+1260
+00:56:40,850 --> 00:56:41,990
+this line of thought and the next
+
+1261
+00:56:41,990 --> 00:56:44,660
+lecture which is a sort of different
+
+1262
+00:56:44,660 --> 00:56:49,310
+kind of decentralized system partially
+
+1263
+00:56:49,310 --> 00:56:52,780
+built on top of Bitcoin
+

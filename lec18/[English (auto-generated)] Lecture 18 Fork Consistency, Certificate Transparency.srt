@@ -1,0 +1,6264 @@
+1
+00:00:03,380 --> 00:00:08,670
+alright hello everyone let's get started
+
+2
+00:00:08,670 --> 00:00:11,969
+I want to talk about a system called
+
+3
+00:00:11,969 --> 00:00:15,360
+certificate transparency today and this
+
+4
+00:00:15,360 --> 00:00:18,960
+is a bit of a departure from most of the
+
+5
+00:00:18,960 --> 00:00:21,119
+topics we talked about so far we've
+
+6
+00:00:21,119 --> 00:00:23,100
+talked about distributed systems that
+
+7
+00:00:23,100 --> 00:00:24,990
+are really closed systems where all the
+
+8
+00:00:24,990 --> 00:00:27,750
+participants are trustworthy they're all
+
+9
+00:00:27,750 --> 00:00:30,960
+maybe be run being run by the same sort
+
+10
+00:00:30,960 --> 00:00:32,488
+of mutually trusting organization like
+
+11
+00:00:32,488 --> 00:00:34,440
+rafters that way you know you just
+
+12
+00:00:34,440 --> 00:00:36,059
+assume at the RAF's tiers do what
+
+13
+00:00:36,059 --> 00:00:40,800
+they're supposed to do but there's also
+
+14
+00:00:40,800 --> 00:00:42,570
+plenty of systems out there particularly
+
+15
+00:00:42,570 --> 00:00:44,370
+systems sort of built an internet scale
+
+16
+00:00:44,370 --> 00:00:48,270
+where the systems are open and anyone
+
+17
+00:00:48,270 --> 00:00:50,760
+can participate being active participant
+
+18
+00:00:50,760 --> 00:00:54,149
+I mean in some big systems out there and
+
+19
+00:00:54,149 --> 00:00:56,129
+if you build systems that are completely
+
+20
+00:00:56,129 --> 00:01:01,289
+open in that way there's often no single
+
+21
+00:01:01,289 --> 00:01:03,329
+universally trusted Authority that
+
+22
+00:01:03,329 --> 00:01:06,450
+everybody is willing to trust to run the
+
+23
+00:01:06,450 --> 00:01:09,150
+system or to protect it that is
+
+24
+00:01:09,150 --> 00:01:11,010
+everybody you sort of potentially
+
+25
+00:01:11,010 --> 00:01:14,159
+mutually suspicious of everyone else and
+
+26
+00:01:14,159 --> 00:01:16,560
+if that's the situation you have to be
+
+27
+00:01:16,560 --> 00:01:18,979
+able to build useful systems out of
+
+28
+00:01:18,979 --> 00:01:23,700
+mutually distrusting pieces and this
+
+29
+00:01:23,700 --> 00:01:26,040
+makes in any sort of internet wide open
+
+30
+00:01:26,040 --> 00:01:27,930
+systems to make trust and security sort
+
+31
+00:01:27,930 --> 00:01:30,000
+of top level systems issues when you're
+
+32
+00:01:30,000 --> 00:01:31,979
+thinking about designing a distributed
+
+33
+00:01:31,979 --> 00:01:34,829
+system so the most basic question when
+
+34
+00:01:34,829 --> 00:01:37,619
+you're building an open system is when
+
+35
+00:01:37,619 --> 00:01:38,939
+I'm talking to another computer or
+
+36
+00:01:38,939 --> 00:01:41,640
+another person you need to know are you
+
+37
+00:01:41,640 --> 00:01:43,439
+talking to the right other computer or
+
+38
+00:01:43,439 --> 00:01:46,049
+are you talking to the right website and
+
+39
+00:01:46,049 --> 00:01:48,799
+this problem is actually close to
+
+40
+00:01:48,799 --> 00:01:51,869
+unsolvable it turns out there's really
+
+41
+00:01:51,869 --> 00:01:54,450
+there's lots of solutions and none
+
+42
+00:01:54,450 --> 00:01:56,939
+really work that well but it is the
+
+43
+00:01:56,939 --> 00:01:59,130
+problem that certificate transparency
+
+44
+00:01:59,130 --> 00:02:04,170
+today's topic is trying to help with the
+
+45
+00:02:04,170 --> 00:02:06,360
+material today ties sort of backwards in
+
+46
+00:02:06,360 --> 00:02:08,788
+the course to consistency it turns out
+
+47
+00:02:08,788 --> 00:02:09,869
+that a lot of what certificate
+
+48
+00:02:09,869 --> 00:02:12,209
+transparency do doing is ensuring that
+
+49
+00:02:12,209 --> 00:02:13,800
+all parties see
+
+50
+00:02:13,800 --> 00:02:16,230
+the same information about certificates
+
+51
+00:02:16,230 --> 00:02:18,990
+that's a real consistency issue and this
+
+52
+00:02:18,990 --> 00:02:21,120
+material also ties forward to blockchain
+
+53
+00:02:21,120 --> 00:02:23,940
+systems like blockchain which is what we
+
+54
+00:02:23,940 --> 00:02:26,000
+talk talking about next week a
+
+55
+00:02:26,000 --> 00:02:29,310
+certificate transparency is among the
+
+56
+00:02:29,310 --> 00:02:32,010
+relatively few non cryptocurrency uses
+
+57
+00:02:32,010 --> 00:02:37,010
+of a blockchain like design alright so
+
+58
+00:02:37,010 --> 00:02:39,690
+by way of introduction I want to start
+
+59
+00:02:39,690 --> 00:02:45,060
+with the situation on the web with web
+
+60
+00:02:45,060 --> 00:02:47,340
+security at any rate as it existed
+
+61
+00:02:47,340 --> 00:02:50,940
+before 1995 before certificates so this
+
+62
+00:02:50,940 --> 00:02:56,280
+is for 1995 and in particular there was
+
+63
+00:02:56,280 --> 00:02:57,990
+a there was a kind of attack in those
+
+64
+00:02:57,990 --> 00:03:00,150
+days that people were worried about
+
+65
+00:03:00,150 --> 00:03:02,040
+called a man-in-the-middle attacks this
+
+66
+00:03:02,040 --> 00:03:06,740
+is man in
+
+67
+00:03:07,420 --> 00:03:10,599
+middle and this is a name for a class of
+
+68
+00:03:10,599 --> 00:03:14,200
+attacks style of attack so you know the
+
+69
+00:03:14,200 --> 00:03:16,300
+set up in those days is you have the
+
+70
+00:03:16,300 --> 00:03:20,770
+internet and you have people running
+
+71
+00:03:20,770 --> 00:03:23,120
+browsers
+
+72
+00:03:23,120 --> 00:03:26,519
+um sitting with our computer attached to
+
+73
+00:03:26,519 --> 00:03:27,120
+the Internet
+
+74
+00:03:27,120 --> 00:03:29,099
+anyone sitting in front of my computer I
+
+75
+00:03:29,099 --> 00:03:31,640
+want to talk to a specific server
+
+76
+00:03:31,640 --> 00:03:33,780
+exposing what I want to do is talk to
+
+77
+00:03:33,780 --> 00:03:39,209
+gmail.com right and ordinarily I would
+
+78
+00:03:39,209 --> 00:03:42,209
+you know maybe contact the DNS system I
+
+79
+00:03:42,209 --> 00:03:45,750
+would as a user I maybe type gmail.com I
+
+80
+00:03:45,750 --> 00:03:47,040
+would sort of know what it was I wanted
+
+81
+00:03:47,040 --> 00:03:49,859
+to talk to name Li gmail.com my browser
+
+82
+00:03:49,859 --> 00:03:51,780
+would talk to DNS servers say what's
+
+83
+00:03:51,780 --> 00:03:54,180
+gmail.com it would reply with a IP
+
+84
+00:03:54,180 --> 00:03:56,190
+address I connected that IP address and
+
+85
+00:03:56,190 --> 00:03:58,379
+you know I need to authenticate myself
+
+86
+00:03:58,379 --> 00:04:00,060
+so I'd probably type my password to
+
+87
+00:04:00,060 --> 00:04:02,519
+Gmail to Gmail's website and then Gmail
+
+88
+00:04:02,519 --> 00:04:08,190
+would show me my email without some kind
+
+89
+00:04:08,190 --> 00:04:10,530
+of story for security this system is
+
+90
+00:04:10,530 --> 00:04:12,629
+actually quite easy to attack and turn
+
+91
+00:04:12,629 --> 00:04:18,120
+out to be easy to attack and the one
+
+92
+00:04:18,120 --> 00:04:19,680
+style of attack is that what's called a
+
+93
+00:04:19,680 --> 00:04:21,630
+man-in-the-middle attack where some evil
+
+94
+00:04:21,630 --> 00:04:25,830
+person sets up a another web server that
+
+95
+00:04:25,830 --> 00:04:28,560
+serves pages that look just like Gmail
+
+96
+00:04:28,560 --> 00:04:30,240
+web servers like the last for your login
+
+97
+00:04:30,240 --> 00:04:34,500
+and password right and then the attacker
+
+98
+00:04:34,500 --> 00:04:39,120
+would maybe intercept my DNS packets or
+
+99
+00:04:39,120 --> 00:04:41,699
+just guess when I would have sent a DNS
+
+100
+00:04:41,699 --> 00:04:43,830
+packet and come up with a fake reply
+
+101
+00:04:43,830 --> 00:04:47,250
+that instead of providing the real IP
+
+102
+00:04:47,250 --> 00:04:49,889
+address of the real gmail.com server
+
+103
+00:04:49,889 --> 00:04:52,110
+would provide the email address of ma of
+
+104
+00:04:52,110 --> 00:04:54,510
+the attackers fake computer and then the
+
+105
+00:04:54,510 --> 00:04:56,880
+user's browser instead of talking to
+
+106
+00:04:56,880 --> 00:05:00,660
+Gmail would actually unknown to them be
+
+107
+00:05:00,660 --> 00:05:02,220
+talking to the attackers computer the
+
+108
+00:05:02,220 --> 00:05:04,020
+attackers computer would provide a web
+
+109
+00:05:04,020 --> 00:05:05,729
+page looks just like a login page user
+
+110
+00:05:05,729 --> 00:05:08,520
+types are paths log and a password and
+
+111
+00:05:08,520 --> 00:05:11,849
+now the attackers computer can forward
+
+112
+00:05:11,849 --> 00:05:14,099
+that to the real Gmail login for you of
+
+113
+00:05:14,099 --> 00:05:16,289
+course you don't know that you know get
+
+114
+00:05:16,289 --> 00:05:18,810
+your current inbox back to the attackers
+
+115
+00:05:18,810 --> 00:05:20,490
+computer which presumably records it
+
+116
+00:05:20,490 --> 00:05:22,680
+along with your password and then sends
+
+117
+00:05:22,680 --> 00:05:24,750
+your inbox or whatever to the browser
+
+118
+00:05:24,750 --> 00:05:28,260
+and this allows a you know if you can
+
+119
+00:05:28,260 --> 00:05:29,340
+execute this kind of man-in-the-middle
+
+120
+00:05:29,340 --> 00:05:32,639
+attack the attackers computer can record
+
+121
+00:05:32,639 --> 00:05:34,440
+your password record your email and
+
+122
+00:05:34,440 --> 00:05:35,580
+you'll never be the wiser
+
+123
+00:05:35,580 --> 00:05:36,780
+and
+
+124
+00:05:36,780 --> 00:05:40,560
+before certificates on SSL and HTTPS
+
+125
+00:05:40,560 --> 00:05:42,530
+there was really no defense against this
+
+126
+00:05:42,530 --> 00:05:46,260
+mom okay so this is the man in the
+
+127
+00:05:46,260 --> 00:05:48,240
+middle attack and this attacker here is
+
+128
+00:05:48,240 --> 00:05:50,910
+the man in the middle looks just like
+
+129
+00:05:50,910 --> 00:05:53,280
+Gmail to the browser pretends to be the
+
+130
+00:05:53,280 --> 00:05:54,900
+user when talking to Gmail so that it
+
+131
+00:05:54,900 --> 00:05:57,630
+can actually get the information from
+
+132
+00:05:57,630 --> 00:05:59,070
+Gmail required to trick the user into
+
+133
+00:05:59,070 --> 00:06:01,260
+thinking it's really Gmail all right so
+
+134
+00:06:01,260 --> 00:06:05,940
+this is the attack in the mid-90s people
+
+135
+00:06:05,940 --> 00:06:11,280
+came up with certificates with SSL or
+
+136
+00:06:11,280 --> 00:06:14,070
+it's also called TLS it's what the
+
+137
+00:06:14,070 --> 00:06:15,930
+protocol the security protocol that
+
+138
+00:06:15,930 --> 00:06:20,990
+you're using when you use HTTPS links um
+
+139
+00:06:20,990 --> 00:06:24,120
+and here the game was that Gmail comm
+
+140
+00:06:24,120 --> 00:06:28,880
+was gonna have a public/private key pair
+
+141
+00:06:28,880 --> 00:06:34,160
+so we'd have a private key that only
+
+142
+00:06:34,160 --> 00:06:38,280
+Gmail knows sitting in its server and
+
+143
+00:06:38,280 --> 00:06:41,790
+then when you connect well your the user
+
+144
+00:06:41,790 --> 00:06:44,430
+you connect somewhere you ask to connect
+
+145
+00:06:44,430 --> 00:06:48,510
+to Gmail you know and in order to verify
+
+146
+00:06:48,510 --> 00:06:50,400
+that you're really talking to Gmail the
+
+147
+00:06:50,400 --> 00:06:52,590
+users going to demand Gmail prove that
+
+148
+00:06:52,590 --> 00:06:55,140
+it really owns Gmail is private key well
+
+149
+00:06:55,140 --> 00:06:55,860
+of course
+
+150
+00:06:55,860 --> 00:06:58,620
+where does your browser find out Gmail
+
+151
+00:06:58,620 --> 00:07:01,050
+is private key from your Gmail public
+
+152
+00:07:01,050 --> 00:07:03,870
+key which is what you need to check that
+
+153
+00:07:03,870 --> 00:07:05,340
+it really has the private key there's
+
+154
+00:07:05,340 --> 00:07:07,830
+also this notion of certificate
+
+155
+00:07:07,830 --> 00:07:09,390
+authorities and certificates so there'd
+
+156
+00:07:09,390 --> 00:07:11,910
+be a certificate authority when Gmail
+
+157
+00:07:11,910 --> 00:07:14,729
+set up its server it would contact the
+
+158
+00:07:14,729 --> 00:07:15,960
+certificate authority may be on the
+
+159
+00:07:15,960 --> 00:07:17,310
+phone or by email or something and say
+
+160
+00:07:17,310 --> 00:07:19,370
+look you know I want a certificate for
+
+161
+00:07:19,370 --> 00:07:24,000
+the DNS name gmail.com and the
+
+162
+00:07:24,000 --> 00:07:25,979
+certificate authority would sort of try
+
+163
+00:07:25,979 --> 00:07:28,169
+to verify that oh yes whoever's asking
+
+164
+00:07:28,169 --> 00:07:30,419
+for certificate really owns that name
+
+165
+00:07:30,419 --> 00:07:32,130
+it really is Google or whoever owns
+
+166
+00:07:32,130 --> 00:07:35,280
+gmail.com and if so the certificate
+
+167
+00:07:35,280 --> 00:07:38,750
+authority would provide a certificate
+
+168
+00:07:39,350 --> 00:07:40,840
+back to gee
+
+169
+00:07:40,840 --> 00:07:43,090
+komm which basically what a certificate
+
+170
+00:07:43,090 --> 00:07:50,010
+contains is the name of the web server
+
+171
+00:07:50,010 --> 00:07:57,120
+the web servers public key and a
+
+172
+00:07:57,120 --> 00:08:01,780
+signature over this certificate made
+
+173
+00:08:01,780 --> 00:08:04,540
+with the certificate authorities private
+
+174
+00:08:04,540 --> 00:08:08,040
+key so this is sort of a self-contained
+
+175
+00:08:08,040 --> 00:08:11,080
+assertion checkable by checking the
+
+176
+00:08:11,080 --> 00:08:12,220
+signature an assertion by the
+
+177
+00:08:12,220 --> 00:08:15,310
+certificate authority that the public
+
+178
+00:08:15,310 --> 00:08:18,220
+key of gmail.com is really this public
+
+179
+00:08:18,220 --> 00:08:21,340
+key gmail.com server would I just keep a
+
+180
+00:08:21,340 --> 00:08:23,490
+copy of the certificate if you connect
+
+181
+00:08:23,490 --> 00:08:27,010
+to gmail.com server with HTTPS the first
+
+182
+00:08:27,010 --> 00:08:28,210
+thing it does is sends you back this
+
+183
+00:08:28,210 --> 00:08:32,169
+certificate at this point is just a
+
+184
+00:08:32,169 --> 00:08:33,429
+certificate right now of course since
+
+185
+00:08:33,429 --> 00:08:35,140
+gmail.com is willing to give it to
+
+186
+00:08:35,140 --> 00:08:37,510
+anybody it's the certificate itself is
+
+187
+00:08:37,510 --> 00:08:38,979
+not at all pregnant it's quite public
+
+188
+00:08:38,979 --> 00:08:42,820
+and then the browser would send some
+
+189
+00:08:42,820 --> 00:08:44,560
+information like a random number for
+
+190
+00:08:44,560 --> 00:08:48,730
+example to the server and ask it to sign
+
+191
+00:08:48,730 --> 00:08:53,350
+it with its private key and then the
+
+192
+00:08:53,350 --> 00:08:55,089
+browser can check using the public key
+
+193
+00:08:55,089 --> 00:08:57,790
+in the certificate that the random
+
+194
+00:08:57,790 --> 00:08:59,200
+number is ran and remember was really
+
+195
+00:08:59,200 --> 00:09:02,680
+signed by the private key that's
+
+196
+00:09:02,680 --> 00:09:04,000
+associated with the public key in the
+
+197
+00:09:04,000 --> 00:09:05,980
+certificate and therefore that whoever
+
+198
+00:09:05,980 --> 00:09:08,800
+it's talking to is really the entity
+
+199
+00:09:08,800 --> 00:09:10,510
+that the certificate authority believes
+
+200
+00:09:10,510 --> 00:09:14,140
+is gmail.com all right and now the
+
+201
+00:09:14,140 --> 00:09:15,279
+reason why this makes man-in-the-middle
+
+202
+00:09:15,279 --> 00:09:17,350
+attacks much harder is that yeah you
+
+203
+00:09:17,350 --> 00:09:20,950
+know you can set up a rogue server that
+
+204
+00:09:20,950 --> 00:09:23,560
+looks just like Gmail calm and maybe you
+
+205
+00:09:23,560 --> 00:09:25,420
+can even hack the DNS system indeed you
+
+206
+00:09:25,420 --> 00:09:27,940
+still can if you're sufficiently clever
+
+207
+00:09:27,940 --> 00:09:32,380
+powerful hack the DNS system to tell
+
+208
+00:09:32,380 --> 00:09:34,390
+people's browsers that oh they should go
+
+209
+00:09:34,390 --> 00:09:36,940
+to your server instead of gmail.com but
+
+210
+00:09:36,940 --> 00:09:38,980
+once somebody's browser contacts your
+
+211
+00:09:38,980 --> 00:09:40,000
+server
+
+212
+00:09:40,000 --> 00:09:42,040
+you're not presumably going to be able
+
+213
+00:09:42,040 --> 00:09:46,120
+to produce a certificate that says but
+
+214
+00:09:46,120 --> 00:09:47,890
+you you can produce Gmail certificate
+
+215
+00:09:47,890 --> 00:09:50,170
+but then Gmail certificate as Gmail's
+
+216
+00:09:50,170 --> 00:09:51,760
+public key your server doesn't have
+
+217
+00:09:51,760 --> 00:09:53,820
+their private key so you can
+
+218
+00:09:53,820 --> 00:09:55,550
+sign the challenge the browser sent you
+
+219
+00:09:55,550 --> 00:09:58,320
+and presumably since you're not the real
+
+220
+00:09:58,320 --> 00:10:01,170
+Google and not the real Gmail you're not
+
+221
+00:10:01,170 --> 00:10:01,920
+going to be able to persuade a
+
+222
+00:10:01,920 --> 00:10:03,450
+certificate authority to give you a
+
+223
+00:10:03,450 --> 00:10:06,660
+certificate associating gmail comm with
+
+224
+00:10:06,660 --> 00:10:10,890
+your public key that unit and so this
+
+225
+00:10:10,890 --> 00:10:11,790
+certificate scheme made
+
+226
+00:10:11,790 --> 00:10:13,050
+man-in-the-middle attacks quite a bit
+
+227
+00:10:13,050 --> 00:10:14,700
+harder and you know indeed they are
+
+228
+00:10:14,700 --> 00:10:16,680
+quite a bit harder now because of
+
+229
+00:10:16,680 --> 00:10:21,810
+certificates okay so it turns out though
+
+230
+00:10:21,810 --> 00:10:24,960
+that the certificate scheme as people
+
+231
+00:10:24,960 --> 00:10:27,680
+now have a lot of experience with it
+
+232
+00:10:27,680 --> 00:10:30,510
+almost 25 years experience within so we
+
+233
+00:10:30,510 --> 00:10:32,550
+now know there's some kind of things
+
+234
+00:10:32,550 --> 00:10:34,560
+that go wrong it was originally imagined
+
+235
+00:10:34,560 --> 00:10:35,810
+that there would just be a couple of
+
+236
+00:10:35,810 --> 00:10:38,460
+trustworthy certificate authorities who
+
+237
+00:10:38,460 --> 00:10:40,170
+would do a good job of checking that
+
+238
+00:10:40,170 --> 00:10:42,570
+request really came from who they
+
+239
+00:10:42,570 --> 00:10:43,860
+claimed to come from that if somebody
+
+240
+00:10:43,860 --> 00:10:45,270
+asked for a certificate for gmail.com
+
+241
+00:10:45,270 --> 00:10:46,950
+that this certificate authorities would
+
+242
+00:10:46,950 --> 00:10:49,260
+indeed actually verified that the
+
+243
+00:10:49,260 --> 00:10:50,520
+request came from the owner gmail.com
+
+244
+00:10:50,520 --> 00:10:53,490
+and not hand out certificates to random
+
+245
+00:10:53,490 --> 00:10:57,600
+people for gmail comp but it that turns
+
+246
+00:10:57,600 --> 00:11:00,210
+out to be very challenging for google
+
+247
+00:11:00,210 --> 00:11:02,910
+maybe you can convince this certificate
+
+248
+00:11:02,910 --> 00:11:04,620
+authority can convince itself that a
+
+249
+00:11:04,620 --> 00:11:06,450
+request comes from Google but you know
+
+250
+00:11:06,450 --> 00:11:09,780
+for just XCOM that's very hard to have a
+
+251
+00:11:09,780 --> 00:11:11,670
+certificate authority reliably able to
+
+252
+00:11:11,670 --> 00:11:14,100
+say oh yeah gosh this request really
+
+253
+00:11:14,100 --> 00:11:16,200
+came from the person who really does own
+
+254
+00:11:16,200 --> 00:11:20,700
+the DMS name XCOM all right a worse
+
+255
+00:11:20,700 --> 00:11:23,640
+problem is that while originally they
+
+256
+00:11:23,640 --> 00:11:25,050
+were envisioned there'd be only a few
+
+257
+00:11:25,050 --> 00:11:26,370
+certificate authority there are now
+
+258
+00:11:26,370 --> 00:11:28,140
+literally hundreds of certificate
+
+259
+00:11:28,140 --> 00:11:30,810
+authorities out there and any
+
+260
+00:11:30,810 --> 00:11:33,150
+certificate authority can generate a
+
+261
+00:11:33,150 --> 00:11:38,070
+certificate for any name and indeed may
+
+262
+00:11:38,070 --> 00:11:39,480
+want to you're allowed to change
+
+263
+00:11:39,480 --> 00:11:40,950
+certificate authorities if you're a
+
+264
+00:11:40,950 --> 00:11:42,990
+website owner you can change certificate
+
+265
+00:11:42,990 --> 00:11:46,590
+authority to whoever you like so there's
+
+266
+00:11:46,590 --> 00:11:48,090
+no sense in which certificate
+
+267
+00:11:48,090 --> 00:11:49,380
+authorities have limits on their powers
+
+268
+00:11:49,380 --> 00:11:51,720
+they can any certificate authority can
+
+269
+00:11:51,720 --> 00:11:56,430
+produce any certificate and now browsers
+
+270
+00:11:56,430 --> 00:11:57,780
+have you know there's a couple hundred
+
+271
+00:11:57,780 --> 00:11:59,310
+certificate authorities and that means
+
+272
+00:11:59,310 --> 00:12:00,900
+that each browser has built into it like
+
+273
+00:12:00,900 --> 00:12:03,210
+Chrome or Firefox or something has built
+
+274
+00:12:03,210 --> 00:12:05,490
+into it a list of the public keys of all
+
+275
+00:12:05,490 --> 00:12:07,320
+the certificate all couple hundred sort
+
+276
+00:12:07,320 --> 00:12:09,690
+good authorities and if any of them sign
+
+277
+00:12:09,690 --> 00:12:11,370
+has signed a certificate produced by web
+
+278
+00:12:11,370 --> 00:12:16,440
+server certificates acceptable the
+
+279
+00:12:16,440 --> 00:12:18,840
+result of this is that there have been
+
+280
+00:12:18,840 --> 00:12:21,180
+multiple incidents of certificate
+
+281
+00:12:21,180 --> 00:12:23,550
+authorities producing bogus certificates
+
+282
+00:12:23,550 --> 00:12:27,090
+that is producing certificates that said
+
+283
+00:12:27,090 --> 00:12:28,770
+they were certificate for Google or
+
+284
+00:12:28,770 --> 00:12:31,830
+Gmail or some other real company but
+
+285
+00:12:31,830 --> 00:12:34,170
+were actually issued to someone totally
+
+286
+00:12:34,170 --> 00:12:37,770
+else absolutely not issued certificate
+
+287
+00:12:37,770 --> 00:12:40,770
+for one of Google's names but not issued
+
+288
+00:12:40,770 --> 00:12:44,420
+to Google issued to someone else like
+
+289
+00:12:44,420 --> 00:12:47,850
+and you know sometimes this happens just
+
+290
+00:12:47,850 --> 00:12:50,040
+by mistake because superior Authority
+
+291
+00:12:50,040 --> 00:12:52,470
+doesn't realize that they're doing the
+
+292
+00:12:52,470 --> 00:12:53,880
+wrong thing and sometimes it's actually
+
+293
+00:12:53,880 --> 00:12:55,080
+quite malicious I mean there have
+
+294
+00:12:55,080 --> 00:12:57,630
+certainly been certificates issued to
+
+295
+00:12:57,630 --> 00:12:59,880
+people who just wanted to snoop on
+
+296
+00:12:59,880 --> 00:13:01,200
+people's traffic and mount
+
+297
+00:13:01,200 --> 00:13:02,760
+man-in-the-middle attacks and did
+
+298
+00:13:02,760 --> 00:13:05,550
+Mountain Man the middle attacks today's
+
+299
+00:13:05,550 --> 00:13:07,740
+readings are mentioned a couple of these
+
+300
+00:13:07,740 --> 00:13:09,960
+incidents and they're particularly
+
+301
+00:13:09,960 --> 00:13:12,120
+troubling because they're hard to
+
+302
+00:13:12,120 --> 00:13:13,920
+prevent because there's so many
+
+303
+00:13:13,920 --> 00:13:15,540
+certificate authorities and not all of
+
+304
+00:13:15,540 --> 00:13:16,970
+them
+
+305
+00:13:16,970 --> 00:13:19,410
+although sorry the last question let was
+
+306
+00:13:19,410 --> 00:13:21,300
+the last line insert box it's a
+
+307
+00:13:21,300 --> 00:13:23,520
+signature over the certificate by the
+
+308
+00:13:23,520 --> 00:13:25,740
+sir tip using by the certificate
+
+309
+00:13:25,740 --> 00:13:27,690
+authorities using the certificate
+
+310
+00:13:27,690 --> 00:13:32,010
+authorities private key okay so there
+
+311
+00:13:32,010 --> 00:13:33,600
+have been incidents of bogus
+
+312
+00:13:33,600 --> 00:13:35,610
+certificates certificates for real
+
+313
+00:13:35,610 --> 00:13:38,370
+websites like Google issued to totally
+
+314
+00:13:38,370 --> 00:13:40,140
+the wrong people and those certificates
+
+315
+00:13:40,140 --> 00:13:43,620
+have been abused and it's not clear how
+
+316
+00:13:43,620 --> 00:13:45,450
+to fix the certificate authority system
+
+317
+00:13:45,450 --> 00:13:47,970
+itself to prevent them because there's
+
+318
+00:13:47,970 --> 00:13:50,910
+so many certificate authorities and they
+
+319
+00:13:50,910 --> 00:13:54,210
+really you just can't expect that
+
+320
+00:13:54,210 --> 00:13:55,670
+they're going to be completely reliable
+
+321
+00:13:55,670 --> 00:14:00,540
+so what can we do about this one
+
+322
+00:14:00,540 --> 00:14:03,240
+possibility would be to have a single
+
+323
+00:14:03,240 --> 00:14:05,250
+online database of all valid
+
+324
+00:14:05,250 --> 00:14:07,950
+certificates so that when a browser
+
+325
+00:14:07,950 --> 00:14:09,840
+you know browser Comcast websites web
+
+326
+00:14:09,840 --> 00:14:11,370
+site hands at a certificate you know
+
+327
+00:14:11,370 --> 00:14:13,620
+might or might be valid then maybe you
+
+328
+00:14:13,620 --> 00:14:15,750
+could imagine the browser would contact
+
+329
+00:14:15,750 --> 00:14:18,630
+the global valid certificate database
+
+330
+00:14:18,630 --> 00:14:20,560
+ins assays this really is certificate
+
+331
+00:14:20,560 --> 00:14:24,220
+a bogus certificate issued by a row
+
+332
+00:14:24,220 --> 00:14:28,060
+certificate authority um the problem is
+
+333
+00:14:28,060 --> 00:14:32,470
+as many problems with that approach one
+
+334
+00:14:32,470 --> 00:14:36,340
+is it's still not clear how you can how
+
+335
+00:14:36,340 --> 00:14:38,860
+anybody can distinguish valid correctly
+
+336
+00:14:38,860 --> 00:14:40,330
+issued certificates from bogus
+
+337
+00:14:40,330 --> 00:14:42,610
+certificates because typically you just
+
+338
+00:14:42,610 --> 00:14:44,800
+don't know who the proper owner of DNS
+
+339
+00:14:44,800 --> 00:14:47,680
+names it is furthermore you need to
+
+340
+00:14:47,680 --> 00:14:49,390
+allow certificate owners to change
+
+341
+00:14:49,390 --> 00:14:51,339
+certificate authorities or renew their
+
+342
+00:14:51,339 --> 00:14:52,779
+certificates or they may lose their
+
+343
+00:14:52,779 --> 00:14:54,660
+private key and need a new certificate
+
+344
+00:14:54,660 --> 00:14:57,190
+to replace their older to think because
+
+345
+00:14:57,190 --> 00:15:00,610
+using a new public/private key pair so
+
+346
+00:15:00,610 --> 00:15:02,140
+people's certificates change all the
+
+347
+00:15:02,140 --> 00:15:05,830
+time and finally even if technically or
+
+348
+00:15:05,830 --> 00:15:07,600
+were possible to distinguish correct
+
+349
+00:15:07,600 --> 00:15:10,240
+certificates from bogus ones
+
+350
+00:15:10,240 --> 00:15:12,070
+there's no entity that everybody would
+
+351
+00:15:12,070 --> 00:15:14,500
+trust to do it you know everybody in the
+
+352
+00:15:14,500 --> 00:15:15,940
+world those you know the Chinese
+
+353
+00:15:15,940 --> 00:15:18,640
+Iranians the Americans you know there's
+
+354
+00:15:18,640 --> 00:15:21,550
+not any one outfit that they all trust
+
+355
+00:15:21,550 --> 00:15:23,890
+and that's the root reason why there's
+
+356
+00:15:23,890 --> 00:15:26,140
+so many certificate authorities so we
+
+357
+00:15:26,140 --> 00:15:29,500
+really can't you really can't expect
+
+358
+00:15:29,500 --> 00:15:31,720
+there to be a single Clearing House that
+
+359
+00:15:31,720 --> 00:15:33,970
+accurately distinguishes between valid
+
+360
+00:15:33,970 --> 00:15:38,050
+and invalid certificates however what
+
+361
+00:15:38,050 --> 00:15:40,060
+certificate authority certificate
+
+362
+00:15:40,060 --> 00:15:42,160
+transparency doing is doing is
+
+363
+00:15:42,160 --> 00:15:47,560
+essentially try not do the best that
+
+364
+00:15:47,560 --> 00:15:51,370
+it's possible to do you know the longest
+
+365
+00:15:51,370 --> 00:15:54,520
+step it can towards a database of the
+
+366
+00:15:54,520 --> 00:15:59,710
+holid trustworthy certificates so now
+
+367
+00:15:59,710 --> 00:16:02,050
+I'm gonna give an overview of the
+
+368
+00:16:02,050 --> 00:16:04,180
+general strategy of certificate
+
+369
+00:16:04,180 --> 00:16:10,930
+transparency the style of certificate
+
+370
+00:16:10,930 --> 00:16:13,120
+transparency is that it's an audit
+
+371
+00:16:13,120 --> 00:16:18,670
+system because it's so hard hard to
+
+372
+00:16:18,670 --> 00:16:21,040
+impossible to just decide does this
+
+373
+00:16:21,040 --> 00:16:23,230
+person own a name a certificate
+
+374
+00:16:23,230 --> 00:16:25,000
+transparency isn't a building a system
+
+375
+00:16:25,000 --> 00:16:27,250
+that prevents bad things from happening
+
+376
+00:16:27,250 --> 00:16:29,770
+which would require you to be able to
+
+377
+00:16:29,770 --> 00:16:32,819
+detect right away that as
+
+378
+00:16:32,819 --> 00:16:35,059
+certificate was bogus instead
+
+379
+00:16:35,059 --> 00:16:37,169
+certificate transparency is going to
+
+380
+00:16:37,169 --> 00:16:42,720
+enable audit that is it'll it's a system
+
+381
+00:16:42,720 --> 00:16:44,819
+to cause all the information to be
+
+382
+00:16:44,819 --> 00:16:47,039
+public so that it can be inspected by
+
+383
+00:16:47,039 --> 00:16:49,319
+people who care that is it's gonna if
+
+384
+00:16:49,319 --> 00:16:51,329
+you know maybe people it'll still allow
+
+385
+00:16:51,329 --> 00:16:53,579
+people to issue bogus certificates but
+
+386
+00:16:53,579 --> 00:16:55,910
+it's gonna insure those certificates are
+
+387
+00:16:55,910 --> 00:16:58,379
+public and that everybody can see them
+
+388
+00:16:58,379 --> 00:17:01,289
+including whoever it is that owns the
+
+389
+00:17:01,289 --> 00:17:06,269
+name that the name that's in the bogus
+
+390
+00:17:06,269 --> 00:17:07,949
+certificate and so this fixes the
+
+391
+00:17:07,949 --> 00:17:10,319
+problem with the pre certificate
+
+392
+00:17:10,319 --> 00:17:12,388
+transparency system where certificate
+
+393
+00:17:12,388 --> 00:17:13,500
+authorities could issue bogus
+
+394
+00:17:13,500 --> 00:17:15,990
+certificates and no one would ever know
+
+395
+00:17:15,990 --> 00:17:19,230
+and they could even give them to victim
+
+396
+00:17:19,230 --> 00:17:21,059
+a few victim browsers who would be
+
+397
+00:17:21,059 --> 00:17:23,069
+tricked by them and still because
+
+398
+00:17:23,069 --> 00:17:24,919
+certificates aren't generally public
+
+399
+00:17:24,919 --> 00:17:28,230
+they could somebody could a certificate
+
+400
+00:17:28,230 --> 00:17:30,090
+authority could issue a bogus
+
+401
+00:17:30,090 --> 00:17:32,460
+certificate for anybody for Google or
+
+402
+00:17:32,460 --> 00:17:34,289
+Microsoft and Google Microsoft might
+
+403
+00:17:34,289 --> 00:17:35,879
+never realize it and the incidents that
+
+404
+00:17:35,879 --> 00:17:37,139
+have come to light have generally been
+
+405
+00:17:37,139 --> 00:17:41,490
+discovered only by accident not because
+
+406
+00:17:41,490 --> 00:17:43,259
+they were sort of foredoomed to be
+
+407
+00:17:43,259 --> 00:17:46,220
+discovered so instead of relying on
+
+408
+00:17:46,220 --> 00:17:48,059
+accidental discovery of bogus
+
+409
+00:17:48,059 --> 00:17:50,549
+certificates certificate transparency
+
+410
+00:17:50,549 --> 00:17:51,840
+it's going to sort of force them into
+
+411
+00:17:51,840 --> 00:17:54,330
+the light where they is much easier to
+
+412
+00:17:54,330 --> 00:17:57,389
+notice them again so it has a sort of
+
+413
+00:17:57,389 --> 00:17:59,730
+audit flavor or nada not a prevention
+
+414
+00:17:59,730 --> 00:18:04,289
+flavor okay so the basic structure again
+
+415
+00:18:04,289 --> 00:18:08,639
+we have gmail.com or some other service
+
+416
+00:18:08,639 --> 00:18:11,100
+that wants a certificate as usual
+
+417
+00:18:11,100 --> 00:18:12,659
+they're gonna ask someone of the
+
+418
+00:18:12,659 --> 00:18:15,539
+hundreds of CAS for a certificate when
+
+419
+00:18:15,539 --> 00:18:18,299
+when when the cert web servers first set
+
+420
+00:18:18,299 --> 00:18:21,779
+up so we're gonna ask a certificate and
+
+421
+00:18:21,779 --> 00:18:23,759
+the certificate authority is gonna send
+
+422
+00:18:23,759 --> 00:18:26,820
+this certificate back to the web server
+
+423
+00:18:26,820 --> 00:18:28,110
+because of course is the web server that
+
+424
+00:18:28,110 --> 00:18:32,159
+gives a certificate to the browser and
+
+425
+00:18:32,159 --> 00:18:34,590
+at the same time though the certificate
+
+426
+00:18:34,590 --> 00:18:36,210
+authority is going to send a copy of the
+
+427
+00:18:36,210 --> 00:18:41,100
+certificate or equivalent information to
+
+428
+00:18:41,100 --> 00:18:43,179
+a sort
+
+429
+00:18:43,179 --> 00:18:46,570
+Transparency vlog server there's gonna
+
+430
+00:18:46,570 --> 00:18:48,599
+the real system there's multiple
+
+431
+00:18:48,599 --> 00:18:50,799
+independent certificate transparently
+
+432
+00:18:50,799 --> 00:18:52,629
+log servers i can assume there's just
+
+433
+00:18:52,629 --> 00:18:55,029
+one so this is some service that you
+
+434
+00:18:55,029 --> 00:18:56,619
+know we don't have turns out we're not
+
+435
+00:18:56,619 --> 00:19:00,309
+gonna have to trust the certificate
+
+436
+00:19:00,309 --> 00:19:01,839
+authorities gonna send it certificate to
+
+437
+00:19:01,839 --> 00:19:04,839
+this certificate log service which has
+
+438
+00:19:04,839 --> 00:19:08,649
+been maintaining a log of all issued
+
+439
+00:19:08,649 --> 00:19:10,629
+certificates or all ones that
+
+440
+00:19:10,629 --> 00:19:12,129
+certificate authorities have told it
+
+441
+00:19:12,129 --> 00:19:13,419
+about when it gets a new certificate
+
+442
+00:19:13,419 --> 00:19:17,529
+it's gonna append it to its log so this
+
+443
+00:19:17,529 --> 00:19:18,669
+you know might have millions of
+
+444
+00:19:18,669 --> 00:19:22,229
+certificates in it after a while now
+
+445
+00:19:22,229 --> 00:19:26,049
+when the browser and some human wants to
+
+446
+00:19:26,049 --> 00:19:29,739
+talk to a website they you know they
+
+447
+00:19:29,739 --> 00:19:32,559
+talk did set up an HTTPS connection to
+
+448
+00:19:32,559 --> 00:19:33,969
+Gmail Gmail sends them a certificate
+
+449
+00:19:33,969 --> 00:19:38,889
+back and the browser's gonna send that
+
+450
+00:19:38,889 --> 00:19:40,450
+certificate to the certificate log
+
+451
+00:19:40,450 --> 00:19:42,940
+server see is this certificate in the
+
+452
+00:19:42,940 --> 00:19:46,389
+log there's difficut log servers gonna
+
+453
+00:19:46,389 --> 00:19:48,339
+say yes or no is their certificate in
+
+454
+00:19:48,339 --> 00:19:50,529
+the log now and if it is then the
+
+455
+00:19:50,529 --> 00:19:53,889
+browser will go ahead and use it now the
+
+456
+00:19:53,889 --> 00:19:55,509
+fact that it's in the log you know
+
+457
+00:19:55,509 --> 00:19:56,889
+doesn't mean it's not bogus right
+
+458
+00:19:56,889 --> 00:19:58,659
+because any certificate authority
+
+459
+00:19:58,659 --> 00:20:00,789
+including the ones that are out there
+
+460
+00:20:00,789 --> 00:20:03,369
+that are malicious or badly run any
+
+461
+00:20:03,369 --> 00:20:06,489
+certificate authority can insert a
+
+462
+00:20:06,489 --> 00:20:09,450
+certificate into the log system and
+
+463
+00:20:09,450 --> 00:20:13,299
+therefore perhaps trick users into using
+
+464
+00:20:13,299 --> 00:20:14,589
+it so for so far we haven't built a
+
+465
+00:20:14,589 --> 00:20:20,049
+system that prevents abuse however it is
+
+466
+00:20:20,049 --> 00:20:22,509
+the case that no browser will use a
+
+467
+00:20:22,509 --> 00:20:25,359
+certificate unless it's in the log so at
+
+468
+00:20:25,359 --> 00:20:29,409
+the same time gmail is going to run up
+
+469
+00:20:29,409 --> 00:20:34,649
+with the CT system calls a monitor and
+
+470
+00:20:34,649 --> 00:20:36,070
+for now well
+
+471
+00:20:36,070 --> 00:20:37,300
+just assume that there's a monitor
+
+472
+00:20:37,300 --> 00:20:39,790
+associated with every website so this
+
+473
+00:20:39,790 --> 00:20:44,290
+monitor periodically also talks to the
+
+474
+00:20:44,290 --> 00:20:47,410
+certificate log servers an asset please
+
+475
+00:20:47,410 --> 00:20:49,150
+give me a copy of your log or really you
+
+476
+00:20:49,150 --> 00:20:51,130
+know please give me a copy of whatever
+
+477
+00:20:51,130 --> 00:20:52,540
+new has been added to your long since I
+
+478
+00:20:52,540 --> 00:20:54,280
+last asked and that means that the
+
+479
+00:20:54,280 --> 00:20:55,810
+monitor is going to build up it's going
+
+480
+00:20:55,810 --> 00:20:58,120
+to be aware of every single certificate
+
+481
+00:20:58,120 --> 00:21:00,250
+that's going to be enough that's in the
+
+482
+00:21:00,250 --> 00:21:03,070
+log and but also because the monitor is
+
+483
+00:21:03,070 --> 00:21:05,560
+associated with Gmail the monitor knows
+
+484
+00:21:05,560 --> 00:21:10,000
+what Gmail's correct certificate is so
+
+485
+00:21:10,000 --> 00:21:12,130
+if some rogue certificate authority
+
+486
+00:21:12,130 --> 00:21:14,350
+issues a certificate for Gmail it's not
+
+487
+00:21:14,350 --> 00:21:18,370
+the one that Gmail itself asked for then
+
+488
+00:21:18,370 --> 00:21:20,980
+Gmail's monitor will stumble across it
+
+489
+00:21:20,980 --> 00:21:24,880
+in the certificate log because Gmail's
+
+490
+00:21:24,880 --> 00:21:26,590
+monitor knows Gmail's correct
+
+491
+00:21:26,590 --> 00:21:29,470
+certificate now of course the rogue
+
+492
+00:21:29,470 --> 00:21:30,910
+certificate authority doesn't have to
+
+493
+00:21:30,910 --> 00:21:32,770
+send its certificate to the certificate
+
+494
+00:21:32,770 --> 00:21:34,150
+log system but in that case when
+
+495
+00:21:34,150 --> 00:21:37,390
+browsers you know maybe accidentally
+
+496
+00:21:37,390 --> 00:21:40,930
+connect to the attackers web server and
+
+497
+00:21:40,930 --> 00:21:42,310
+the attacker would swipe server gives
+
+498
+00:21:42,310 --> 00:21:43,780
+them the bogus certificate if they
+
+499
+00:21:43,780 --> 00:21:45,790
+haven't put it in the log then the
+
+500
+00:21:45,790 --> 00:21:47,440
+browser won't believe it and will abort
+
+501
+00:21:47,440 --> 00:21:48,850
+the connection it's not because it's not
+
+502
+00:21:48,850 --> 00:21:49,660
+in the log
+
+503
+00:21:49,660 --> 00:21:53,440
+so the log sort of forces because
+
+504
+00:21:53,440 --> 00:21:55,540
+browsers require certificates being a
+
+505
+00:21:55,540 --> 00:21:58,000
+log the log forces all certificates to
+
+506
+00:21:58,000 --> 00:22:00,250
+be public where they can be audited and
+
+507
+00:22:00,250 --> 00:22:03,850
+checked by monitors who know what the
+
+508
+00:22:03,850 --> 00:22:05,890
+proper certificates our and so some
+
+509
+00:22:05,890 --> 00:22:07,630
+monitors are run by big companies and
+
+510
+00:22:07,630 --> 00:22:10,390
+companies know their own certificates
+
+511
+00:22:10,390 --> 00:22:12,520
+some monitors are run by certificate
+
+512
+00:22:12,520 --> 00:22:14,080
+authorities on behalf of their customers
+
+513
+00:22:14,080 --> 00:22:15,820
+and again those certificate authorities
+
+514
+00:22:15,820 --> 00:22:17,500
+know what certificates they've issued to
+
+515
+00:22:17,500 --> 00:22:19,360
+their customers and they can at least
+
+516
+00:22:19,360 --> 00:22:21,160
+alert their customers if they see a
+
+517
+00:22:21,160 --> 00:22:23,560
+certificate they didn't issue for one of
+
+518
+00:22:23,560 --> 00:22:26,140
+their customers names I'm in addition
+
+519
+00:22:26,140 --> 00:22:28,600
+there's some totally third-party monitor
+
+520
+00:22:28,600 --> 00:22:30,760
+systems where you give the third-party
+
+521
+00:22:30,760 --> 00:22:34,180
+monitor your names and yours and your
+
+522
+00:22:34,180 --> 00:22:37,020
+valid certificates and it checks for
+
+523
+00:22:37,020 --> 00:22:41,360
+expected certificates for your names
+
+524
+00:22:41,360 --> 00:22:47,130
+alright this is the overall scheme but
+
+525
+00:22:47,130 --> 00:22:51,660
+it depends very much on browsers seeing
+
+526
+00:22:51,660 --> 00:22:54,660
+the very same log contents that monitors
+
+527
+00:22:54,660 --> 00:22:59,130
+see and but remember we were up against
+
+528
+00:22:59,130 --> 00:23:00,630
+this problem that we're not sure that we
+
+529
+00:23:00,630 --> 00:23:02,400
+can trust any component in this system
+
+530
+00:23:02,400 --> 00:23:04,470
+so indeed we found this certificate
+
+531
+00:23:04,470 --> 00:23:06,270
+authorities some of them are malicious
+
+532
+00:23:06,270 --> 00:23:07,950
+or have employees who can't be trusted
+
+533
+00:23:07,950 --> 00:23:11,010
+or are sloppy and don't follow the rules
+
+534
+00:23:11,010 --> 00:23:13,080
+so we're going to assume we have to
+
+535
+00:23:13,080 --> 00:23:14,790
+assume that the same will be true the
+
+536
+00:23:14,790 --> 00:23:16,650
+certificate log servers that some of
+
+537
+00:23:16,650 --> 00:23:18,660
+them will be malicious some of them may
+
+538
+00:23:18,660 --> 00:23:21,720
+conspire with rogue certificate
+
+539
+00:23:21,720 --> 00:23:23,130
+authorities and intentionally try to
+
+540
+00:23:23,130 --> 00:23:27,840
+help them issue bogus certificates some
+
+541
+00:23:27,840 --> 00:23:29,850
+of them may be sloppy some of them may
+
+542
+00:23:29,850 --> 00:23:31,650
+be legitimate but maybe some of their
+
+543
+00:23:31,650 --> 00:23:33,990
+employees or are corruptible you pay
+
+544
+00:23:33,990 --> 00:23:36,390
+them being a bribe so I'll do something
+
+545
+00:23:36,390 --> 00:23:38,100
+funny to the log delete something or add
+
+546
+00:23:38,100 --> 00:23:41,100
+something to it so what we need to build
+
+547
+00:23:41,100 --> 00:23:43,080
+is a log that even though the log
+
+548
+00:23:43,080 --> 00:23:47,160
+operator may be not cooperating not
+
+549
+00:23:47,160 --> 00:23:50,280
+trustworthy we can still be sure or at
+
+550
+00:23:50,280 --> 00:23:52,370
+least know if it's not the case that
+
+551
+00:23:52,370 --> 00:23:54,780
+browsers are seeing the same log contest
+
+552
+00:23:54,780 --> 00:23:56,910
+as monitors so if our browser uses a
+
+553
+00:23:56,910 --> 00:23:59,760
+certificate that was in the log the
+
+554
+00:23:59,760 --> 00:24:01,470
+monitor who owns that name will
+
+555
+00:24:01,470 --> 00:24:05,880
+eventually see it so what we need to do
+
+556
+00:24:05,880 --> 00:24:13,590
+is we need to build a log system that is
+
+557
+00:24:13,590 --> 00:24:16,920
+append-only so that it can't show a
+
+558
+00:24:16,920 --> 00:24:20,340
+certificate to a browser then delete it
+
+559
+00:24:20,340 --> 00:24:24,200
+before monitors see it so append-only
+
+560
+00:24:27,110 --> 00:24:28,950
+no Forks
+
+561
+00:24:28,950 --> 00:24:33,840
+in the sense that we don't want the log
+
+562
+00:24:33,840 --> 00:24:36,180
+system to basically keep two logs one of
+
+563
+00:24:36,180 --> 00:24:38,910
+which it shows two browsers and one of
+
+564
+00:24:38,910 --> 00:24:41,880
+which shows two monitors so we need no
+
+565
+00:24:41,880 --> 00:24:53,550
+Forks and we need untrusted we can't be
+
+566
+00:24:53,550 --> 00:24:56,970
+sure that the certificate servers are
+
+567
+00:24:56,970 --> 00:25:02,210
+correct so just to back up a bit the
+
+568
+00:25:02,210 --> 00:25:05,700
+critical properties we need for the log
+
+569
+00:25:05,700 --> 00:25:08,520
+system so larger than just a log servers
+
+570
+00:25:08,520 --> 00:25:10,950
+but the entire system of the log servers
+
+571
+00:25:10,950 --> 00:25:14,040
+plus the various checks is we have to
+
+572
+00:25:14,040 --> 00:25:16,670
+prevent deletion that is we need the
+
+573
+00:25:16,670 --> 00:25:19,800
+logs to be append only because if a log
+
+574
+00:25:19,800 --> 00:25:24,420
+server could delete items out of its log
+
+575
+00:25:24,420 --> 00:25:26,880
+then they could effectively show a bogus
+
+576
+00:25:26,880 --> 00:25:29,400
+certificate to a browser claimants in
+
+577
+00:25:29,400 --> 00:25:31,020
+the long and maybe in the log at that
+
+578
+00:25:31,020 --> 00:25:34,140
+time the browser uses it but then maybe
+
+579
+00:25:34,140 --> 00:25:35,850
+this certificate server could delete
+
+580
+00:25:35,850 --> 00:25:38,820
+that certificate from its log so that by
+
+581
+00:25:38,820 --> 00:25:40,170
+the time the monitor's came to look at
+
+582
+00:25:40,170 --> 00:25:42,180
+the log the bogus certificate wouldn't
+
+583
+00:25:42,180 --> 00:25:44,730
+be there so we need to have a system
+
+584
+00:25:44,730 --> 00:25:46,890
+that either prevents deletion or at
+
+585
+00:25:46,890 --> 00:25:49,530
+least detects if deletion occurred so
+
+586
+00:25:49,530 --> 00:25:52,140
+that's the sense in which the system
+
+587
+00:25:52,140 --> 00:25:56,040
+needs to be append-only and we also have
+
+588
+00:25:56,040 --> 00:26:00,140
+to prevent what's called equivocation or
+
+589
+00:26:00,140 --> 00:26:02,750
+not' we have to prevent Forks or
+
+590
+00:26:02,750 --> 00:26:06,620
+equivalently equivocation
+
+591
+00:26:08,920 --> 00:26:12,540
+so you know it's
+
+592
+00:26:12,540 --> 00:26:15,450
+maybe the certificate log servers could
+
+593
+00:26:15,450 --> 00:26:17,820
+be implementing append-only logs but if
+
+594
+00:26:17,820 --> 00:26:21,060
+it if it uh implemented two different
+
+595
+00:26:21,060 --> 00:26:23,570
+depend the only logs and showed one two
+
+596
+00:26:23,570 --> 00:26:25,530
+browsers and show the other append-only
+
+597
+00:26:25,530 --> 00:26:27,990
+log two monitors then we could be in a
+
+598
+00:26:27,990 --> 00:26:30,150
+position where yeah you know that the
+
+599
+00:26:30,150 --> 00:26:31,950
+browser that we showed the log we showed
+
+600
+00:26:31,950 --> 00:26:33,540
+the browser's contains the bogus
+
+601
+00:26:33,540 --> 00:26:36,780
+certificate but the log we showed a
+
+602
+00:26:36,780 --> 00:26:39,710
+monitors doesn't doesn't contain the
+
+603
+00:26:39,710 --> 00:26:42,000
+bogus certificate so we have to rule out
+
+604
+00:26:42,000 --> 00:26:45,240
+equivocation to all without trusting the
+
+605
+00:26:45,240 --> 00:26:50,700
+servers so how can we do this now we're
+
+606
+00:26:50,700 --> 00:26:53,820
+getting into the kind of details that
+
+607
+00:26:53,820 --> 00:26:56,550
+the last of the assignments was talking
+
+608
+00:26:56,550 --> 00:27:00,870
+about the first step is this thing
+
+609
+00:27:00,870 --> 00:27:05,850
+called a Merkel tree and this is
+
+610
+00:27:05,850 --> 00:27:08,430
+something that's sort of that the log
+
+611
+00:27:08,430 --> 00:27:10,320
+servers are expected to build on top of
+
+612
+00:27:10,320 --> 00:27:12,570
+the log so the idea is that there's the
+
+613
+00:27:12,570 --> 00:27:14,750
+actual log itself which is a sequence of
+
+614
+00:27:14,750 --> 00:27:17,270
+certificates you know certificate one
+
+615
+00:27:17,270 --> 00:27:19,890
+certificate to presumably in the order
+
+616
+00:27:19,890 --> 00:27:24,840
+that a certificate
+
+617
+00:27:24,840 --> 00:27:26,580
+certificates to be added to the system
+
+618
+00:27:26,580 --> 00:27:28,409
+and the prime millions I'm just going to
+
+619
+00:27:28,409 --> 00:27:33,480
+assume there's a couple now it's gonna
+
+620
+00:27:33,480 --> 00:27:35,520
+turn out you know we don't want to have
+
+621
+00:27:35,520 --> 00:27:36,840
+the browser's have to download the whole
+
+622
+00:27:36,840 --> 00:27:40,409
+log and so we need tools to so that we
+
+623
+00:27:40,409 --> 00:27:42,330
+can allow the logging system to
+
+624
+00:27:42,330 --> 00:27:48,539
+basically send trustworthy summaries or
+
+625
+00:27:48,539 --> 00:27:50,250
+unambiguous summaries of what's in the
+
+626
+00:27:50,250 --> 00:27:53,250
+log to the the browsers and I'll talk in
+
+627
+00:27:53,250 --> 00:27:54,659
+a bit about it exactly what those
+
+628
+00:27:54,659 --> 00:27:57,120
+summaries are used for but the basic
+
+629
+00:27:57,120 --> 00:28:03,750
+scheme is that the log servers are gonna
+
+630
+00:28:03,750 --> 00:28:07,559
+use cryptographic hashes to sort of hash
+
+631
+00:28:07,559 --> 00:28:10,409
+up the complete set of records that are
+
+632
+00:28:10,409 --> 00:28:11,880
+in the log can produce a single
+
+633
+00:28:11,880 --> 00:28:14,549
+cryptographic hash which is typically
+
+634
+00:28:14,549 --> 00:28:16,860
+these days about 256 bits long so the
+
+635
+00:28:16,860 --> 00:28:19,409
+cryptographic hash summarizes the
+
+636
+00:28:19,409 --> 00:28:23,039
+countenance of the log and the way
+
+637
+00:28:23,039 --> 00:28:25,649
+that's done is that the is as a
+
+638
+00:28:25,649 --> 00:28:28,950
+basically a tree structure of pairs over
+
+639
+00:28:28,950 --> 00:28:30,630
+hash always hashing together pairs of
+
+640
+00:28:30,630 --> 00:28:35,940
+numbers at the zeroeth level so I'm
+
+641
+00:28:35,940 --> 00:28:38,730
+gonna write each for a hash each one of
+
+642
+00:28:38,730 --> 00:28:40,320
+the log entries has a hash so we're
+
+643
+00:28:40,320 --> 00:28:42,750
+gonna have sort of at the base level we
+
+644
+00:28:42,750 --> 00:28:46,649
+have the hash of each log entry each
+
+645
+00:28:46,649 --> 00:28:50,039
+certificate and then we're going to hash
+
+646
+00:28:50,039 --> 00:28:55,710
+up peers so that the next level we're
+
+647
+00:28:55,710 --> 00:28:59,270
+gonna have a hash of this and
+
+648
+00:28:59,270 --> 00:29:04,190
+concatenated with this and a hash of
+
+649
+00:29:04,190 --> 00:29:07,799
+this concatenated with this these two
+
+650
+00:29:07,799 --> 00:29:11,510
+hashes and then at the top level sort of
+
+651
+00:29:12,330 --> 00:29:14,519
+we're we're overdoing is hashing these
+
+652
+00:29:14,519 --> 00:29:16,320
+two the concatenation of these two
+
+653
+00:29:16,320 --> 00:29:21,679
+hashes and this single hash here is a
+
+654
+00:29:21,860 --> 00:29:26,039
+unambiguous sort of stand-in for the
+
+655
+00:29:26,039 --> 00:29:28,380
+complete log one of the properties of
+
+656
+00:29:28,380 --> 00:29:31,019
+these cryptographic hashes like sha-256
+
+657
+00:29:31,019 --> 00:29:33,570
+is that it's not feasible to find two
+
+658
+00:29:33,570 --> 00:29:35,640
+inputs to the hash function that produce
+
+659
+00:29:35,640 --> 00:29:37,769
+the same output and that means if you
+
+660
+00:29:37,769 --> 00:29:39,149
+tell somebody the output of the hash
+
+661
+00:29:39,149 --> 00:29:43,289
+function there's only one input you're
+
+662
+00:29:43,289 --> 00:29:44,840
+ever going to be able to find that
+
+663
+00:29:44,840 --> 00:29:48,360
+produce that output so if the log server
+
+664
+00:29:48,360 --> 00:29:51,120
+does hash up in this way the contents of
+
+665
+00:29:51,120 --> 00:29:54,149
+its logs only this sequence of these log
+
+666
+00:29:54,149 --> 00:29:56,399
+records will ever be able to produce
+
+667
+00:29:56,399 --> 00:29:59,760
+that hash or guaranteed effectively that
+
+668
+00:29:59,760 --> 00:30:02,460
+the log server is not going to be able
+
+669
+00:30:02,460 --> 00:30:05,399
+to find some other log that produces the
+
+670
+00:30:05,399 --> 00:30:09,179
+same final tree hash as this sequence of
+
+671
+00:30:09,179 --> 00:30:12,600
+log entries all right so this is the
+
+672
+00:30:12,600 --> 00:30:14,850
+Merkel tree this is the sort of tree
+
+673
+00:30:14,850 --> 00:30:18,659
+hash that summarizes the entire log at
+
+674
+00:30:18,659 --> 00:30:23,190
+the top of the Merkel tree there there's
+
+675
+00:30:23,190 --> 00:30:27,750
+will actually call it a signed tree head
+
+676
+00:30:27,750 --> 00:30:29,760
+because in fact the log servers take
+
+677
+00:30:29,760 --> 00:30:32,010
+this hash this at the top of the tree
+
+678
+00:30:32,010 --> 00:30:33,690
+and sign it with their private key and
+
+679
+00:30:33,690 --> 00:30:36,990
+give that to clients to browsers and
+
+680
+00:30:36,990 --> 00:30:40,769
+monitors and the fact that they've
+
+681
+00:30:40,769 --> 00:30:42,269
+signed it means that they they can't
+
+682
+00:30:42,269 --> 00:30:43,470
+disavow it later
+
+683
+00:30:43,470 --> 00:30:45,570
+that was really them and produced it so
+
+684
+00:30:45,570 --> 00:30:47,130
+that's you know just to be able to catch
+
+685
+00:30:47,130 --> 00:30:53,340
+lying lying log servers and so the point
+
+686
+00:30:53,340 --> 00:30:55,889
+here is that once a log server has
+
+687
+00:30:55,889 --> 00:30:59,850
+revealed a particular sign tree head to
+
+688
+00:30:59,850 --> 00:31:03,269
+a browser or monitor its committed to
+
+689
+00:31:03,269 --> 00:31:05,669
+some specific log contents because it
+
+690
+00:31:05,669 --> 00:31:06,720
+won't be able to ever produce a
+
+691
+00:31:06,720 --> 00:31:08,730
+different log contents to produce the
+
+692
+00:31:08,730 --> 00:31:10,350
+same hash so you hashes are really
+
+693
+00:31:10,350 --> 00:31:14,700
+function as kind of commitments okay so
+
+694
+00:31:14,700 --> 00:31:17,490
+this is the with the log but the Merkel
+
+695
+00:31:17,490 --> 00:31:20,370
+tree looks like for a particular log now
+
+696
+00:31:20,370 --> 00:31:23,429
+the third reading today sort of outlined
+
+697
+00:31:23,429 --> 00:31:25,110
+how to
+
+698
+00:31:25,110 --> 00:31:27,210
+and the law how to add records to the
+
+699
+00:31:27,210 --> 00:31:32,790
+log for arbitrary numbers of Records I'm
+
+700
+00:31:32,790 --> 00:31:34,380
+just going to assume that the log always
+
+701
+00:31:34,380 --> 00:31:37,350
+grows by factors of 2 which is
+
+702
+00:31:37,350 --> 00:31:39,090
+impractical but makes it easier to
+
+703
+00:31:39,090 --> 00:31:41,190
+explain Naumann so that means that as
+
+704
+00:31:41,190 --> 00:31:43,230
+certificate authorities send in new
+
+705
+00:31:43,230 --> 00:31:45,299
+certificates to add to the log the log
+
+706
+00:31:45,299 --> 00:31:48,780
+server will wait until it has as many
+
+707
+00:31:48,780 --> 00:31:50,820
+new records as it has old records and
+
+708
+00:31:50,820 --> 00:31:54,179
+then produce another tree head and the
+
+709
+00:31:54,179 --> 00:31:56,760
+way it does that is it's gonna in order
+
+710
+00:31:56,760 --> 00:32:01,110
+to extend the log the log servers going
+
+711
+00:32:01,110 --> 00:32:02,790
+to wait off as another four records and
+
+712
+00:32:02,790 --> 00:32:05,669
+then it's gonna hash them pairwise just
+
+713
+00:32:05,669 --> 00:32:10,190
+as before and then it'll produce a new
+
+714
+00:32:10,490 --> 00:32:14,250
+tree head that is the hash of the
+
+715
+00:32:14,250 --> 00:32:19,610
+concatenation of these two hashes and
+
+716
+00:32:21,380 --> 00:32:26,370
+this is the new tree head for the new
+
+717
+00:32:26,370 --> 00:32:28,950
+expanded law and so that means as time
+
+718
+00:32:28,950 --> 00:32:33,000
+goes on and a log server this log grows
+
+719
+00:32:33,000 --> 00:32:34,770
+longer and longer it produces sort of
+
+720
+00:32:34,770 --> 00:32:37,679
+higher and higher a sequence of higher
+
+721
+00:32:37,679 --> 00:32:42,169
+and higher tree heads as the logarithms
+
+722
+00:32:44,809 --> 00:32:50,400
+okay so this is the structure that we're
+
+723
+00:32:50,400 --> 00:32:53,700
+expecting log servers to maintain of
+
+724
+00:32:53,700 --> 00:32:54,540
+course who knows what they're actually
+
+725
+00:32:54,540 --> 00:32:57,000
+doing especially if they're malicious
+
+726
+00:32:57,000 --> 00:32:59,790
+but the protocol the certificate
+
+727
+00:32:59,790 --> 00:33:01,799
+transparency protocol sort of is written
+
+728
+00:33:01,799 --> 00:33:03,840
+you know as if the log server was was
+
+729
+00:33:03,840 --> 00:33:06,090
+actually doing this all right so what do
+
+730
+00:33:06,090 --> 00:33:08,640
+we need to do but do the point of this
+
+731
+00:33:08,640 --> 00:33:14,309
+Merkle trees is to use them to force log
+
+732
+00:33:14,309 --> 00:33:16,410
+servers to prove certain things about
+
+733
+00:33:16,410 --> 00:33:18,840
+the logs that they can about the log
+
+734
+00:33:18,840 --> 00:33:21,059
+that they're maintaining we're going to
+
+735
+00:33:21,059 --> 00:33:24,059
+want to know what those those proofs
+
+736
+00:33:24,059 --> 00:33:27,220
+look like the first kind of
+
+737
+00:33:27,220 --> 00:33:33,510
+is what I'll call a proof of inclusion
+
+738
+00:33:33,510 --> 00:33:39,030
+and this is what a
+
+739
+00:33:40,050 --> 00:33:42,540
+NEADS when it when it wants to find out
+
+740
+00:33:42,540 --> 00:33:44,880
+if a certificate that has just been
+
+741
+00:33:44,880 --> 00:33:46,320
+given by a web server if that
+
+742
+00:33:46,320 --> 00:33:49,290
+certificate is really in the law it's
+
+743
+00:33:49,290 --> 00:33:54,180
+gonna ask the certificate it's gonna ask
+
+744
+00:33:54,180 --> 00:33:57,090
+the log server look here's a certificate
+
+745
+00:33:57,090 --> 00:33:59,550
+you know is it an is it in your log and
+
+746
+00:33:59,550 --> 00:34:01,110
+the certificate server is gonna send
+
+747
+00:34:01,110 --> 00:34:05,610
+back a proof of actually not just that
+
+748
+00:34:05,610 --> 00:34:07,080
+the certificate is in the log but
+
+749
+00:34:07,080 --> 00:34:08,520
+actually where it is what its position
+
+750
+00:34:08,520 --> 00:34:14,760
+is in the log and of course the browser
+
+751
+00:34:14,760 --> 00:34:16,110
+wants this proof because it doesn't want
+
+752
+00:34:16,110 --> 00:34:17,699
+to use the certificate if it's not in
+
+753
+00:34:17,699 --> 00:34:19,590
+the log because if it's not I'm along
+
+754
+00:34:19,590 --> 00:34:21,060
+then monitors won't see it and there's
+
+755
+00:34:21,060 --> 00:34:23,280
+no / - no protection against their
+
+756
+00:34:23,280 --> 00:34:27,270
+certificate being bogus and it needs to
+
+757
+00:34:27,270 --> 00:34:33,300
+be a proof because we we can't afford to
+
+758
+00:34:33,300 --> 00:34:35,370
+let this log server a malicious log
+
+759
+00:34:35,370 --> 00:34:37,650
+forever change its mind we don't want to
+
+760
+00:34:37,650 --> 00:34:39,239
+take the log servers word for it because
+
+761
+00:34:39,239 --> 00:34:40,830
+then they might a malicious log server
+
+762
+00:34:40,830 --> 00:34:44,310
+might say yes and this proof is gonna
+
+763
+00:34:44,310 --> 00:34:46,830
+help us catch it you know if a log
+
+764
+00:34:46,830 --> 00:34:49,080
+server does lie these proofs are gonna
+
+765
+00:34:49,080 --> 00:34:50,940
+help us catch the fact that the log
+
+766
+00:34:50,940 --> 00:34:54,330
+servers lied and produce evidence that
+
+767
+00:34:54,330 --> 00:34:56,250
+the log server is malicious and should
+
+768
+00:34:56,250 --> 00:34:59,940
+be ignored from now on is that sort of
+
+769
+00:34:59,940 --> 00:35:01,500
+the ultimate sanction against the log
+
+770
+00:35:01,500 --> 00:35:03,840
+servers is that the browser's actually
+
+771
+00:35:03,840 --> 00:35:05,520
+have a list of acceptable log servers
+
+772
+00:35:05,520 --> 00:35:10,110
+and these proofs would be part of the
+
+773
+00:35:10,110 --> 00:35:14,370
+evidence to cause one of the log servers
+
+774
+00:35:14,370 --> 00:35:16,230
+to be taken out of the log if it was
+
+775
+00:35:16,230 --> 00:35:18,660
+malicious okay so we need a proof we
+
+776
+00:35:18,660 --> 00:35:20,160
+want the log server to produce a proof
+
+777
+00:35:20,160 --> 00:35:24,380
+that a given certificate is in its log
+
+778
+00:35:24,380 --> 00:35:29,190
+so actually the first step is that the
+
+779
+00:35:29,190 --> 00:35:31,770
+browser asks the log server for the
+
+780
+00:35:31,770 --> 00:35:35,670
+current sign tree head so what the
+
+781
+00:35:35,670 --> 00:35:37,740
+browser's really asking is is this
+
+782
+00:35:37,740 --> 00:35:41,040
+certificate in the log that summarized
+
+783
+00:35:41,040 --> 00:35:45,120
+by this current by this sign tree head
+
+784
+00:35:45,120 --> 00:35:47,340
+and the log server may lie about the
+
+785
+00:35:47,340 --> 00:35:49,860
+sign tree head right the browser asks it
+
+786
+00:35:49,860 --> 00:35:52,220
+for the current sign tree head and then
+
+787
+00:35:52,220 --> 00:35:54,410
+for a proof that the certificate is in
+
+788
+00:35:54,410 --> 00:35:56,960
+the log the log server could lie about
+
+789
+00:35:56,960 --> 00:35:58,310
+the sign tree headband will deal about
+
+790
+00:35:58,310 --> 00:36:01,160
+that we'll consider that later but for
+
+791
+00:36:01,160 --> 00:36:06,320
+now let's assume that the the browser
+
+792
+00:36:06,320 --> 00:36:09,619
+has the correct sign tree head and is
+
+793
+00:36:09,619 --> 00:36:12,800
+demanding a proof okay so for simplicity
+
+794
+00:36:12,800 --> 00:36:15,050
+I'm just gonna explain how to do this
+
+795
+00:36:15,050 --> 00:36:16,640
+for a log with two records and it turns
+
+796
+00:36:16,640 --> 00:36:18,980
+out that extending that to a log with
+
+797
+00:36:18,980 --> 00:36:21,859
+with other more higher power of two
+
+798
+00:36:21,859 --> 00:36:26,330
+records is relatively easy um so the
+
+799
+00:36:26,330 --> 00:36:27,980
+browser actually has a particular sign
+
+800
+00:36:27,980 --> 00:36:32,810
+tree head let's suppose the correct log
+
+801
+00:36:32,810 --> 00:36:35,450
+that sits under that sign tree head is
+
+802
+00:36:35,450 --> 00:36:39,890
+the two LM in log a B for particular
+
+803
+00:36:39,890 --> 00:36:44,050
+certificates a and B and that means that
+
+804
+00:36:44,050 --> 00:36:46,280
+the correct
+
+805
+00:36:46,280 --> 00:36:49,550
+Merkle tree for that it securely is at
+
+806
+00:36:49,550 --> 00:36:52,849
+the bottom as the hashes of a and B and
+
+807
+00:36:52,849 --> 00:36:56,630
+then the sign tree head is actually the
+
+808
+00:36:56,630 --> 00:37:01,220
+hash of a hash of a concatenated with a
+
+809
+00:37:01,220 --> 00:37:06,680
+hash would be so let's suppose this is
+
+810
+00:37:06,680 --> 00:37:09,859
+the sign tree head that the certificate
+
+811
+00:37:09,859 --> 00:37:11,960
+that the log server actually gave to the
+
+812
+00:37:11,960 --> 00:37:16,609
+client of course the client doesn't this
+
+813
+00:37:16,609 --> 00:37:20,060
+client only knows this value this is
+
+814
+00:37:20,060 --> 00:37:21,410
+final hash value doesn't actually know
+
+815
+00:37:21,410 --> 00:37:26,810
+what is in the log the proof if the if
+
+816
+00:37:26,810 --> 00:37:28,460
+the browser asked for a proof that a is
+
+817
+00:37:28,460 --> 00:37:33,740
+in the log then the proof that the log
+
+818
+00:37:33,740 --> 00:37:38,060
+server can return is simply the proof
+
+819
+00:37:38,060 --> 00:37:42,710
+for a is a in the log is simply eizan in
+
+820
+00:37:42,710 --> 00:37:50,950
+the log and the hash of the other
+
+821
+00:37:50,950 --> 00:37:55,280
+element in the log so zero and the hash
+
+822
+00:37:55,280 --> 00:37:56,940
+of b
+
+823
+00:37:56,940 --> 00:38:00,900
+and that is enough information for a to
+
+824
+00:38:00,900 --> 00:38:03,329
+convince itself that for sorry for the
+
+825
+00:38:03,329 --> 00:38:05,760
+client to convince itself that a really
+
+826
+00:38:05,760 --> 00:38:08,069
+is at position zero because it can take
+
+827
+00:38:08,069 --> 00:38:10,290
+it knows the certificate is interested
+
+828
+00:38:10,290 --> 00:38:13,829
+in it can hash it part of the proof was
+
+829
+00:38:13,829 --> 00:38:16,619
+the hash of the other element in this
+
+830
+00:38:16,619 --> 00:38:21,030
+lowest level hash so the browser can
+
+831
+00:38:21,030 --> 00:38:23,099
+that now knows H a and H B you can hash
+
+832
+00:38:23,099 --> 00:38:26,099
+them together can execute this hash and
+
+833
+00:38:26,099 --> 00:38:27,750
+see if the result is the same as the
+
+834
+00:38:27,750 --> 00:38:29,760
+sine tree head that it happens and if it
+
+835
+00:38:29,760 --> 00:38:34,290
+is then that means that the certificate
+
+836
+00:38:34,290 --> 00:38:35,700
+log is actually produce a valid proof
+
+837
+00:38:35,700 --> 00:38:39,980
+that certificate a is at position B
+
+838
+00:38:39,980 --> 00:38:42,660
+that's a sorry it's a position zero in
+
+839
+00:38:42,660 --> 00:38:45,390
+the log summarized by this sign tree
+
+840
+00:38:45,390 --> 00:38:50,240
+head and it turns out that in larger
+
+841
+00:38:50,240 --> 00:38:55,020
+larger logs you know if you're looking
+
+842
+00:38:55,020 --> 00:38:57,329
+for if you need a proof that a is really
+
+843
+00:38:57,329 --> 00:38:59,609
+here all you need is the sequence of
+
+844
+00:38:59,609 --> 00:39:05,280
+hashes of the other branch of each hash
+
+845
+00:39:05,280 --> 00:39:07,880
+up to the sign tree head that you have
+
+846
+00:39:07,880 --> 00:39:11,220
+so in a for element log if you if you
+
+847
+00:39:11,220 --> 00:39:13,290
+need a proof that a is position zero you
+
+848
+00:39:13,290 --> 00:39:15,660
+need this hash units then you need this
+
+849
+00:39:15,660 --> 00:39:17,640
+hash and if the lock is bigger you know
+
+850
+00:39:17,640 --> 00:39:19,560
+eight elements then you also need this
+
+851
+00:39:19,560 --> 00:39:22,109
+hash assuming that you have the signed
+
+852
+00:39:22,109 --> 00:39:23,550
+tree hit so you can take the element you
+
+853
+00:39:23,550 --> 00:39:25,710
+know and hash it together with each of
+
+854
+00:39:25,710 --> 00:39:28,170
+these other hashes see if it's equal to
+
+855
+00:39:28,170 --> 00:39:32,760
+the sign tree head okay so if the
+
+856
+00:39:32,760 --> 00:39:34,560
+browser asks is supposing the browser
+
+857
+00:39:34,560 --> 00:39:37,770
+asks whether X is in the log at position
+
+858
+00:39:37,770 --> 00:39:41,720
+zero well X isn't in the log right so
+
+859
+00:39:41,720 --> 00:39:44,430
+hopefully there's no easy way for the
+
+860
+00:39:44,430 --> 00:39:46,140
+log server to produce the proof that X
+
+861
+00:39:46,140 --> 00:39:48,930
+is in the log in position zero but
+
+862
+00:39:48,930 --> 00:39:50,670
+suppose the log servers wants to lie and
+
+863
+00:39:50,670 --> 00:39:52,560
+it's in the position where it already
+
+864
+00:39:52,560 --> 00:39:55,500
+exposed a sign tree head for log that
+
+865
+00:39:55,500 --> 00:39:59,310
+contain a and then B browser doesn't
+
+866
+00:39:59,310 --> 00:40:01,109
+know was a and B doesn't know what's in
+
+867
+00:40:01,109 --> 00:40:03,839
+the log and the log server wants to
+
+868
+00:40:03,839 --> 00:40:06,480
+trick the client into the browser into
+
+869
+00:40:06,480 --> 00:40:07,980
+thinking that it's really
+
+870
+00:40:07,980 --> 00:40:11,730
+at position zero well it turns out that
+
+871
+00:40:11,730 --> 00:40:17,460
+in order to do that the for this small
+
+872
+00:40:17,460 --> 00:40:20,300
+log the certificate server has to
+
+873
+00:40:20,300 --> 00:40:31,830
+produce for some why it needs to find a
+
+874
+00:40:31,830 --> 00:40:36,630
+why that if it takes it's hash one
+
+875
+00:40:36,630 --> 00:40:38,880
+concatenated with X you know so this is
+
+876
+00:40:38,880 --> 00:40:41,910
+that's that it's equal to the sign tree
+
+877
+00:40:41,910 --> 00:40:44,100
+head right because the client we're
+
+878
+00:40:44,100 --> 00:40:45,300
+assuming the client already has to sign
+
+879
+00:40:45,300 --> 00:40:48,630
+tree head we need to find a some number
+
+880
+00:40:48,630 --> 00:40:50,820
+here that when hashed together with the
+
+881
+00:40:50,820 --> 00:40:52,740
+hash of X that the clients asking about
+
+882
+00:40:52,740 --> 00:40:55,710
+produces that same sign tree hit well we
+
+883
+00:40:55,710 --> 00:40:57,090
+know the sign tree head or the
+
+884
+00:40:57,090 --> 00:40:58,260
+assumption is assigned tree it was
+
+885
+00:40:58,260 --> 00:40:59,580
+actually for some other log right
+
+886
+00:40:59,580 --> 00:41:00,750
+because we're trying to rule out the
+
+887
+00:41:00,750 --> 00:41:04,590
+possibility that the log server can give
+
+888
+00:41:04,590 --> 00:41:06,540
+you a sign tree head for one log but
+
+889
+00:41:06,540 --> 00:41:09,060
+that convince you that something else is
+
+890
+00:41:09,060 --> 00:41:10,800
+in that log that's not there so the sign
+
+891
+00:41:10,800 --> 00:41:14,970
+tree had really was produced by from the
+
+892
+00:41:14,970 --> 00:41:17,910
+hashes of the records that really were
+
+893
+00:41:17,910 --> 00:41:22,920
+in the log and now we need and since you
+
+894
+00:41:22,920 --> 00:41:24,870
+know X is definitely different from a
+
+895
+00:41:24,870 --> 00:41:26,490
+that means the hash of X is different
+
+896
+00:41:26,490 --> 00:41:28,560
+from the hash of a and that means that
+
+897
+00:41:28,560 --> 00:41:32,550
+the log server needs to find two
+
+898
+00:41:32,550 --> 00:41:35,550
+different inputs to the hash function
+
+899
+00:41:35,550 --> 00:41:38,790
+that produced the same output and the
+
+900
+00:41:38,790 --> 00:41:41,550
+Assumption widely believed to be true
+
+901
+00:41:41,550 --> 00:41:43,350
+for practical purposes is that that's
+
+902
+00:41:43,350 --> 00:41:46,040
+not possible for cryptographic hashes
+
+903
+00:41:46,040 --> 00:41:50,310
+therefore the cent sign tree head was
+
+904
+00:41:50,310 --> 00:41:53,670
+produced by hashing up one log that it
+
+905
+00:41:53,670 --> 00:41:56,250
+will not be possible to find these sort
+
+906
+00:41:56,250 --> 00:42:00,060
+of other hash values that would be
+
+907
+00:42:00,060 --> 00:42:04,200
+required to produce a proof that some
+
+908
+00:42:04,200 --> 00:42:06,210
+other element was in the log that wasn't
+
+909
+00:42:06,210 --> 00:42:07,970
+really there
+
+910
+00:42:07,970 --> 00:42:13,520
+any questions about this about anything
+
+911
+00:42:17,090 --> 00:42:18,500
+[Music]
+
+912
+00:42:18,500 --> 00:42:20,700
+interesting a nice thing about this is
+
+913
+00:42:20,700 --> 00:42:24,240
+that the proofs are the proofs consist
+
+914
+00:42:24,240 --> 00:42:27,540
+of just the sort of other hashes on the
+
+915
+00:42:27,540 --> 00:42:29,970
+way up to the root if there's n
+
+916
+00:42:29,970 --> 00:42:32,190
+certificates there's only log in other
+
+917
+00:42:32,190 --> 00:42:34,830
+hashes and so the proofs are reasonably
+
+918
+00:42:34,830 --> 00:42:36,570
+concise in particular that are much much
+
+919
+00:42:36,570 --> 00:42:39,119
+smaller than the full log and since you
+
+920
+00:42:39,119 --> 00:42:40,590
+know every browser that needs to connect
+
+921
+00:42:40,590 --> 00:42:42,960
+to a website he's going to need one of
+
+922
+00:42:42,960 --> 00:42:47,690
+these proofs it's good if they're small
+
+923
+00:42:48,110 --> 00:42:51,540
+okay well this was whole discussion was
+
+924
+00:42:51,540 --> 00:42:55,200
+assuming that the sign tree had the
+
+925
+00:42:55,200 --> 00:42:57,590
+theum
+
+926
+00:42:58,099 --> 00:43:04,489
+or had was the correct sign tree head if
+
+927
+00:43:04,489 --> 00:43:07,880
+the but no there's no immediate reason
+
+928
+00:43:07,880 --> 00:43:09,829
+to believe that the log server would
+
+929
+00:43:09,829 --> 00:43:11,690
+have given if the logs are is malicious
+
+930
+00:43:11,690 --> 00:43:13,609
+and it wants to trick a client you know
+
+931
+00:43:13,609 --> 00:43:14,900
+why would it give the client the correct
+
+932
+00:43:14,900 --> 00:43:16,609
+see sign tree head why doesn't it give
+
+933
+00:43:16,609 --> 00:43:18,529
+it just me giving the sign tree head for
+
+934
+00:43:18,529 --> 00:43:20,930
+the bogus log that it wants to trick the
+
+935
+00:43:20,930 --> 00:43:24,319
+client into using so we have to be
+
+936
+00:43:24,319 --> 00:43:26,089
+prepared for the possibility that the
+
+937
+00:43:26,089 --> 00:43:28,549
+log server has cooked up I just
+
+938
+00:43:28,549 --> 00:43:29,900
+completely different log for the browser
+
+939
+00:43:29,900 --> 00:43:31,670
+that's not like anybody else's log and
+
+940
+00:43:31,670 --> 00:43:33,529
+it just contains the bogus certificates
+
+941
+00:43:33,529 --> 00:43:36,680
+that a malicious log server wants to
+
+942
+00:43:36,680 --> 00:43:43,309
+trick this client into believing so what
+
+943
+00:43:43,309 --> 00:43:47,930
+do we do about that well it turns out
+
+944
+00:43:47,930 --> 00:43:50,720
+that this is at least in the first
+
+945
+00:43:50,720 --> 00:43:52,749
+instance this is totally possible
+
+946
+00:43:52,749 --> 00:43:55,819
+you know usually what's gonna happen
+
+947
+00:43:55,819 --> 00:43:57,289
+usually the way this will play out is
+
+948
+00:43:57,289 --> 00:44:00,289
+that we'd have some browser that was you
+
+949
+00:44:00,289 --> 00:44:03,380
+know seeing the correct logs until some
+
+950
+00:44:03,380 --> 00:44:06,319
+point in time when when somebody wanted
+
+951
+00:44:06,319 --> 00:44:10,039
+to attack it and you know you want the
+
+952
+00:44:10,039 --> 00:44:11,269
+browser student be able to use all the
+
+953
+00:44:11,269 --> 00:44:13,960
+websites that it's ordinarily seeing
+
+954
+00:44:13,960 --> 00:44:18,799
+plus a sort of different log with bogus
+
+955
+00:44:18,799 --> 00:44:21,289
+certificates that the log server wants
+
+956
+00:44:21,289 --> 00:44:23,059
+to trick just that client just that
+
+957
+00:44:23,059 --> 00:44:25,579
+victim browser into using so now this is
+
+958
+00:44:25,579 --> 00:44:31,299
+a fork fork attack or more broadly
+
+959
+00:44:31,299 --> 00:44:35,930
+equivocation and the reason why people
+
+960
+00:44:35,930 --> 00:44:39,310
+call this kind of attack
+
+961
+00:44:39,310 --> 00:44:41,380
+a fork attack is that if we just never
+
+962
+00:44:41,380 --> 00:44:42,730
+mind the Merkel tree for a moment if we
+
+963
+00:44:42,730 --> 00:44:45,460
+just consider the log usually the log
+
+964
+00:44:45,460 --> 00:44:47,200
+already has you know millions of
+
+965
+00:44:47,200 --> 00:44:50,370
+certificates in it and everybody's seen
+
+966
+00:44:50,370 --> 00:44:52,420
+the beginning part of the log then at
+
+967
+00:44:52,420 --> 00:44:57,340
+some point in time we want to attack we
+
+968
+00:44:57,340 --> 00:45:00,880
+want to persuade our victim to use some
+
+969
+00:45:00,880 --> 00:45:04,330
+bogus certificate B but we don't want to
+
+970
+00:45:04,330 --> 00:45:05,920
+show B to anybody else certainly not to
+
+971
+00:45:05,920 --> 00:45:07,510
+the monitor so we're gonna sort of cook
+
+972
+00:45:07,510 --> 00:45:10,300
+up this other log the sort of continues
+
+973
+00:45:10,300 --> 00:45:12,220
+as usual and contains new submissions
+
+974
+00:45:12,220 --> 00:45:14,830
+but definitely doesn't contain the bogus
+
+975
+00:45:14,830 --> 00:45:18,550
+certificate B and you know what this
+
+976
+00:45:18,550 --> 00:45:20,470
+looks like is a fork because both the
+
+977
+00:45:20,470 --> 00:45:23,680
+sort of main log that monitors are shown
+
+978
+00:45:23,680 --> 00:45:26,380
+is kind of off on one fork and then this
+
+979
+00:45:26,380 --> 00:45:28,630
+vlog we're cooking up especially to
+
+980
+00:45:28,630 --> 00:45:31,480
+trick a victim is a different fork this
+
+981
+00:45:31,480 --> 00:45:33,460
+is the construction that the malicious
+
+982
+00:45:33,460 --> 00:45:35,050
+log server would have to produce if it
+
+983
+00:45:35,050 --> 00:45:37,590
+wants to trick a browser into using a
+
+984
+00:45:37,590 --> 00:45:42,400
+bogus certificate and again these are
+
+985
+00:45:42,400 --> 00:45:45,790
+possible it's possible to do this at
+
+986
+00:45:45,790 --> 00:45:48,760
+least briefly in with certificate
+
+987
+00:45:48,760 --> 00:45:52,260
+authority the sift a fit transparency
+
+988
+00:45:52,260 --> 00:45:54,820
+luckily though is not the end of the
+
+989
+00:45:54,820 --> 00:45:57,550
+story and certificate authority contains
+
+990
+00:45:57,550 --> 00:46:01,180
+some tools that allow it to make Forks
+
+991
+00:46:01,180 --> 00:46:06,840
+much more difficult so the basic scheme
+
+992
+00:46:06,840 --> 00:46:15,040
+is that this isn't this is the way the
+
+993
+00:46:15,040 --> 00:46:16,390
+certificate authority sort of intended
+
+994
+00:46:16,390 --> 00:46:18,010
+to work all certificate transparency is
+
+995
+00:46:18,010 --> 00:46:20,940
+intended to work but doesn't quite
+
+996
+00:46:20,940 --> 00:46:24,370
+what's going on here is that the the the
+
+997
+00:46:24,370 --> 00:46:26,290
+monitors and people are not being
+
+998
+00:46:26,290 --> 00:46:30,460
+attacked or gonna see a a sign tree
+
+999
+00:46:30,460 --> 00:46:32,470
+particular sign tree head let's say
+
+1000
+00:46:32,470 --> 00:46:33,700
+science we hit one of course is gonna
+
+1001
+00:46:33,700 --> 00:46:37,240
+change as the log extends and the victim
+
+1002
+00:46:37,240 --> 00:46:39,340
+we know must see some other sign tree
+
+1003
+00:46:39,340 --> 00:46:41,350
+head because this is a signed tree hit
+
+1004
+00:46:41,350 --> 00:46:44,370
+that is hashed over this
+
+1005
+00:46:44,559 --> 00:46:46,299
+certificates guaranteed to be different
+
+1006
+00:46:46,299 --> 00:46:48,279
+from the sign tree heads this is the
+
+1007
+00:46:48,279 --> 00:46:51,299
+militia service showing two monitors
+
+1008
+00:46:51,299 --> 00:46:53,739
+if only the browsers and monitors could
+
+1009
+00:46:53,739 --> 00:46:56,859
+compare notes they would maybe instantly
+
+1010
+00:46:56,859 --> 00:46:58,329
+realize that they were seeing different
+
+1011
+00:46:58,329 --> 00:47:00,849
+trees and all it takes is comparing you
+
+1012
+00:47:00,849 --> 00:47:02,559
+know if we play our cards right all it
+
+1013
+00:47:02,559 --> 00:47:04,239
+takes is comparing the sign tree had its
+
+1014
+00:47:04,239 --> 00:47:06,969
+they've gotten from the log server to
+
+1015
+00:47:06,969 --> 00:47:08,829
+realize wait a minute we're seeing
+
+1016
+00:47:08,829 --> 00:47:10,959
+different logs now something's terribly
+
+1017
+00:47:10,959 --> 00:47:15,489
+wrong so the critical thing we need to
+
+1018
+00:47:15,489 --> 00:47:18,789
+do is have have the different
+
+1019
+00:47:18,789 --> 00:47:21,130
+participants in the system be able to
+
+1020
+00:47:21,130 --> 00:47:24,959
+compare sign tree heads and the
+
+1021
+00:47:24,959 --> 00:47:27,339
+certificate transparency has a provision
+
+1022
+00:47:27,339 --> 00:47:30,249
+for this called gossip and the way it's
+
+1023
+00:47:30,249 --> 00:47:33,999
+intended to works that browsers well the
+
+1024
+00:47:33,999 --> 00:47:36,549
+details don't really matter but what it
+
+1025
+00:47:36,549 --> 00:47:38,619
+really amounts to is that all the
+
+1026
+00:47:38,619 --> 00:47:41,229
+participants sort of drop off the recent
+
+1027
+00:47:41,229 --> 00:47:43,059
+sign tree heads they've seen into a big
+
+1028
+00:47:43,059 --> 00:47:47,829
+pool that they all inspect to try to
+
+1029
+00:47:47,829 --> 00:47:50,469
+figure out if there's inconsistent sign
+
+1030
+00:47:50,469 --> 00:47:52,709
+tree heads that clearly indicate
+
+1031
+00:47:52,709 --> 00:47:55,869
+divergent logs that have for it so we're
+
+1032
+00:47:55,869 --> 00:47:58,380
+going to gossip which really means
+
+1033
+00:47:58,380 --> 00:48:01,380
+exchange
+
+1034
+00:48:02,000 --> 00:48:07,260
+I'm sign tree heads and compare it turns
+
+1035
+00:48:07,260 --> 00:48:09,480
+out that current certificate
+
+1036
+00:48:09,480 --> 00:48:12,180
+transparency implementations don't do
+
+1037
+00:48:12,180 --> 00:48:16,109
+this but they ought to and they'll
+
+1038
+00:48:16,109 --> 00:48:17,160
+figure it out at some point
+
+1039
+00:48:17,160 --> 00:48:21,359
+all right okay so the question is given
+
+1040
+00:48:21,359 --> 00:48:25,430
+to sign tree heads how do we decide if
+
+1041
+00:48:25,430 --> 00:48:27,660
+they're evidence that the log has been
+
+1042
+00:48:27,660 --> 00:48:33,270
+forked the thing that makes this hard is
+
+1043
+00:48:33,270 --> 00:48:36,180
+that even if a log hasn't been forked as
+
+1044
+00:48:36,180 --> 00:48:40,010
+it's depended to new sign tree heads
+
+1045
+00:48:40,010 --> 00:48:42,540
+will become current so you know maybe
+
+1046
+00:48:42,540 --> 00:48:46,140
+sign tree head one was the legitimate so
+
+1047
+00:48:46,140 --> 00:48:47,970
+he had a vlog at this point of then some
+
+1048
+00:48:47,970 --> 00:48:50,070
+more certificates are added and sign
+
+1049
+00:48:50,070 --> 00:48:54,150
+tree head 3 becomes the correct head of
+
+1050
+00:48:54,150 --> 00:48:55,800
+the law and then signed tree head for
+
+1051
+00:48:55,800 --> 00:48:59,820
+etc so really what this gossip
+
+1052
+00:48:59,820 --> 00:49:04,440
+comparison least to do is distinguish
+
+1053
+00:49:04,440 --> 00:49:07,109
+situations where one sign tree head is
+
+1054
+00:49:07,109 --> 00:49:09,840
+really describes a prefix a log that's a
+
+1055
+00:49:09,840 --> 00:49:11,580
+prefix of the log described by another
+
+1056
+00:49:11,580 --> 00:49:13,170
+sign tree head because this is the
+
+1057
+00:49:13,170 --> 00:49:15,180
+legitimate situation where you have the
+
+1058
+00:49:15,180 --> 00:49:17,070
+two these two sign tree heads are
+
+1059
+00:49:17,070 --> 00:49:20,100
+different but the second one really does
+
+1060
+00:49:20,100 --> 00:49:21,780
+subsume the first one we want to
+
+1061
+00:49:21,780 --> 00:49:24,180
+distinguish that from two signed tree as
+
+1062
+00:49:24,180 --> 00:49:26,300
+that are different where neither
+
+1063
+00:49:26,300 --> 00:49:28,770
+describes a log that's a prefix of the
+
+1064
+00:49:28,770 --> 00:49:31,710
+other one's log one tell these two cases
+
+1065
+00:49:31,710 --> 00:49:40,020
+apart this telling that situation apart
+
+1066
+00:49:40,020 --> 00:49:44,609
+is the purpose of the consistency proof
+
+1067
+00:49:44,609 --> 00:49:47,609
+the log or Merkel consistency proof that
+
+1068
+00:49:47,609 --> 00:49:49,260
+the reading is talked about so this is
+
+1069
+00:49:49,260 --> 00:49:51,410
+the
+
+1070
+00:49:52,080 --> 00:49:56,610
+la consistency proof
+
+1071
+00:49:58,430 --> 00:50:00,490
+you
+
+1072
+00:50:05,749 --> 00:50:08,069
+so the game here is that we're given to
+
+1073
+00:50:08,069 --> 00:50:12,299
+sign tree heads H 1 and H 2 and we're
+
+1074
+00:50:12,299 --> 00:50:22,619
+asking is h 1s log prefix really it's
+
+1075
+00:50:22,619 --> 00:50:24,659
+not these are - these are hashes so it's
+
+1076
+00:50:24,659 --> 00:50:26,669
+really asking about the log that the
+
+1077
+00:50:26,669 --> 00:50:38,489
+hashes represent and you know we're
+
+1078
+00:50:38,489 --> 00:50:40,380
+hoping the answer is yes and if the
+
+1079
+00:50:40,380 --> 00:50:41,789
+answer's no that means that the log
+
+1080
+00:50:41,789 --> 00:50:43,649
+servers Fork Dustin is hiding something
+
+1081
+00:50:43,649 --> 00:50:51,059
+from one party or the other okay well it
+
+1082
+00:50:51,059 --> 00:50:54,089
+turns out that um as we as I mentioned
+
+1083
+00:50:54,089 --> 00:50:57,269
+before the as the Merkel tree as the log
+
+1084
+00:50:57,269 --> 00:50:59,519
+grows the Merkel tree also grows and
+
+1085
+00:50:59,519 --> 00:51:03,569
+what we see is a sequence of signs of
+
+1086
+00:51:03,569 --> 00:51:11,279
+tree heads each one as a log doubles in
+
+1087
+00:51:11,279 --> 00:51:14,939
+size each one has its as its left thing
+
+1088
+00:51:14,939 --> 00:51:17,789
+let me draw in the actual hash functions
+
+1089
+00:51:17,789 --> 00:51:20,729
+of this hash function is hashing up two
+
+1090
+00:51:20,729 --> 00:51:23,929
+things the result of this hash function
+
+1091
+00:51:24,079 --> 00:51:27,149
+is one of the inputs to the next sign
+
+1092
+00:51:27,149 --> 00:51:28,949
+tree head the result of this hash
+
+1093
+00:51:28,949 --> 00:51:30,959
+function is one of the inputs to the
+
+1094
+00:51:30,959 --> 00:51:34,999
+next sign tree head I know we get this
+
+1095
+00:51:34,999 --> 00:51:42,209
+kind of tree of life sign tree heads all
+
+1096
+00:51:42,209 --> 00:51:45,509
+right and I need to sign tree heads if
+
+1097
+00:51:45,509 --> 00:51:47,549
+they're legitimate you know if each one
+
+1098
+00:51:47,549 --> 00:51:49,079
+is log is a prefix of H 2 that means
+
+1099
+00:51:49,079 --> 00:51:50,759
+that maybe this one's H 1 and this one's
+
+1100
+00:51:50,759 --> 00:51:52,619
+H 2 and they're gonna have this
+
+1101
+00:51:52,619 --> 00:51:55,499
+relationship thing you know if each one
+
+1102
+00:51:55,499 --> 00:51:57,449
+is a piece of H 2 then they must have
+
+1103
+00:51:57,449 --> 00:51:59,429
+this relationship where each 2 was
+
+1104
+00:51:59,429 --> 00:52:02,219
+produced by taking each one hashing it
+
+1105
+00:52:02,219 --> 00:52:04,589
+with some other thing and maybe hashing
+
+1106
+00:52:04,589 --> 00:52:06,719
+that with some other thing until we get
+
+1107
+00:52:06,719 --> 00:52:10,830
+to the point where we find H 2 and with
+
+1108
+00:52:10,830 --> 00:52:14,940
+means is that if a browser or monitor
+
+1109
+00:52:14,940 --> 00:52:20,310
+challenges a log a log server to prove
+
+1110
+00:52:20,310 --> 00:52:23,460
+that each one's log is really a prefix
+
+1111
+00:52:23,460 --> 00:52:27,720
+of h2s log what the log server has to
+
+1112
+00:52:27,720 --> 00:52:31,860
+produce is this sequence of other the
+
+1113
+00:52:31,860 --> 00:52:34,440
+other side of each of the Hat sign tree
+
+1114
+00:52:34,440 --> 00:52:39,200
+head hashes on the way from h1 to h2 and
+
+1115
+00:52:39,200 --> 00:52:43,140
+this is the proof and then again you
+
+1116
+00:52:43,140 --> 00:52:46,040
+know this is reminiscent of the
+
+1117
+00:52:46,040 --> 00:52:51,020
+inclusion proofs then to check the proof
+
+1118
+00:52:51,020 --> 00:52:54,180
+you need to take each one hash it with
+
+1119
+00:52:54,180 --> 00:52:57,150
+the first other thing you know hash that
+
+1120
+00:52:57,150 --> 00:52:58,680
+along with the second other things that
+
+1121
+00:52:58,680 --> 00:53:00,630
+you get to the last one of these and
+
+1122
+00:53:00,630 --> 00:53:03,360
+that had better be equal to h2 if it is
+
+1123
+00:53:03,360 --> 00:53:08,940
+it's a proof that h2 is a suffix of each
+
+1124
+00:53:08,940 --> 00:53:13,280
+one otherwise the log servers evidently
+
+1125
+00:53:13,280 --> 00:53:18,630
+tried to fork you and again you know the
+
+1126
+00:53:18,630 --> 00:53:22,790
+basis of this is that there's no other
+
+1127
+00:53:22,790 --> 00:53:25,980
+you know h2 really isn't as supposing h1
+
+1128
+00:53:25,980 --> 00:53:29,970
+isn't a prefix of h2 there's no way that
+
+1129
+00:53:29,970 --> 00:53:34,530
+uh since h2 was created from some actual
+
+1130
+00:53:34,530 --> 00:53:36,720
+log that's not the same as h1 there's no
+
+1131
+00:53:36,720 --> 00:53:40,400
+way that the log server could cook up
+
+1132
+00:53:40,400 --> 00:53:44,910
+these values that are required to cause
+
+1133
+00:53:44,910 --> 00:53:47,220
+the hashes this sort of repeated hash of
+
+1134
+00:53:47,220 --> 00:53:50,910
+h1 to equal H to H do really encompass
+
+1135
+00:53:50,910 --> 00:53:53,880
+ooming that the cryptographic hash does
+
+1136
+00:53:53,880 --> 00:53:55,890
+prevent you from binding to different
+
+1137
+00:53:55,890 --> 00:53:59,210
+inputs that produce the same out
+
+1138
+00:54:02,930 --> 00:54:06,230
+alright ok so this is the log
+
+1139
+00:54:06,230 --> 00:54:12,710
+consistency proof okay so the question
+
+1140
+00:54:12,710 --> 00:54:14,420
+is who usually challenges the log server
+
+1141
+00:54:14,420 --> 00:54:15,890
+so I'll actually talk about that in a
+
+1142
+00:54:15,890 --> 00:54:19,030
+minute but it turns out that um both
+
+1143
+00:54:19,030 --> 00:54:24,339
+browsers and monitors
+
+1144
+00:54:25,160 --> 00:54:28,560
+well Luke browsers and monitors
+
+1145
+00:54:28,560 --> 00:54:30,090
+challenge the log server you it's
+
+1146
+00:54:30,090 --> 00:54:31,770
+actually usually the browser's
+
+1147
+00:54:31,770 --> 00:54:33,600
+challenging the log server that's the
+
+1148
+00:54:33,600 --> 00:54:35,460
+most important thing but there's two
+
+1149
+00:54:35,460 --> 00:54:36,600
+points in time at which you need to
+
+1150
+00:54:36,600 --> 00:54:37,920
+challenge the log server to produce
+
+1151
+00:54:37,920 --> 00:54:41,220
+these proofs and I'll talk about both of
+
+1152
+00:54:41,220 --> 00:55:00,630
+them all right okay actually so the
+
+1153
+00:55:00,630 --> 00:55:06,030
+first place at which one point at which
+
+1154
+00:55:06,030 --> 00:55:07,920
+these proofs are used as for gossip as
+
+1155
+00:55:07,920 --> 00:55:11,250
+part of gossip as I outlined and the the
+
+1156
+00:55:11,250 --> 00:55:12,780
+scheme that's intended for gossip is
+
+1157
+00:55:12,780 --> 00:55:16,770
+that browsers will periodically talk to
+
+1158
+00:55:16,770 --> 00:55:18,690
+some central repository of some set of
+
+1159
+00:55:18,690 --> 00:55:22,860
+central repositories and just contribute
+
+1160
+00:55:22,860 --> 00:55:24,900
+to a pool of sign tree heads the sign
+
+1161
+00:55:24,900 --> 00:55:28,080
+tree hits the recently seen from the log
+
+1162
+00:55:28,080 --> 00:55:30,900
+server and the browsers were also
+
+1163
+00:55:30,900 --> 00:55:34,040
+periodically pull out random elements of
+
+1164
+00:55:34,040 --> 00:55:36,510
+sign tree heads that other browsers have
+
+1165
+00:55:36,510 --> 00:55:37,920
+seen just Brandon they pulled them out
+
+1166
+00:55:37,920 --> 00:55:39,630
+of the pool and it'll be multiple of
+
+1167
+00:55:39,630 --> 00:55:41,520
+these collects these pools run by
+
+1168
+00:55:41,520 --> 00:55:43,530
+different people so that if one of them
+
+1169
+00:55:43,530 --> 00:55:46,710
+is cheating that will be proof against
+
+1170
+00:55:46,710 --> 00:55:51,120
+that and then the browser will for
+
+1171
+00:55:51,120 --> 00:55:53,370
+whatever just any random sign tree has
+
+1172
+00:55:53,370 --> 00:55:56,420
+it apples out of the pool it will ask
+
+1173
+00:55:56,420 --> 00:55:59,100
+the log server to produce the logs
+
+1174
+00:55:59,100 --> 00:56:01,020
+insistency proof for that pair of sign
+
+1175
+00:56:01,020 --> 00:56:03,570
+tree heads and you know if nobody's
+
+1176
+00:56:03,570 --> 00:56:06,540
+cheating design it should always be easy
+
+1177
+00:56:06,540 --> 00:56:09,240
+for the log server to produce you know
+
+1178
+00:56:09,240 --> 00:56:12,660
+any consistency proof that's demanded of
+
+1179
+00:56:12,660 --> 00:56:15,630
+it but if it's for somebody suppose it
+
+1180
+00:56:15,630 --> 00:56:18,090
+the log server is for somebody and given
+
+1181
+00:56:18,090 --> 00:56:19,170
+them a sign tree had this really
+
+1182
+00:56:19,170 --> 00:56:21,240
+describes a totally different log or
+
+1183
+00:56:21,240 --> 00:56:22,860
+even a long the difference in one
+
+1184
+00:56:22,860 --> 00:56:25,500
+element from the logs that everybody
+
+1185
+00:56:25,500 --> 00:56:27,450
+else is seeing eventually that browser
+
+1186
+00:56:27,450 --> 00:56:30,750
+will contribute that's that sign tree
+
+1187
+00:56:30,750 --> 00:56:34,170
+head to the pool the gossip pool then
+
+1188
+00:56:34,170 --> 00:56:36,180
+eventually somebody else
+
+1189
+00:56:36,180 --> 00:56:38,099
+we'll pull that sign tray head out of
+
+1190
+00:56:38,099 --> 00:56:41,039
+the pool and ask for a proof for you
+
+1191
+00:56:41,039 --> 00:56:42,390
+know some other sign tree had that
+
+1192
+00:56:42,390 --> 00:56:43,980
+presumably is on a different Fork and
+
+1193
+00:56:43,980 --> 00:56:46,980
+then the log server will not be able to
+
+1194
+00:56:46,980 --> 00:56:49,859
+produce the proof and I'm since they're
+
+1195
+00:56:49,859 --> 00:56:52,049
+signed since the scientist or signed by
+
+1196
+00:56:52,049 --> 00:56:55,230
+the log server that's just absolute
+
+1197
+00:56:55,230 --> 00:56:59,849
+proof that the log server has forked two
+
+1198
+00:56:59,849 --> 00:57:02,270
+of its clients presumably with intent
+
+1199
+00:57:02,270 --> 00:57:05,220
+reveal a bogus certificate to one of
+
+1200
+00:57:05,220 --> 00:57:09,869
+them and hide it from the other okay but
+
+1201
+00:57:09,869 --> 00:57:11,279
+there's actually another place where it
+
+1202
+00:57:11,279 --> 00:57:15,270
+turns out you need the these consistency
+
+1203
+00:57:15,270 --> 00:57:18,180
+proves not just during gossip but
+
+1204
+00:57:18,180 --> 00:57:19,380
+actually also during the ordinary
+
+1205
+00:57:19,380 --> 00:57:28,349
+operation of the browsers so the the
+
+1206
+00:57:28,349 --> 00:57:31,410
+difficulty is that suppose you know
+
+1207
+00:57:31,410 --> 00:57:33,539
+suppose the browser is it's kind of
+
+1208
+00:57:33,539 --> 00:57:36,779
+seeing consistent version of the log is
+
+1209
+00:57:36,779 --> 00:57:39,930
+the same as everybody else but then log
+
+1210
+00:57:39,930 --> 00:57:41,609
+server wants to trick it into using this
+
+1211
+00:57:41,609 --> 00:57:48,930
+bogus certificate so the log server
+
+1212
+00:57:48,930 --> 00:57:52,319
+sends it a signed tree you know makes
+
+1213
+00:57:52,319 --> 00:57:53,579
+signed RIA that's different from
+
+1214
+00:57:53,579 --> 00:57:56,150
+everybody else that refers to a you know
+
+1215
+00:57:56,150 --> 00:57:58,260
+malicious log that contains this bad
+
+1216
+00:57:58,260 --> 00:57:59,700
+certificate preferred video since it
+
+1217
+00:57:59,700 --> 00:58:00,779
+doesn't want other people to notice
+
+1218
+00:58:00,779 --> 00:58:02,309
+certainly doesn't want you know the
+
+1219
+00:58:02,309 --> 00:58:04,470
+monitors to notice you know cooks up
+
+1220
+00:58:04,470 --> 00:58:07,500
+this other log that is what everybody
+
+1221
+00:58:07,500 --> 00:58:12,569
+else is seeing all right so now the you
+
+1222
+00:58:12,569 --> 00:58:16,380
+know the browser checks and sees you
+
+1223
+00:58:16,380 --> 00:58:18,270
+know I asked for inclusion proof and the
+
+1224
+00:58:18,270 --> 00:58:20,190
+inclusion that log server will be able
+
+1225
+00:58:20,190 --> 00:58:21,539
+to produce the inclusion proof because
+
+1226
+00:58:21,539 --> 00:58:23,520
+this sign tree had that the browser has
+
+1227
+00:58:23,520 --> 00:58:25,859
+really does refer to this bad log the
+
+1228
+00:58:25,859 --> 00:58:27,990
+browser will go ahead and use this bogus
+
+1229
+00:58:27,990 --> 00:58:30,089
+certificate and maybe get tricked and
+
+1230
+00:58:30,089 --> 00:58:31,470
+give away the user's password
+
+1231
+00:58:31,470 --> 00:58:36,450
+you know who knows what but depending on
+
+1232
+00:58:36,450 --> 00:58:38,400
+the details of other browsers work we're
+
+1233
+00:58:38,400 --> 00:58:40,529
+at risk of the next time the browser
+
+1234
+00:58:40,529 --> 00:58:42,480
+which it doesn't realize anything's gone
+
+1235
+00:58:42,480 --> 00:58:44,279
+wrong talks to the log server the log
+
+1236
+00:58:44,279 --> 00:58:46,410
+server might then say you know there's a
+
+1237
+00:58:46,410 --> 00:58:47,910
+new log with a bunch of new stuff on it
+
+1238
+00:58:47,910 --> 00:58:49,930
+and here is the sign tree
+
+1239
+00:58:49,930 --> 00:58:52,809
+of the current log why don't you switch
+
+1240
+00:58:52,809 --> 00:58:54,880
+my to use that as your sign tree hit and
+
+1241
+00:58:54,880 --> 00:58:59,170
+so now if that were allowed to happen
+
+1242
+00:58:59,170 --> 00:59:01,569
+then the browser's now would completely
+
+1243
+00:59:01,569 --> 00:59:03,339
+lost the evidence that anything went
+
+1244
+00:59:03,339 --> 00:59:04,869
+wrong because now the browser is using
+
+1245
+00:59:04,869 --> 00:59:06,940
+the same trees everybody else no it's
+
+1246
+00:59:06,940 --> 00:59:08,500
+going to contribute this sign tree head
+
+1247
+00:59:08,500 --> 00:59:10,779
+to the gossip pool it's all gonna look
+
+1248
+00:59:10,779 --> 00:59:15,279
+good and we had this sort of brief evil
+
+1249
+00:59:15,279 --> 00:59:17,559
+tree that was evil log that was revealed
+
+1250
+00:59:17,559 --> 00:59:20,349
+evil log Fork but if the browser's are
+
+1251
+00:59:20,349 --> 00:59:22,630
+willing to accept a new sign tree head
+
+1252
+00:59:22,630 --> 00:59:25,750
+then we can basically have the browser
+
+1253
+00:59:25,750 --> 00:59:30,369
+forget about so we want what we want is
+
+1254
+00:59:30,369 --> 00:59:34,210
+this what we want is for if a browser if
+
+1255
+00:59:34,210 --> 00:59:38,279
+the log service shows a particular log
+
+1256
+00:59:38,279 --> 00:59:41,470
+to the browser that the browser that
+
+1257
+00:59:41,470 --> 00:59:43,809
+they can't trick the browser into
+
+1258
+00:59:43,809 --> 00:59:46,150
+switching away from that log that is
+
+1259
+00:59:46,150 --> 00:59:48,819
+that we want to be able to enforce that
+
+1260
+00:59:48,819 --> 00:59:52,779
+the browser sees only strict extensions
+
+1261
+00:59:52,779 --> 00:59:55,619
+to the log that it's seen already and
+
+1262
+00:59:55,619 --> 00:59:57,819
+doesn't simply get switched to a log
+
+1263
+00:59:57,819 --> 01:00:00,190
+that is not compatible with the log the
+
+1264
+01:00:00,190 --> 01:00:01,960
+browser seen before it's the property
+
+1265
+01:00:01,960 --> 01:00:03,279
+that we're looking for it's actually
+
+1266
+01:00:03,279 --> 01:00:12,010
+called for consistency and with any
+
+1267
+01:00:12,010 --> 01:00:14,500
+first two is that if the browser's been
+
+1268
+01:00:14,500 --> 01:00:16,480
+forked onto a different fork from other
+
+1269
+01:00:16,480 --> 01:00:18,970
+people then they must stay on that fork
+
+1270
+01:00:18,970 --> 01:00:22,830
+in it it should never be able to switch
+
+1271
+01:00:22,830 --> 01:00:25,270
+to the main fork and the reason for that
+
+1272
+01:00:25,270 --> 01:00:27,370
+is we want to preserve you need to
+
+1273
+01:00:27,370 --> 01:00:29,860
+preserve this bad sign tree head and its
+
+1274
+01:00:29,860 --> 01:00:33,370
+successors so that when the browser
+
+1275
+01:00:33,370 --> 01:00:36,760
+participates in the gossip protocol it's
+
+1276
+01:00:36,760 --> 01:00:41,500
+contributing sign tree heads that nobody
+
+1277
+01:00:41,500 --> 01:00:44,380
+else has and that cannot be proved to be
+
+1278
+01:00:44,380 --> 01:00:46,450
+compatible using the log consistency
+
+1279
+01:00:46,450 --> 01:00:48,220
+proof okay so how do we achieve for
+
+1280
+01:00:48,220 --> 01:00:52,000
+consistency well um it's actually easy
+
+1281
+01:00:52,000 --> 01:00:53,740
+with the tools we have now every time
+
+1282
+01:00:53,740 --> 01:00:56,470
+the log server tells a browser oh here's
+
+1283
+01:00:56,470 --> 01:00:58,330
+a new sign tree head for a longer log
+
+1284
+01:00:58,330 --> 01:01:01,930
+the browser will require the will not
+
+1285
+01:01:01,930 --> 01:01:04,890
+accept the new sign tree head until the
+
+1286
+01:01:04,890 --> 01:01:08,230
+log server has has produced a log
+
+1287
+01:01:08,230 --> 01:01:10,210
+consistency proof that the new sign tree
+
+1288
+01:01:10,210 --> 01:01:15,550
+head describes a suffix of the old sign
+
+1289
+01:01:15,550 --> 01:01:17,560
+tree that is that the log of the old
+
+1290
+01:01:17,560 --> 01:01:19,510
+sign tree has a prefix of the log of the
+
+1291
+01:01:19,510 --> 01:01:21,760
+new sign tree and of course if a log
+
+1292
+01:01:21,760 --> 01:01:24,250
+server is as forked the browser and it's
+
+1293
+01:01:24,250 --> 01:01:26,620
+keeping the browser on that same Fork it
+
+1294
+01:01:26,620 --> 01:01:28,930
+can produce the proofs but of course you
+
+1295
+01:01:28,930 --> 01:01:30,880
+know it's digging its grave even deeper
+
+1296
+01:01:30,880 --> 01:01:33,370
+because I'm as producing more and more
+
+1297
+01:01:33,370 --> 01:01:35,800
+sign tree heads for a which will
+
+1298
+01:01:35,800 --> 01:01:37,120
+eventually be caught by the gossip
+
+1299
+01:01:37,120 --> 01:01:40,060
+protocol whereas if the blog server
+
+1300
+01:01:40,060 --> 01:01:43,960
+tries to cause the browser to switch to
+
+1301
+01:01:43,960 --> 01:01:45,970
+a sign tree head that describes the same
+
+1302
+01:01:45,970 --> 01:01:48,700
+log everybody else has been seeing the
+
+1303
+01:01:48,700 --> 01:01:50,500
+browser will demand a consistency proof
+
+1304
+01:01:50,500 --> 01:01:52,930
+and the log server will not be able to
+
+1305
+01:01:52,930 --> 01:01:55,240
+produce it because deed the log
+
+1306
+01:01:55,240 --> 01:01:57,070
+described by the first sign tree head is
+
+1307
+01:01:57,070 --> 01:02:00,610
+not a prefix of the log described by the
+
+1308
+01:02:00,610 --> 01:02:03,270
+second sign tree
+
+1309
+01:02:05,110 --> 01:02:11,600
+okay okay so the system these these log
+
+1310
+01:02:11,600 --> 01:02:13,400
+consistency proofs provide for
+
+1311
+01:02:13,400 --> 01:02:15,980
+consistency and for consistency plus
+
+1312
+01:02:15,980 --> 01:02:20,540
+gossiping and that requiring this log
+
+1313
+01:02:20,540 --> 01:02:23,390
+consistency proves for the science found
+
+1314
+01:02:23,390 --> 01:02:24,230
+by gossiping
+
+1315
+01:02:24,230 --> 01:02:27,590
+I'm the two of them together make it
+
+1316
+01:02:27,590 --> 01:02:31,490
+likely that all the participants or
+
+1317
+01:02:31,490 --> 01:02:33,350
+seeing the same log and that if they're
+
+1318
+01:02:33,350 --> 01:02:34,970
+not seeing the same log they'll be able
+
+1319
+01:02:34,970 --> 01:02:38,720
+to detect that fact by the failure of a
+
+1320
+01:02:38,720 --> 01:02:42,100
+log consistency proof
+
+1321
+01:02:45,400 --> 01:02:48,450
+any questions
+
+1322
+01:02:53,579 --> 01:02:58,029
+okay so that how many log service are
+
+1323
+01:02:58,029 --> 01:02:59,380
+there that is a great question
+
+1324
+01:02:59,380 --> 01:03:02,319
+so I describe the system as if there was
+
+1325
+01:03:02,319 --> 01:03:03,730
+just one log server it turns out in the
+
+1326
+01:03:03,730 --> 01:03:05,680
+real system there's lots of log servers
+
+1327
+01:03:05,680 --> 01:03:07,660
+at least dozens so this is a deployed
+
+1328
+01:03:07,660 --> 01:03:09,940
+system which you can programmed in that
+
+1329
+01:03:09,940 --> 01:03:12,130
+is actually used by Chrome and I think
+
+1330
+01:03:12,130 --> 01:03:15,880
+Safari there are at least dozens of
+
+1331
+01:03:15,880 --> 01:03:17,769
+these log servers and when certificate
+
+1332
+01:03:17,769 --> 01:03:19,180
+and certificate authorities are actually
+
+1333
+01:03:19,180 --> 01:03:21,009
+required by chrome to submit all their
+
+1334
+01:03:21,009 --> 01:03:25,660
+certificates to the to the log servers
+
+1335
+01:03:25,660 --> 01:03:29,170
+to multiple log servers the different
+
+1336
+01:03:29,170 --> 01:03:30,220
+log servers don't actually keep
+
+1337
+01:03:30,220 --> 01:03:32,769
+identical logs the convention is that a
+
+1338
+01:03:32,769 --> 01:03:34,539
+certificate authority will submit a new
+
+1339
+01:03:34,539 --> 01:03:37,210
+certificate to save you know a couple
+
+1340
+01:03:37,210 --> 01:03:41,190
+maybe five different log servers and
+
+1341
+01:03:41,190 --> 01:03:44,140
+actually in the certificate information
+
+1342
+01:03:44,140 --> 01:03:46,299
+that a website tells your browser it
+
+1343
+01:03:46,299 --> 01:03:50,319
+includes the identities of log servers
+
+1344
+01:03:50,319 --> 01:03:52,089
+of the certificate transparency log
+
+1345
+01:03:52,089 --> 01:03:54,730
+servers that have the certificate in
+
+1346
+01:03:54,730 --> 01:03:56,799
+their log so your browser knows which
+
+1347
+01:03:56,799 --> 01:04:01,359
+log servers to talk to and the reason
+
+1348
+01:04:01,359 --> 01:04:03,369
+why there's more than one of them is of
+
+1349
+01:04:03,369 --> 01:04:05,170
+course some of them may go bad some of
+
+1350
+01:04:05,170 --> 01:04:06,999
+them may turn out to be malicious or go
+
+1351
+01:04:06,999 --> 01:04:09,489
+out of business or who knows what and in
+
+1352
+01:04:09,489 --> 01:04:10,749
+that case you still want to have a
+
+1353
+01:04:10,749 --> 01:04:15,339
+couple more to fall back on they don't
+
+1354
+01:04:15,339 --> 01:04:17,440
+have to be identical because they don't
+
+1355
+01:04:17,440 --> 01:04:20,349
+as long as the certificate is in at
+
+1356
+01:04:20,349 --> 01:04:23,739
+least one log that's you know as far as
+
+1357
+01:04:23,739 --> 01:04:25,779
+anybody knows is trustworthy that's
+
+1358
+01:04:25,779 --> 01:04:32,829
+sufficient because you know the issue
+
+1359
+01:04:32,829 --> 01:04:33,140
+here
+
+1360
+01:04:33,140 --> 01:04:36,109
+not really necessarily the fact that the
+
+1361
+01:04:36,109 --> 01:04:37,730
+log had the certificate in it because
+
+1362
+01:04:37,730 --> 01:04:40,549
+that's not proof that the certificate is
+
+1363
+01:04:40,549 --> 01:04:43,250
+good all we're looking for is log
+
+1364
+01:04:43,250 --> 01:04:47,750
+servers that aren't forking the monitors
+
+1365
+01:04:47,750 --> 01:04:50,960
+and browsers that use them so it's
+
+1366
+01:04:50,960 --> 01:04:52,789
+enough for a certificate to be in even a
+
+1367
+01:04:52,789 --> 01:04:56,599
+single log server that's not forking
+
+1368
+01:04:56,599 --> 01:04:58,819
+people because then the monitors are
+
+1369
+01:04:58,819 --> 01:04:59,930
+guaranteed to see it because the
+
+1370
+01:04:59,930 --> 01:05:04,460
+monitors check all the log servers so if
+
+1371
+01:05:04,460 --> 01:05:06,260
+a bogus certificate shows up even even a
+
+1372
+01:05:06,260 --> 01:05:07,970
+single log server the monitors will
+
+1373
+01:05:07,970 --> 01:05:10,549
+eventually notice because all the
+
+1374
+01:05:10,549 --> 01:05:15,200
+monitors look at all the log servers
+
+1375
+01:05:15,200 --> 01:05:18,609
+that the browsers are willing to accept
+
+1376
+01:05:18,609 --> 01:05:22,250
+all right another question what prevents
+
+1377
+01:05:22,250 --> 01:05:25,309
+a log server from going down and issuing
+
+1378
+01:05:25,309 --> 01:05:28,490
+bogus certificates before they get
+
+1379
+01:05:28,490 --> 01:05:31,190
+caught you know nothing actually if
+
+1380
+01:05:31,190 --> 01:05:34,400
+you're willing to that's definitely a
+
+1381
+01:05:34,400 --> 01:05:36,559
+defect in the system that at least for a
+
+1382
+01:05:36,559 --> 01:05:38,869
+while you can
+
+1383
+01:05:38,869 --> 01:05:43,640
+malicious log server contributing bogus
+
+1384
+01:05:43,640 --> 01:05:44,720
+certificates so if you have a
+
+1385
+01:05:44,720 --> 01:05:47,420
+certificate authority that's become
+
+1386
+01:05:47,420 --> 01:05:49,609
+malicious and this issuing bogus
+
+1387
+01:05:49,609 --> 01:05:51,920
+certificates they look correct but
+
+1388
+01:05:51,920 --> 01:05:59,059
+they're bogus and a log server then that
+
+1389
+01:05:59,059 --> 01:06:00,589
+that's willing to serve these it's
+
+1390
+01:06:00,589 --> 01:06:01,849
+willing to put these certificates in the
+
+1391
+01:06:01,849 --> 01:06:04,009
+log and of course they all are then at
+
+1392
+01:06:04,009 --> 01:06:05,779
+least for a while browsers will be
+
+1393
+01:06:05,779 --> 01:06:07,160
+willing to use them the thing is though
+
+1394
+01:06:07,160 --> 01:06:09,440
+that the you know they will be caught
+
+1395
+01:06:09,440 --> 01:06:12,170
+and this is the system is its intent is
+
+1396
+01:06:12,170 --> 01:06:15,440
+to improve the situation in the priests
+
+1397
+01:06:15,440 --> 01:06:17,930
+or to make a transparency system if
+
+1398
+01:06:17,930 --> 01:06:19,759
+somebody was issuing bogus certificates
+
+1399
+01:06:19,759 --> 01:06:21,410
+and browsers were being tricked into
+
+1400
+01:06:21,410 --> 01:06:23,630
+using them you might never find out ever
+
+1401
+01:06:23,630 --> 01:06:26,299
+in the certificate transparency world
+
+1402
+01:06:26,299 --> 01:06:28,460
+you may not find out right away and so
+
+1403
+01:06:28,460 --> 01:06:31,000
+some some people may use them but then
+
+1404
+01:06:31,000 --> 01:06:32,960
+relatively quickly you know a few days
+
+1405
+01:06:32,960 --> 01:06:35,059
+or something the monitors will start to
+
+1406
+01:06:35,059 --> 01:06:37,130
+notice that there's bad certificates in
+
+1407
+01:06:37,130 --> 01:06:39,829
+the logs and somebody will go and track
+
+1408
+01:06:39,829 --> 01:06:41,990
+it down and figure out who is malicious
+
+1409
+01:06:41,990 --> 01:06:45,009
+or who is making mistakes
+
+1410
+01:06:52,740 --> 01:06:56,849
+yeah so I guess a certificate a
+
+1411
+01:06:56,849 --> 01:06:58,470
+certificate transparency law could
+
+1412
+01:06:58,470 --> 01:07:02,099
+refuse to talk to the monitors yeah I'm
+
+1413
+01:07:02,099 --> 01:07:08,250
+not sure I think ultimately the if you
+
+1414
+01:07:08,250 --> 01:07:09,599
+know we're now treading into a kind of
+
+1415
+01:07:09,599 --> 01:07:11,940
+non-technical region you know what to do
+
+1416
+01:07:11,940 --> 01:07:13,950
+if there's evidence that something's
+
+1417
+01:07:13,950 --> 01:07:15,809
+gone wrong this is actually quite hard
+
+1418
+01:07:15,809 --> 01:07:18,270
+because much of the time is something
+
+1419
+01:07:18,270 --> 01:07:20,010
+seems to go wrong even bogus
+
+1420
+01:07:20,010 --> 01:07:22,920
+certificates often often the reason it's
+
+1421
+01:07:22,920 --> 01:07:24,329
+just somebody made a mistake it was a
+
+1422
+01:07:24,329 --> 01:07:26,490
+legitimate mistake you know somebody
+
+1423
+01:07:26,490 --> 01:07:28,859
+blew it and it's not evidence of malice
+
+1424
+01:07:28,859 --> 01:07:31,160
+is just that somebody made a mistake I
+
+1425
+01:07:31,160 --> 01:07:33,480
+think what would happen if a monitor was
+
+1426
+01:07:33,480 --> 01:07:35,880
+misbehaving in almost any way like not
+
+1427
+01:07:35,880 --> 01:07:37,800
+answering requests if it was doing
+
+1428
+01:07:37,800 --> 01:07:41,460
+consistently people notice and either
+
+1429
+01:07:41,460 --> 01:07:43,859
+ask them to shape up or take them out of
+
+1430
+01:07:43,859 --> 01:07:44,339
+the list
+
+1431
+01:07:44,339 --> 01:07:46,410
+stop using them the browser vendors
+
+1432
+01:07:46,410 --> 01:07:48,690
+would take that logs her out of a list
+
+1433
+01:07:48,690 --> 01:07:50,760
+of acceptable log servers after a while
+
+1434
+01:07:50,760 --> 01:07:53,880
+but yeah there's like a gray area of bad
+
+1435
+01:07:53,880 --> 01:07:56,190
+behavior that's not bad enough to the
+
+1436
+01:07:56,190 --> 01:07:57,299
+warrant being taken out of the
+
+1437
+01:07:57,299 --> 01:08:00,630
+acceptable list I think of a log server
+
+1438
+01:08:00,630 --> 01:08:01,980
+has been found to work the question is
+
+1439
+01:08:01,980 --> 01:08:03,180
+what if the log server has been found
+
+1440
+01:08:03,180 --> 01:08:07,650
+before what happens then I think I think
+
+1441
+01:08:07,650 --> 01:08:09,030
+what would happen is the people who were
+
+1442
+01:08:09,030 --> 01:08:11,760
+run you know the people who the browser
+
+1443
+01:08:11,760 --> 01:08:15,720
+vendors would talk to the log server and
+
+1444
+01:08:15,720 --> 01:08:17,100
+ask them the people running the log
+
+1445
+01:08:17,100 --> 01:08:19,979
+server and ask them what happened and if
+
+1446
+01:08:19,979 --> 01:08:21,029
+they came up with a convincing
+
+1447
+01:08:21,029 --> 01:08:22,410
+explanation that they didn't made a
+
+1448
+01:08:22,410 --> 01:08:24,929
+mistake you know which maybe they
+
+1449
+01:08:24,929 --> 01:08:26,729
+couldn't maybe I don't know they their
+
+1450
+01:08:26,729 --> 01:08:28,620
+machine crashes it loses part of their
+
+1451
+01:08:28,620 --> 01:08:31,469
+log they restart you know starting from
+
+1452
+01:08:31,469 --> 01:08:34,529
+a prefix of the log and start growing a
+
+1453
+01:08:34,529 --> 01:08:37,830
+different log if it seems like a mistake
+
+1454
+01:08:37,830 --> 01:08:41,250
+honest mistake then well it was a
+
+1455
+01:08:41,250 --> 01:08:44,339
+mistake but if it if the log server
+
+1456
+01:08:44,339 --> 01:08:46,529
+operators can't provide a convincing
+
+1457
+01:08:46,529 --> 01:08:48,299
+explanation of what happened then I
+
+1458
+01:08:48,299 --> 01:08:49,859
+think the browser vendors would just
+
+1459
+01:08:49,859 --> 01:08:53,210
+delete them from the list of acceptable
+
+1460
+01:08:53,640 --> 01:09:02,600
+klog servers okay but these are you know
+
+1461
+01:09:02,600 --> 01:09:06,240
+these are sort of problems with the
+
+1462
+01:09:06,240 --> 01:09:09,330
+system because you can you know the
+
+1463
+01:09:09,330 --> 01:09:11,340
+definitions of like who owns a name or
+
+1464
+01:09:11,340 --> 01:09:13,020
+what acceptable but you know whether
+
+1465
+01:09:13,020 --> 01:09:14,729
+it's okay for your server to be down or
+
+1466
+01:09:14,729 --> 01:09:18,470
+not these are very hard to pin down
+
+1467
+01:09:18,470 --> 01:09:24,720
+properties you know I think the system
+
+1468
+01:09:24,720 --> 01:09:26,819
+is not full you could definitely get
+
+1469
+01:09:26,819 --> 01:09:28,500
+away with bad behavior at least for a
+
+1470
+01:09:28,500 --> 01:09:32,220
+while but the hope is that there's
+
+1471
+01:09:32,220 --> 01:09:35,990
+strong enough auditing here that if some
+
+1472
+01:09:35,990 --> 01:09:39,090
+certificate authority or log server was
+
+1473
+01:09:39,090 --> 01:09:42,840
+persistently badly behaved that people
+
+1474
+01:09:42,840 --> 01:09:44,220
+would notice the monitors would notice
+
+1475
+01:09:44,220 --> 01:09:45,720
+they may not do anything for a while but
+
+1476
+01:09:45,720 --> 01:09:50,040
+eventually they would decide that you
+
+1477
+01:09:50,040 --> 01:09:52,200
+know you're either too much of a pain or
+
+1478
+01:09:52,200 --> 01:09:54,229
+to malicious to be part of the system
+
+1479
+01:09:54,229 --> 01:09:58,440
+and delete you from the browser lists of
+
+1480
+01:09:58,440 --> 01:09:59,910
+course they split the browser vendors in
+
+1481
+01:09:59,910 --> 01:10:03,060
+a position of quite strong power so Wow
+
+1482
+01:10:03,060 --> 01:10:04,320
+the system is in general pretty
+
+1483
+01:10:04,320 --> 01:10:06,150
+decentralized yeah there can be lots of
+
+1484
+01:10:06,150 --> 01:10:08,270
+certificate authorities and lots of
+
+1485
+01:10:08,270 --> 01:10:10,470
+certificate transparency log servers
+
+1486
+01:10:10,470 --> 01:10:12,540
+there's only a handful of browser
+
+1487
+01:10:12,540 --> 01:10:15,450
+vendors and that there because they
+
+1488
+01:10:15,450 --> 01:10:17,880
+maintain the lists of acceptable
+
+1489
+01:10:17,880 --> 01:10:21,900
+certificate authorities and log servers
+
+1490
+01:10:21,900 --> 01:10:26,390
+they do have a lot of power and you know
+
+1491
+01:10:26,390 --> 01:10:31,110
+it's the way it is unfortunately okay so
+
+1492
+01:10:31,110 --> 01:10:35,490
+things to take away from a certificate
+
+1493
+01:10:35,490 --> 01:10:38,100
+transparency design so one thing is the
+
+1494
+01:10:38,100 --> 01:10:40,680
+key property it has super important is
+
+1495
+01:10:40,680 --> 01:10:43,850
+just that everyone sees the same log
+
+1496
+01:10:43,850 --> 01:10:46,170
+even if some of the parties are
+
+1497
+01:10:46,170 --> 01:10:48,420
+malicious either everyone sees the same
+
+1498
+01:10:48,420 --> 01:10:50,190
+long or they can accumulate evidence
+
+1499
+01:10:50,190 --> 01:10:53,310
+from failed proofs that something's
+
+1500
+01:10:53,310 --> 01:10:55,080
+funny is going on and because both
+
+1501
+01:10:55,080 --> 01:10:56,280
+browsers who are using those
+
+1502
+01:10:56,280 --> 01:10:59,280
+certificates and the owners of the DNS
+
+1503
+01:10:59,280 --> 01:11:01,830
+names who are running monitors see the
+
+1504
+01:11:01,830 --> 01:11:05,949
+same log because of these proofs
+
+1505
+01:11:05,949 --> 01:11:08,530
+the monitors can detect problems and
+
+1506
+01:11:08,530 --> 01:11:10,060
+therefore the browser's even though the
+
+1507
+01:11:10,060 --> 01:11:11,860
+browsers can't actually detect bogus
+
+1508
+01:11:11,860 --> 01:11:13,390
+certificates they can at least be
+
+1509
+01:11:13,390 --> 01:11:14,980
+confident that there if there's bogus
+
+1510
+01:11:14,980 --> 01:11:16,570
+certificates out there that monitors
+
+1511
+01:11:16,570 --> 01:11:19,510
+will detect them and possibly put them
+
+1512
+01:11:19,510 --> 01:11:20,800
+on revocation lists actually that's
+
+1513
+01:11:20,800 --> 01:11:23,830
+something I didn't mention if if there's
+
+1514
+01:11:23,830 --> 01:11:26,620
+evidence of a monitor spots what must be
+
+1515
+01:11:26,620 --> 01:11:29,199
+a bogus certificate like MIT sees
+
+1516
+01:11:29,199 --> 01:11:32,260
+somebody they don't know about being
+
+1517
+01:11:32,260 --> 01:11:34,870
+issued a certificate for MIT did you it
+
+1518
+01:11:34,870 --> 01:11:35,940
+turns out there's a pre-existing
+
+1519
+01:11:35,940 --> 01:11:38,739
+revocation service that you can put bad
+
+1520
+01:11:38,739 --> 01:11:41,469
+certificates on that the browser's check
+
+1521
+01:11:41,469 --> 01:11:44,410
+so if a monitor sees a bogus certificate
+
+1522
+01:11:44,410 --> 01:11:46,179
+it can actually be effectively disabled
+
+1523
+01:11:46,179 --> 01:11:49,350
+by putting it on in the revocation
+
+1524
+01:11:49,350 --> 01:11:51,880
+certificate revocation system that's not
+
+1525
+01:11:51,880 --> 01:11:53,440
+part of certificate transparency it's
+
+1526
+01:11:53,440 --> 01:11:57,219
+been around for a long time okay so the
+
+1527
+01:11:57,219 --> 01:11:58,600
+key property is everyone sees the same
+
+1528
+01:11:58,600 --> 01:12:02,590
+log of certificates another thing to
+
+1529
+01:12:02,590 --> 01:12:04,840
+take away from this is that if you can't
+
+1530
+01:12:04,840 --> 01:12:07,380
+figure out a way to prevent bad behavior
+
+1531
+01:12:07,380 --> 01:12:10,260
+maybe you can build something these
+
+1532
+01:12:10,260 --> 01:12:13,989
+usable that relies on auditing instead
+
+1533
+01:12:13,989 --> 01:12:16,300
+of preventing that is can detect bad
+
+1534
+01:12:16,300 --> 01:12:19,330
+things after the fact that might be good
+
+1535
+01:12:19,330 --> 01:12:21,190
+enough it's often much easier than
+
+1536
+01:12:21,190 --> 01:12:24,210
+preventing the bad things some technical
+
+1537
+01:12:24,210 --> 01:12:27,040
+ideas are here in this this work one is
+
+1538
+01:12:27,040 --> 01:12:30,040
+this idea of equivocation that I'm a big
+
+1539
+01:12:30,040 --> 01:12:33,400
+danger is the possibility that a
+
+1540
+01:12:33,400 --> 01:12:35,170
+malicious server will sort of provide
+
+1541
+01:12:35,170 --> 01:12:38,590
+split views one viewed one set of people
+
+1542
+01:12:38,590 --> 01:12:39,969
+another view to another set of people
+
+1543
+01:12:39,969 --> 01:12:42,070
+it's usually called a fork or
+
+1544
+01:12:42,070 --> 01:12:43,870
+equivocation it's an important kind of
+
+1545
+01:12:43,870 --> 01:12:46,570
+attack another property this for
+
+1546
+01:12:46,570 --> 01:12:48,160
+consistency property it turns out it's
+
+1547
+01:12:48,160 --> 01:12:50,199
+often valuable to when you're worried
+
+1548
+01:12:50,199 --> 01:12:52,330
+about Forks to build a system that
+
+1549
+01:12:52,330 --> 01:12:55,780
+forces the malicious server once it has
+
+1550
+01:12:55,780 --> 01:12:57,670
+formed somebody to keep them on that
+
+1551
+01:12:57,670 --> 01:13:00,460
+fork so it can't erase evidence by
+
+1552
+01:13:00,460 --> 01:13:03,699
+erasing a fork I'm the final technical
+
+1553
+01:13:03,699 --> 01:13:06,940
+trick is the notion of gossiping in
+
+1554
+01:13:06,940 --> 01:13:08,710
+order to detect for because it's
+
+1555
+01:13:08,710 --> 01:13:10,600
+actually gen if the participants don't
+
+1556
+01:13:10,600 --> 01:13:13,210
+communicate with each other it's
+
+1557
+01:13:13,210 --> 01:13:14,650
+actually typically not possible to
+
+1558
+01:13:14,650 --> 01:13:17,140
+notice that there has been a fork so if
+
+1559
+01:13:17,140 --> 01:13:18,580
+you want to detect Forks there has to be
+
+1560
+01:13:18,580 --> 01:13:19,870
+one way or another
+
+1561
+01:13:19,870 --> 01:13:22,020
+some kind of gossip some kind of
+
+1562
+01:13:22,020 --> 01:13:23,830
+communication between the parties so
+
+1563
+01:13:23,830 --> 01:13:26,310
+they can compare notes and detect forks
+
+1564
+01:13:26,310 --> 01:13:30,990
+and we'll see most of these things again
+
+1565
+01:13:30,990 --> 01:13:36,810
+next week when we look at Bitcoin and
+
+1566
+01:13:36,810 --> 01:13:40,710
+that's all I had to say
+

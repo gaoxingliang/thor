@@ -5,6 +5,9 @@
 视频地址:
 - [LEC 13 Spanner](https://www.bilibili.com/video/BV1Se4y1a7az/)
 - [LEC 17 COPS](https://www.bilibili.com/video/BV12P411F77i/)
+- LEC 18 Fork consistency
+- LEC 19 BitCoin
+- LEC 20 Blockstack
 
 
 # 其他
