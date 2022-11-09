@@ -3,18 +3,15 @@
 
 # UPDATES
 视频地址:
-- [LEC 13 Spanner](https://www.bilibili.com/video/BV1Se4y1a7az/)
-- [LEC 17 COPS](https://www.bilibili.com/video/BV12P411F77i/)
-- LEC 18 Fork consistency
-- LEC 19 BitCoin
-- LEC 20 Blockstack
+[B站合集地址](https://space.bilibili.com/11615329/channel/seriesdetail?sid=2759504&ctype=0) <br>
+[阿里云盘地址](https://www.aliyundrive.com/s/3bWXxeS5ri2)
 
 
 # 其他
 可能还需要fixsrt.py中对在线生成的srt做修改.<br>
 
 # 字幕翻译错误请提PR.
-现在是机翻的但是英语应该错误不多.
+现在是机翻的但是英语应该错误不多. 部分我在慢慢修改中.
 
 ----------------原有README------------------------
 # thor
