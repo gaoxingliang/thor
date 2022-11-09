@@ -108,7 +108,7 @@ workloads tend to be read dominated and
 
 28
 00:01:43,060 --> 00:01:45,680
-you know you'd like rights to work and
+you know you'd like writes to work and
 
 29
 00:01:45,680 --> 00:01:47,479
@@ -152,7 +152,7 @@ is that the reason these happen locally
 
 39
 00:02:11,800 --> 00:02:14,420
-and rights might be little more
+and writes might be little more
 
 40
 00:02:14,420 --> 00:02:18,470
@@ -164,7 +164,7 @@ pattern is spanner you remember that a
 
 42
 00:02:22,790 --> 00:02:24,890
-spanner and spanner rights involved
+spanner and spanner writes involved
 
 43
 00:02:24,890 --> 00:02:27,560
@@ -196,7 +196,7 @@ to at least a majority of the other data
 
 50
 00:02:43,430 --> 00:02:45,319
-centers that are replicas so the rights
+centers that are replicas so the writes
 
 51
 00:02:45,319 --> 00:02:49,620
@@ -216,7 +216,7 @@ and the reads are much faster because
 
 55
 00:02:57,450 --> 00:03:01,019
-the breeze used a true time scheme that
+the reads used a true time scheme that
 
 56
 00:03:01,019 --> 00:03:04,709
@@ -244,11 +244,11 @@ primary site that has the primary set of
 
 62
 00:03:18,720 --> 00:03:21,060
-my sequel databases so if a client wants
+MYSQL databases so if a client wants
 
 63
 00:03:21,060 --> 00:03:23,640
-to do a right I suppose the primary side
+to do a write I suppose the primary side
 
 64
 00:03:23,640 --> 00:03:25,140
@@ -256,7 +256,7 @@ this data center 3 does to send all
 
 65
 00:03:25,140 --> 00:03:27,750
-rights to data center 3 and then data
+writes to data center 3 and then data
 
 66
 00:03:27,750 --> 00:03:30,540
@@ -268,7 +268,7 @@ validations to the other data centers
 
 68
 00:03:32,129 --> 00:03:33,750
-right so actually a little bit expensive
+write so actually a little bit expensive
 
 69
 00:03:33,750 --> 00:03:38,810
@@ -308,7 +308,7 @@ second which is very fast so again the
 
 78
 00:03:59,430 --> 00:04:02,700
-Facebook memcache D scheme needs to
+Facebook memcached scheme needs to
 
 79
 00:04:02,700 --> 00:04:04,079
@@ -316,7 +316,7 @@ involve cross data center of
 
 80
 00:04:04,079 --> 00:04:06,450
-communication for rights but the reads
+communication for writes but the reads
 
 81
 00:04:06,450 --> 00:04:09,930
@@ -332,7 +332,7 @@ answering is whether we can have a
 
 84
 00:04:12,750 --> 00:04:16,880
-system that allows rights to pursue
+system that allows writes to pursue
 
 85
 00:04:16,880 --> 00:04:19,260
@@ -344,11 +344,11 @@ point of views that the client can talk
 
 87
 00:04:21,060 --> 00:04:22,680
-to the from once it were right they can
+to the from once it were write they can
 
 88
 00:04:22,680 --> 00:04:26,729
-send the right local replica in its own
+send the write local replica in its own
 
 89
 00:04:26,729 --> 00:04:28,800
@@ -368,7 +368,7 @@ have to talk to other data centers or
 
 93
 00:04:34,770 --> 00:04:38,039
-wait for other data centers to do rights
+wait for other data centers to do writes
 
 94
 00:04:38,039 --> 00:04:40,830
@@ -376,7 +376,7 @@ so what we really want is a system that
 
 95
 00:04:40,830 --> 00:04:47,780
-can have local reads and local rights
+can have local reads and local writes
 
 96
 00:04:48,440 --> 00:04:50,940
@@ -396,7 +396,7 @@ unlike spanner and Facebook paper we had
 
 100
 00:04:59,040 --> 00:05:00,690
-a purely local rights be much faster
+a purely local writes be much faster
 
 101
 00:05:00,690 --> 00:05:04,200
@@ -408,7 +408,7 @@ might also help with fault tolerance
 
 103
 00:05:05,700 --> 00:05:08,160
-robustness if rights can be done locally
+robustness if writes can be done locally
 
 104
 00:05:08,160 --> 00:05:09,540
@@ -448,7 +448,7 @@ we're going to be worried about
 
 113
 00:05:28,470 --> 00:05:29,880
-consistency if you only do the rights
+consistency if you only do the writes
 
 114
 00:05:29,880 --> 00:05:31,980
@@ -504,7 +504,7 @@ strategy I'm gonna actually talk about
 
 127
 00:05:56,790 --> 00:06:02,040
-two strawman designs to sort of okay but
+two straw man designs to sort of okay but
 
 128
 00:06:02,040 --> 00:06:05,700
@@ -588,7 +588,7 @@ the client immediately saying oh yes I
 
 148
 00:07:17,490 --> 00:07:22,200
-did you're right but in addition each
+did you're write but in addition each
 
 149
 00:07:22,200 --> 00:07:26,360
@@ -596,7 +596,7 @@ server will maintain a queue of
 
 150
 00:07:26,360 --> 00:07:29,010
-outstanding rights that have been sent
+outstanding writes that have been sent
 
 151
 00:07:29,010 --> 00:07:30,660
@@ -608,7 +608,7 @@ to send to other data centers and it
 
 153
 00:07:32,190 --> 00:07:34,229
-will stream these rights asynchronously
+will stream these writes asynchronously
 
 154
 00:07:34,229 --> 00:07:38,100
@@ -628,11 +628,11 @@ server here will send a copy of the
 
 158
 00:07:45,810 --> 00:07:48,960
-clients right to each of the other data
+clients write to each of the other data
 
 159
 00:07:48,960 --> 00:07:52,169
-setups and you know those rights go
+setups and you know those writes go
 
 160
 00:07:52,169 --> 00:07:53,250
@@ -652,7 +652,7 @@ data centers and each of those shard
 
 164
 00:07:58,950 --> 00:08:00,930
-servers will then apply the right to its
+servers will then apply the writes to its
 
 165
 00:08:00,930 --> 00:08:07,340
@@ -660,11 +660,11 @@ local table of data so this is a design
 
 166
 00:08:07,340 --> 00:08:10,560
-that has very good performance right the
+that has very good performance write the
 
 167
 00:08:10,560 --> 00:08:12,750
-reason rights are all done locally may
+reason writes are all done locally may
 
 168
 00:08:12,750 --> 00:08:13,979
@@ -688,7 +688,7 @@ opportunity independently if the shard
 
 173
 00:08:22,710 --> 00:08:24,270
-server for a gets right you know it has
+server for a gets write you know it has
 
 174
 00:08:24,270 --> 00:08:27,120
@@ -732,11 +732,11 @@ really never have any impact beyond the
 
 184
 00:08:50,290 --> 00:08:52,150
-local data center the rights though do a
+local data center the writes though do a
 
 185
 00:08:52,150 --> 00:08:53,680
-bit of work whenever you do a right you
+bit of work whenever you do a write you
 
 186
 00:08:53,680 --> 00:08:54,820
@@ -748,7 +748,7 @@ it but the shard server then has to push
 
 188
 00:08:57,010 --> 00:08:59,320
-the rights out to the other data centers
+the writes out to the other data centers
 
 189
 00:08:59,320 --> 00:09:01,810
@@ -764,7 +764,7 @@ quickly so reads involve less work than
 
 192
 00:09:06,490 --> 00:09:09,040
-rights and that's appropriate for a read
+writes and that's appropriate for a read
 
 193
 00:09:09,040 --> 00:09:12,640
@@ -772,7 +772,7 @@ heavy workload if you are more worried
 
 194
 00:09:12,640 --> 00:09:14,470
-about rate performance you could imagine
+about write performance you could imagine
 
 195
 00:09:14,470 --> 00:09:16,420
@@ -788,7 +788,7 @@ have to consult multiple data centers
 
 198
 00:09:19,810 --> 00:09:22,360
-and rights are purely local so you can
+and writes are purely local so you can
 
 199
 00:09:22,360 --> 00:09:23,830
@@ -816,7 +816,7 @@ one that's most recent perhaps and then
 
 205
 00:09:34,990 --> 00:09:37,390
-rights are very cheap and breeds are
+writes are very cheap and reads are
 
 206
 00:09:37,390 --> 00:09:38,430
@@ -876,7 +876,7 @@ source
 
 220
 00:10:11,730 --> 00:10:14,410
-Kassandra system
+Cassandra system
 
 221
 00:10:14,410 --> 00:10:17,660
@@ -908,7 +908,7 @@ write other readers and other data
 
 228
 00:10:43,760 --> 00:10:46,360
-centers are not guaranteed EC or right
+centers are not guaranteed to see your write
 
 229
 00:10:46,360 --> 00:10:48,890
@@ -916,7 +916,7 @@ but they will someday because you're
 
 230
 00:10:48,890 --> 00:10:50,180
-pushing out the rights so they'll
+pushing out the writes so they'll
 
 231
 00:10:50,180 --> 00:10:53,180
@@ -940,15 +940,15 @@ starting with a sure you know M sends
 
 236
 00:11:03,980 --> 00:11:07,100
-out it's my right to shards of a rim
+out it's my write to shards of a rim
 
 237
 00:11:07,100 --> 00:11:09,440
-sends out one right and the server for a
+sends out one write and the server for a
 
 238
 00:11:09,440 --> 00:11:12,560
-sends out my right for a but you know
+sends out my write for a but you know
 
 239
 00:11:12,560 --> 00:11:14,240
@@ -1220,7 +1220,7 @@ the photo to my list
 
 306
 00:14:22,770 --> 00:14:25,980
-right that's what my my clients code
+write that's what my my clients code
 
 307
 00:14:25,980 --> 00:14:28,020
@@ -1340,7 +1340,7 @@ the list this photo may not exist yet
 
 336
 00:15:44,490 --> 00:15:47,550
-because the first right may not have
+because the first write may not have
 
 337
 00:15:47,550 --> 00:15:50,670
@@ -1552,7 +1552,7 @@ consistency system and that's how to
 
 389
 00:18:02,860 --> 00:18:07,830
-decide on which right is most recent so
+decide on which write is most recent so
 
 390
 00:18:07,830 --> 00:18:12,309
@@ -1576,7 +1576,7 @@ suppose we have some key or call okay
 
 395
 00:18:27,320 --> 00:18:32,420
-and to rights for it you know to clients
+and to writes for it you know to clients
 
 396
 00:18:32,420 --> 00:18:35,120
@@ -1616,7 +1616,7 @@ the same data so you know data center
 
 405
 00:18:58,520 --> 00:19:01,130
-three is gonna get these two rights and
+three is gonna get these two writes and
 
 406
 00:19:01,130 --> 00:19:02,510
@@ -1628,11 +1628,11 @@ value for K well of course um datacenter
 
 408
 00:19:06,110 --> 00:19:08,090
-- sees the same rights right it sees its
+- sees the same writes write it sees its
 
 409
 00:19:08,090 --> 00:19:13,460
-own right so they're all seeing this
+own write so they're all seeing this
 
 410
 00:19:13,460 --> 00:19:14,810
@@ -1648,7 +1648,7 @@ be the final value regardless and the
 
 413
 00:19:20,780 --> 00:19:22,970
-order that they arrived in right because
+order that they arrived in write because
 
 414
 00:19:22,970 --> 00:19:26,150
@@ -1720,7 +1720,7 @@ the current time oh it's you know it's
 
 431
 00:20:12,250 --> 00:20:15,320
-125 right now and it'll sort of
+125 write now and it'll sort of
 
 432
 00:20:15,320 --> 00:20:17,740
@@ -1752,7 +1752,7 @@ the time so you know maybe this one was
 
 439
 00:20:35,360 --> 00:20:37,970
-written at 102 and this right occurred
+written at 102 and this write occurred
 
 440
 00:20:37,970 --> 00:20:40,390
@@ -1764,7 +1764,7 @@ and so if if 102 writer or suppose the
 
 442
 00:20:47,409 --> 00:20:49,269
-one of three right arrives first then
+one of three write arrives first then
 
 443
 00:20:49,269 --> 00:20:51,279
@@ -1780,7 +1780,7 @@ two three
 
 446
 00:20:56,909 --> 00:21:00,070
-and when the right for 102 arrives the
+and when the write for 102 arrives the
 
 447
 00:21:00,070 --> 00:21:01,350
@@ -1788,11 +1788,11 @@ standard Center will say oh actually
 
 448
 00:21:01,350 --> 00:21:04,269
-that's an older right I'm just gonna
+that's an older write I'm just gonna
 
 449
 00:21:04,269 --> 00:21:05,889
-ignore this right because it has a lower
+ignore this write because it has a lower
 
 450
 00:21:05,889 --> 00:21:08,019
@@ -1808,11 +1808,11 @@ the other order did a sentence we would
 
 453
 00:21:11,919 --> 00:21:13,389
-have actually stored this right briefly
+have actually stored this write briefly
 
 454
 00:21:13,389 --> 00:21:16,239
-until the right with the higher
+until the write with the higher
 
 455
 00:21:16,239 --> 00:21:17,499
@@ -1908,7 +1908,7 @@ different servers to be you want and
 
 478
 00:22:22,239 --> 00:22:23,889
-then if two rights ride with the same
+then if two writes ride with the same
 
 479
 00:22:23,889 --> 00:22:26,230
@@ -1924,7 +1924,7 @@ these little bits will be used to
 
 482
 00:22:30,009 --> 00:22:33,549
-disambiguate which of the two right says
+disambiguate which of the two write says
 
 483
 00:22:33,549 --> 00:22:36,340
@@ -1992,7 +1992,7 @@ serious problem here one not so
 
 499
 00:23:16,899 --> 00:23:23,409
-important problem is that rights that
+important problem is that writes that
 
 500
 00:23:23,409 --> 00:23:26,710
@@ -2000,11 +2000,11 @@ come earlier in time you know that
 
 501
 00:23:26,710 --> 00:23:28,419
-should be overwritten by later right so
+should be overwritten by later write so
 
 502
 00:23:28,419 --> 00:23:30,879
-it could be the rights that came earlier
+it could be the writes that came earlier
 
 503
 00:23:30,879 --> 00:23:33,279
@@ -2016,7 +2016,7 @@ on are assigned high time stamps and
 
 505
 00:23:35,710 --> 00:23:38,440
-therefore not superseded by rights that
+therefore not superseded by writes that
 
 506
 00:23:38,440 --> 00:23:43,480
@@ -2028,7 +2028,7 @@ guarantees about this ID eventual
 
 508
 00:23:45,580 --> 00:23:49,359
-consistency and we never said oh rights
+consistency and we never said oh writes
 
 509
 00:23:49,359 --> 00:23:51,720
@@ -2036,7 +2036,7 @@ that come later in time we're gonna win
 
 510
 00:23:51,720 --> 00:23:58,409
-over rightfully the clients nevertheless
+over writefully the clients nevertheless
 
 511
 00:23:58,409 --> 00:24:02,889
@@ -2076,7 +2076,7 @@ in addition if some servers clock is too
 
 520
 00:24:23,830 --> 00:24:26,169
-high and it doesn't right you know if
+high and it doesn't write you know if
 
 521
 00:24:26,169 --> 00:24:29,019
@@ -2448,7 +2448,7 @@ the counter with value 10 they both had
 
 613
 00:29:27,809 --> 00:29:30,720
-one and maybe we've put 11 right and but
+one and maybe we've put 11 write and but
 
 614
 00:29:30,720 --> 00:29:32,130
@@ -2652,7 +2652,7 @@ into a situation where you might have
 
 664
 00:31:45,740 --> 00:31:47,730
-conflicting rights to the same data that
+conflicting writes to the same data that
 
 665
 00:31:47,730 --> 00:31:50,090
@@ -2744,7 +2744,7 @@ still allows local reads and local
 
 687
 00:32:52,800 --> 00:32:59,040
-rights but is has slightly mini-lesson
+writes but is has slightly mini-lesson
 
 688
 00:32:59,040 --> 00:33:03,290
@@ -2904,7 +2904,7 @@ say no it's got to then read that data
 
 727
 00:35:10,130 --> 00:35:13,270
-yes all right so how would you use this
+yes all write so how would you use this
 
 728
 00:35:13,270 --> 00:35:16,670
@@ -3036,7 +3036,7 @@ means the client one now given the way
 
 760
 00:36:54,290 --> 00:36:56,210
-this code works right had already called
+this code works write had already called
 
 761
 00:36:56,210 --> 00:36:58,580
@@ -3108,7 +3108,7 @@ put in order for things to work out
 
 778
 00:37:45,770 --> 00:37:48,290
-right the reader for the readers much
+write the reader for the readers much
 
 779
 00:37:48,290 --> 00:37:50,330
@@ -3248,7 +3248,7 @@ other data centers brought up
 
 813
 00:39:10,590 --> 00:39:12,870
-that's absolutely right so you're
+that's absolutely write so you're
 
 814
 00:39:12,870 --> 00:39:16,680
@@ -3400,7 +3400,7 @@ Facebook memcache D paper has to send
 
 851
 00:41:01,230 --> 00:41:02,910
-all rights through the primary data
+all writes through the primary data
 
 852
 00:41:02,910 --> 00:41:04,470
@@ -3432,7 +3432,7 @@ for a majority of replica sites to
 
 859
 00:41:18,119 --> 00:41:19,530
-acknowledge the rights before the
+acknowledge the writes before the
 
 860
 00:41:19,530 --> 00:41:21,630
@@ -3444,7 +3444,7 @@ that clients might have dis rule that
 
 862
 00:41:23,280 --> 00:41:25,859
-the rights might have to wait to talk to
+the writes might have to wait to talk to
 
 863
 00:41:25,859 --> 00:41:27,359
@@ -3564,7 +3564,7 @@ the other data center so that means if a
 
 892
 00:42:52,400 --> 00:42:56,300
-client does it right does it put to its
+client does it write does it put to its
 
 893
 00:42:56,300 --> 00:42:59,000
@@ -3584,7 +3584,7 @@ centers will talk to his local log
 
 897
 00:43:07,010 --> 00:43:11,900
-server and append the right to the one
+server and append the write to the one
 
 898
 00:43:11,900 --> 00:43:13,280
@@ -3608,7 +3608,7 @@ instead of again instead of this shard
 
 903
 00:43:25,520 --> 00:43:27,350
-server sending the right to key B sort
+server sending the write to key B sort
 
 904
 00:43:27,350 --> 00:43:31,010
@@ -3616,7 +3616,7 @@ of independently it's gonna tell the
 
 905
 00:43:31,010 --> 00:43:34,220
-local log server to append the right to
+local log server to append the write to
 
 906
 00:43:34,220 --> 00:43:37,280
@@ -3632,7 +3632,7 @@ log order so that all data centers are
 
 909
 00:43:45,080 --> 00:43:46,910
-guaranteed to see the right to a first
+guaranteed to see the write to a first
 
 910
 00:43:46,910 --> 00:43:49,400
@@ -3644,15 +3644,15 @@ to a first and then all data centers are
 
 912
 00:43:52,430 --> 00:43:53,630
-going to see our right to B and that
+going to see our write to B and that
 
 913
 00:43:53,630 --> 00:43:54,920
-means if a client does a right to a
+means if a client does a write to a
 
 914
 00:43:54,920 --> 00:43:57,950
-first and then does it right to be the
+first and then does it write to be the
 
 915
 00:43:57,950 --> 00:43:59,630
@@ -3664,7 +3664,7 @@ in its log a and B and they'll be sent
 
 917
 00:44:01,640 --> 00:44:04,160
-the right to a first and then the right
+the write to a first and then the write
 
 918
 00:44:04,160 --> 00:44:06,200
@@ -3756,7 +3756,7 @@ forcing ordered writes and we're causing
 
 940
 00:45:05,810 --> 00:45:08,180
-the rights to show up in order at the
+the writes to show up in order at the
 
 941
 00:45:08,180 --> 00:45:09,530
@@ -3784,7 +3784,7 @@ about this style of solution is that the
 
 947
 00:45:24,170 --> 00:45:26,690
-log server now all the rights have to go
+log server now all the writes have to go
 
 948
 00:45:26,690 --> 00:45:29,420
@@ -3804,7 +3804,7 @@ total a reasonably high workload the
 
 952
 00:45:37,010 --> 00:45:39,200
-right workload all the rights have to go
+write workload all the writes have to go
 
 953
 00:45:39,200 --> 00:45:42,080
@@ -3812,7 +3812,7 @@ through this log server and possibly all
 
 954
 00:45:42,080 --> 00:45:45,170
-the rights have to be played out through
+the writes have to be played out through
 
 955
 00:45:45,170 --> 00:45:47,960
@@ -4408,7 +4408,7 @@ these dependencies
 
 1103
 00:54:13,090 --> 00:54:19,960
-XV 2 + a YB 4 right and this is sent
+XV 2 + a YB 4 write and this is sent
 
 1104
 00:54:19,960 --> 00:54:22,630
@@ -4488,11 +4488,11 @@ datacenter 3 so that means that the
 
 1123
 00:55:24,640 --> 00:55:27,070
-shard server visi must hold this right
+shard server visi must hold this write
 
 1124
 00:55:27,070 --> 00:55:30,010
-must delay applying this right to Z
+must delay applying this write to Z
 
 1125
 00:55:30,010 --> 00:55:33,370
@@ -5048,7 +5048,7 @@ was you know the client never has to
 
 1263
 01:02:12,590 --> 01:02:14,300
-wait for rights to complete there's none
+wait for writes to complete there's none
 
 1264
 01:02:14,300 --> 01:02:16,220
@@ -5688,7 +5688,7 @@ then when if the client then does this
 
 1423
 01:10:16,400 --> 01:10:18,710
-put right what this turns into is sent
+put write what this turns into is sent
 
 1424
 01:10:18,710 --> 01:10:20,990
@@ -5796,7 +5796,7 @@ put
 
 1450
 01:11:27,269 --> 01:11:32,079
-all right a final thing to note about
+all write a final thing to note about
 
 1451
 01:11:32,079 --> 01:11:36,999
@@ -5900,7 +5900,7 @@ information why don't you go look at it
 
 1476
 01:12:48,550 --> 01:12:52,090
-right and then client to you know does
+write and then client to you know does
 
 1477
 01:12:52,090 --> 01:12:57,519
@@ -5944,7 +5944,7 @@ telephone call had been itself a put
 
 1487
 01:13:28,840 --> 01:13:31,340
-right you know it would have been a put
+write you know it would have been a put
 
 1488
 01:13:31,340 --> 01:13:33,380
@@ -6040,7 +6040,7 @@ their belief was caused by something
 
 1511
 01:14:32,990 --> 01:14:41,290
-that cops wasn't aware of all right
+that cops wasn't aware of all write
 
 1512
 01:14:41,290 --> 01:14:46,040
@@ -6208,7 +6208,7 @@ client Reesie access control list and
 
 1553
 01:16:38,630 --> 01:16:40,880
-sees that I'm on the list but then right
+sees that I'm on the list but then write
 
 1554
 01:16:40,880 --> 01:16:44,060
@@ -6228,7 +6228,7 @@ not supposed to see in the list list
 
 1558
 01:16:51,760 --> 01:16:56,740
-right so c2 does a you know a port of
+write so c2 does a you know a port of
 
 1559
 01:16:56,740 --> 01:16:59,660
@@ -6368,7 +6368,7 @@ myself in the list so again if we do it
 
 1593
 01:18:22,230 --> 01:18:23,520
-in this order it's also not right
+in this order it's also not write
 
 1594
 01:18:23,520 --> 01:18:28,110
