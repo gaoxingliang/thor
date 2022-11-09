@@ -1,3 +1,19 @@
+# Why?
+原始的视频资源后续的lecture没有字幕更新了.
+
+# UPDATES
+视频地址:
+- [LEC 13 Spanner](https://www.bilibili.com/video/BV1Se4y1a7az/)
+- [LEC 17 COPS](https://www.bilibili.com/video/BV12P411F77i/)
+
+
+# 其他
+可能还需要fixsrt.py中对在线生成的srt做修改.<br>
+
+# 字幕翻译错误请提PR.
+现在是机翻的但是英语应该错误不多.
+
+----------------原有README------------------------
 # thor
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
 [![All Contributors](https://img.shields.io/badge/all_contributors-8-orange.svg?style=flat-square)](#contributors-)

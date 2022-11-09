@@ -1,0 +1,6820 @@
+1
+00:00:02,689 --> 00:00:09,319
+alright hello everyone let's get started
+
+2
+00:00:10,849 --> 00:00:14,900
+today the topic is causal consistency
+
+3
+00:00:14,900 --> 00:00:20,910
+and then use the cop system the cop's
+
+4
+00:00:20,910 --> 00:00:23,310
+paper that we're every day is a case
+
+5
+00:00:23,310 --> 00:00:26,099
+study for causal consistency so the
+
+6
+00:00:26,099 --> 00:00:30,570
+setting is actually familiar we're
+
+7
+00:00:30,570 --> 00:00:35,850
+talking again about big websites that
+
+8
+00:00:35,850 --> 00:00:39,469
+have data in multiple data centers and
+
+9
+00:00:39,469 --> 00:00:42,120
+they want to replicate the data in each
+
+10
+00:00:42,120 --> 00:00:43,770
+of their all their data in each their
+
+11
+00:00:43,770 --> 00:00:45,750
+data centers have to keep a copy close
+
+12
+00:00:45,750 --> 00:00:50,700
+to users and for perhaps for fault
+
+13
+00:00:50,700 --> 00:00:55,020
+tolerance so as usual we have maybe I'll
+
+14
+00:00:55,020 --> 00:00:59,600
+have three data centers
+
+15
+00:01:02,630 --> 00:01:04,340
+and you know because we're building big
+
+16
+00:01:04,340 --> 00:01:05,690
+systems we're going to shard the data
+
+17
+00:01:05,690 --> 00:01:07,280
+and every data center is going to have
+
+18
+00:01:07,280 --> 00:01:09,380
+multiple servers with you know maybe all
+
+19
+00:01:09,380 --> 00:01:12,710
+the keys that start with Z a through all
+
+20
+00:01:12,710 --> 00:01:14,570
+the custodian corresponding shards of
+
+21
+00:01:14,570 --> 00:01:29,300
+URLs we've seen this for and you know
+
+22
+00:01:29,300 --> 00:01:31,520
+the usual goals people have you know
+
+23
+00:01:31,520 --> 00:01:33,470
+there's many different designs for how
+
+24
+00:01:33,470 --> 00:01:34,820
+to make this work but you know you
+
+25
+00:01:34,820 --> 00:01:37,190
+really like reads to be certainly like
+
+26
+00:01:37,190 --> 00:01:39,080
+reads to be fast because these web
+
+27
+00:01:39,080 --> 00:01:43,060
+workloads tend to be read dominated and
+
+28
+00:01:43,060 --> 00:01:45,680
+you know you'd like rights to work and
+
+29
+00:01:45,680 --> 00:01:47,479
+you'd like to have us as much
+
+30
+00:01:47,479 --> 00:01:52,640
+consistency as you can so the fast
+
+31
+00:01:52,640 --> 00:01:53,780
+reasons are interesting because the
+
+32
+00:01:53,780 --> 00:01:55,970
+clients are typically web browsers so
+
+33
+00:01:55,970 --> 00:01:59,270
+and there's web going to be some set of
+
+34
+00:01:59,270 --> 00:02:03,020
+web browsers which all call clients the
+
+35
+00:02:03,020 --> 00:02:04,369
+clients the storage system but they're
+
+36
+00:02:04,369 --> 00:02:07,039
+really web browsers talking to a user's
+
+37
+00:02:07,039 --> 00:02:09,139
+browser some so the typical arrangement
+
+38
+00:02:09,139 --> 00:02:11,800
+is that the reason these happen locally
+
+39
+00:02:11,800 --> 00:02:14,420
+and rights might be little more
+
+40
+00:02:14,420 --> 00:02:18,470
+complicated so one system that fits this
+
+41
+00:02:18,470 --> 00:02:22,790
+pattern is spanner you remember that a
+
+42
+00:02:22,790 --> 00:02:24,890
+spanner and spanner rights involved
+
+43
+00:02:24,890 --> 00:02:27,560
+Paxos that runs across all the data
+
+44
+00:02:27,560 --> 00:02:29,800
+centers so if you do a write in paxos
+
+45
+00:02:29,800 --> 00:02:33,290
+maybe a client in a data center needs to
+
+46
+00:02:33,290 --> 00:02:35,959
+do a write the communication involve
+
+47
+00:02:35,959 --> 00:02:39,350
+actually need requires taxes maybe
+
+48
+00:02:39,350 --> 00:02:41,300
+running on one of these servers to talk
+
+49
+00:02:41,300 --> 00:02:43,430
+to at least a majority of the other data
+
+50
+00:02:43,430 --> 00:02:45,319
+centers that are replicas so the rights
+
+51
+00:02:45,319 --> 00:02:49,620
+tend to be a little bit slow but there
+
+52
+00:02:49,620 --> 00:02:52,500
+consistent in addition Savannah supports
+
+53
+00:02:52,500 --> 00:02:54,319
+two-phase commit so we had transactions
+
+54
+00:02:54,319 --> 00:02:57,450
+and the reads are much faster because
+
+55
+00:02:57,450 --> 00:03:01,019
+the breeze used a true time scheme that
+
+56
+00:03:01,019 --> 00:03:04,709
+the span of paper described and really
+
+57
+00:03:04,709 --> 00:03:07,560
+only consulted local we also read the
+
+58
+00:03:07,560 --> 00:03:09,959
+Facebook memcache new paper which is
+
+59
+00:03:09,959 --> 00:03:13,829
+another design in this demo pattern the
+
+60
+00:03:13,829 --> 00:03:15,269
+Facebook memcache key paper there's a
+
+61
+00:03:15,269 --> 00:03:18,720
+primary site that has the primary set of
+
+62
+00:03:18,720 --> 00:03:21,060
+my sequel databases so if a client wants
+
+63
+00:03:21,060 --> 00:03:23,640
+to do a right I suppose the primary side
+
+64
+00:03:23,640 --> 00:03:25,140
+this data center 3 does to send all
+
+65
+00:03:25,140 --> 00:03:27,750
+rights to data center 3 and then data
+
+66
+00:03:27,750 --> 00:03:30,540
+center 3 sends out new information or in
+
+67
+00:03:30,540 --> 00:03:32,129
+validations to the other data centers
+
+68
+00:03:32,129 --> 00:03:33,750
+right so actually a little bit expensive
+
+69
+00:03:33,750 --> 00:03:38,810
+and not unlike spanner on the other hand
+
+70
+00:03:38,810 --> 00:03:41,220
+all the reads are local when a client
+
+71
+00:03:41,220 --> 00:03:42,540
+needs to do a bead it could consult a
+
+72
+00:03:42,540 --> 00:03:44,579
+memcache key server in the local data
+
+73
+00:03:44,579 --> 00:03:49,920
+center and there's memcachedb sir just
+
+74
+00:03:49,920 --> 00:03:51,840
+blindingly fast this the people
+
+75
+00:03:51,840 --> 00:03:53,730
+reporting them a single memcache the
+
+76
+00:03:53,730 --> 00:03:56,519
+server conserve a million reads per
+
+77
+00:03:56,519 --> 00:03:59,430
+second which is very fast so again the
+
+78
+00:03:59,430 --> 00:04:02,700
+Facebook memcache D scheme needs to
+
+79
+00:04:02,700 --> 00:04:04,079
+involve cross data center of
+
+80
+00:04:04,079 --> 00:04:06,450
+communication for rights but the reads
+
+81
+00:04:06,450 --> 00:04:09,930
+are local so the question for today and
+
+82
+00:04:09,930 --> 00:04:11,220
+the question of the cops papers
+
+83
+00:04:11,220 --> 00:04:12,750
+answering is whether we can have a
+
+84
+00:04:12,750 --> 00:04:16,880
+system that allows rights to pursue
+
+85
+00:04:16,880 --> 00:04:19,260
+purely locally and this from the clients
+
+86
+00:04:19,260 --> 00:04:21,060
+point of views that the client can talk
+
+87
+00:04:21,060 --> 00:04:22,680
+to the from once it were right they can
+
+88
+00:04:22,680 --> 00:04:26,729
+send the right local replica in its own
+
+89
+00:04:26,729 --> 00:04:28,800
+data center as well as some reads to
+
+90
+00:04:28,800 --> 00:04:31,050
+just the local replicas and never have
+
+91
+00:04:31,050 --> 00:04:33,330
+to wait for other data centers never
+
+92
+00:04:33,330 --> 00:04:34,770
+have to talk to other data centers or
+
+93
+00:04:34,770 --> 00:04:38,039
+wait for other data centers to do rights
+
+94
+00:04:38,039 --> 00:04:40,830
+so what we really want is a system that
+
+95
+00:04:40,830 --> 00:04:47,780
+can have local reads and local rights
+
+96
+00:04:48,440 --> 00:04:50,940
+that's the big that's the big goal
+
+97
+00:04:50,940 --> 00:04:53,580
+really a performance goal this would
+
+98
+00:04:53,580 --> 00:04:55,170
+help for performance of course cuz now
+
+99
+00:04:55,170 --> 00:04:59,040
+unlike spanner and Facebook paper we had
+
+100
+00:04:59,040 --> 00:05:00,690
+a purely local rights be much faster
+
+101
+00:05:00,690 --> 00:05:04,200
+from the clients point of view um it
+
+102
+00:05:04,200 --> 00:05:05,700
+might also help with fault tolerance
+
+103
+00:05:05,700 --> 00:05:08,160
+robustness if rights can be done locally
+
+104
+00:05:08,160 --> 00:05:09,540
+then we don't have to worry about
+
+105
+00:05:09,540 --> 00:05:10,980
+whether other data centers are up or
+
+106
+00:05:10,980 --> 00:05:12,060
+whether we can talk to them quickly
+
+107
+00:05:12,060 --> 00:05:15,090
+because the clients don't need to wait
+
+108
+00:05:15,090 --> 00:05:18,810
+for them so we're gonna be looking for
+
+109
+00:05:18,810 --> 00:05:20,790
+systems that have this this level of
+
+110
+00:05:20,790 --> 00:05:25,500
+performance and in the end we're gonna
+
+111
+00:05:25,500 --> 00:05:27,810
+let the consistency model you know cuz
+
+112
+00:05:27,810 --> 00:05:28,470
+we're going to be worried about
+
+113
+00:05:28,470 --> 00:05:29,880
+consistency if you only do the rights
+
+114
+00:05:29,880 --> 00:05:31,980
+initially to the local replicas you know
+
+115
+00:05:31,980 --> 00:05:33,690
+what about other data centers replicas
+
+116
+00:05:33,690 --> 00:05:36,030
+data so we'll certainly be worried about
+
+117
+00:05:36,030 --> 00:05:36,840
+consistency
+
+118
+00:05:36,840 --> 00:05:38,850
+but the attitude for this lecture at
+
+119
+00:05:38,850 --> 00:05:40,260
+least is that we're gonna let the
+
+120
+00:05:40,260 --> 00:05:42,450
+consistency trail along behind the
+
+121
+00:05:42,450 --> 00:05:44,640
+performance you know once we figure out
+
+122
+00:05:44,640 --> 00:05:46,710
+how to get good performance will well
+
+123
+00:05:46,710 --> 00:05:48,450
+then sort of figure out how to define
+
+124
+00:05:48,450 --> 00:05:51,210
+consistency in think about whether it's
+
+125
+00:05:51,210 --> 00:05:54,330
+good enough okay so that's the overall
+
+126
+00:05:54,330 --> 00:05:56,790
+strategy I'm gonna actually talk about
+
+127
+00:05:56,790 --> 00:06:02,040
+two strawman designs to sort of okay but
+
+128
+00:06:02,040 --> 00:06:05,700
+not great designs on the way to before
+
+129
+00:06:05,700 --> 00:06:08,160
+we actually talk about how cops works so
+
+130
+00:06:08,160 --> 00:06:12,800
+first i want to talk about a simplest
+
+131
+00:06:12,800 --> 00:06:16,770
+design that follows this local rating
+
+132
+00:06:16,770 --> 00:06:19,140
+strategy that I can think of I'll call
+
+133
+00:06:19,140 --> 00:06:27,560
+this straw man 1 so in straw and one
+
+134
+00:06:27,560 --> 00:06:33,680
+we're going to have three data centers
+
+135
+00:06:34,669 --> 00:06:37,350
+and let's just assume that the data is
+
+136
+00:06:37,350 --> 00:06:41,490
+charted two ways in each of them so he's
+
+137
+00:06:41,490 --> 00:06:43,560
+from maybe ATM and keys from embassy
+
+138
+00:06:43,560 --> 00:06:45,300
+shard it the same way in each of the
+
+139
+00:06:45,300 --> 00:06:55,100
+data centers and the clients will read
+
+140
+00:06:55,100 --> 00:06:59,370
+locally and if a client writes so
+
+141
+00:06:59,370 --> 00:07:01,680
+supposing a client needs to write it key
+
+142
+00:07:01,680 --> 00:07:03,660
+that starts with M the clients gonna
+
+143
+00:07:03,660 --> 00:07:08,610
+send a write of key M to the shard
+
+144
+00:07:08,610 --> 00:07:10,610
+server the local shard server that has
+
+145
+00:07:10,610 --> 00:07:13,290
+its responsible he's starting with M
+
+146
+00:07:13,290 --> 00:07:15,840
+that shard server would return reply to
+
+147
+00:07:15,840 --> 00:07:17,490
+the client immediately saying oh yes I
+
+148
+00:07:17,490 --> 00:07:22,200
+did you're right but in addition each
+
+149
+00:07:22,200 --> 00:07:26,360
+server will maintain a queue of
+
+150
+00:07:26,360 --> 00:07:29,010
+outstanding rights that have been sent
+
+151
+00:07:29,010 --> 00:07:30,660
+to it recently got clients that it needs
+
+152
+00:07:30,660 --> 00:07:32,190
+to send to other data centers and it
+
+153
+00:07:32,190 --> 00:07:34,229
+will stream these rights asynchronously
+
+154
+00:07:34,229 --> 00:07:38,100
+in the background to the corresponding
+
+155
+00:07:38,100 --> 00:07:40,320
+servers in the other data center so
+
+156
+00:07:40,320 --> 00:07:42,960
+after applying to the client our shard
+
+157
+00:07:42,960 --> 00:07:45,810
+server here will send a copy of the
+
+158
+00:07:45,810 --> 00:07:48,960
+clients right to each of the other data
+
+159
+00:07:48,960 --> 00:07:52,169
+setups and you know those rights go
+
+160
+00:07:52,169 --> 00:07:53,250
+through the network maybe they take a
+
+161
+00:07:53,250 --> 00:07:55,229
+long time eventually they're gonna
+
+162
+00:07:55,229 --> 00:07:57,120
+arrive at the target data set the other
+
+163
+00:07:57,120 --> 00:07:58,950
+data centers and each of those shard
+
+164
+00:07:58,950 --> 00:08:00,930
+servers will then apply the right to its
+
+165
+00:08:00,930 --> 00:08:07,340
+local table of data so this is a design
+
+166
+00:08:07,340 --> 00:08:10,560
+that has very good performance right the
+
+167
+00:08:10,560 --> 00:08:12,750
+reason rights are all done locally may
+
+168
+00:08:12,750 --> 00:08:13,979
+never have two clients never have to
+
+169
+00:08:13,979 --> 00:08:16,100
+wait there's a lot of parallelism
+
+170
+00:08:16,100 --> 00:08:18,990
+because you know this shard server for a
+
+171
+00:08:18,990 --> 00:08:20,750
+and the shirts are for a more
+
+172
+00:08:20,750 --> 00:08:22,710
+opportunity independently if the shard
+
+173
+00:08:22,710 --> 00:08:24,270
+server for a gets right you know it has
+
+174
+00:08:24,270 --> 00:08:27,120
+to push its data to the corresponding
+
+175
+00:08:27,120 --> 00:08:28,470
+shard servers and other data centers but
+
+176
+00:08:28,470 --> 00:08:30,300
+it can do those push pushes
+
+177
+00:08:30,300 --> 00:08:33,150
+independently of other shard service
+
+178
+00:08:33,150 --> 00:08:34,799
+pushes so there's parallelism both in
+
+179
+00:08:34,799 --> 00:08:36,450
+serving and and pushing the writes
+
+180
+00:08:36,450 --> 00:08:41,429
+around if you think about it a little
+
+181
+00:08:41,429 --> 00:08:44,580
+bit it's this design also essentially
+
+182
+00:08:44,580 --> 00:08:48,250
+effectively favors reads and the reads
+
+183
+00:08:48,250 --> 00:08:50,290
+really never have any impact beyond the
+
+184
+00:08:50,290 --> 00:08:52,150
+local data center the rights though do a
+
+185
+00:08:52,150 --> 00:08:53,680
+bit of work whenever you do a right you
+
+186
+00:08:53,680 --> 00:08:54,820
+know the client doesn't have to wait for
+
+187
+00:08:54,820 --> 00:08:57,010
+it but the shard server then has to push
+
+188
+00:08:57,010 --> 00:08:59,320
+the rights out to the other data centers
+
+189
+00:08:59,320 --> 00:09:01,810
+and you know means that new data the
+
+190
+00:09:01,810 --> 00:09:03,220
+other data center then proceed very
+
+191
+00:09:03,220 --> 00:09:06,490
+quickly so reads involve less work than
+
+192
+00:09:06,490 --> 00:09:09,040
+rights and that's appropriate for a read
+
+193
+00:09:09,040 --> 00:09:12,640
+heavy workload if you are more worried
+
+194
+00:09:12,640 --> 00:09:14,470
+about rate performance you could imagine
+
+195
+00:09:14,470 --> 00:09:16,420
+other designs for example you can
+
+196
+00:09:16,420 --> 00:09:18,220
+imagine design in which reads actually
+
+197
+00:09:18,220 --> 00:09:19,810
+have to consult multiple data centers
+
+198
+00:09:19,810 --> 00:09:22,360
+and rights are purely local so you can
+
+199
+00:09:22,360 --> 00:09:23,830
+imagine a scheme in which you have when
+
+200
+00:09:23,830 --> 00:09:25,690
+you do a read you actually read the data
+
+201
+00:09:25,690 --> 00:09:28,030
+from each of the other date the current
+
+202
+00:09:28,030 --> 00:09:30,970
+copy of the key you want from each of
+
+203
+00:09:30,970 --> 00:09:32,350
+the other data centers and choose the
+
+204
+00:09:32,350 --> 00:09:34,990
+one that's most recent perhaps and then
+
+205
+00:09:34,990 --> 00:09:37,390
+rights are very cheap and breeds are
+
+206
+00:09:37,390 --> 00:09:38,430
+expensive or you can imagine
+
+207
+00:09:38,430 --> 00:09:41,070
+combinations of these two strategies
+
+208
+00:09:41,070 --> 00:09:44,860
+some sort of quorum overlap scheme or
+
+209
+00:09:44,860 --> 00:09:46,810
+you write a majority and write a
+
+210
+00:09:46,810 --> 00:09:48,490
+majority at the only a majority of data
+
+211
+00:09:48,490 --> 00:09:49,870
+centers and meet a majority of data
+
+212
+00:09:49,870 --> 00:09:53,440
+centers and rely on the overlap and in
+
+213
+00:09:53,440 --> 00:09:56,380
+fact there are real live systems that
+
+214
+00:09:56,380 --> 00:10:00,040
+people use in commercially in real
+
+215
+00:10:00,040 --> 00:10:02,560
+websites that follow much this design so
+
+216
+00:10:02,560 --> 00:10:04,120
+if you're interested in sort of a real
+
+217
+00:10:04,120 --> 00:10:06,580
+world version of this you can look up
+
+218
+00:10:06,580 --> 00:10:11,230
+Amazon's dynamo system or the open
+
+219
+00:10:11,230 --> 00:10:11,730
+source
+
+220
+00:10:11,730 --> 00:10:14,410
+Kassandra system
+
+221
+00:10:14,410 --> 00:10:17,660
+there was much more elaborated than when
+
+222
+00:10:17,660 --> 00:10:19,760
+I've sketched out here but they follow
+
+223
+00:10:19,760 --> 00:10:23,540
+the same basic pattern so the usual name
+
+224
+00:10:23,540 --> 00:10:26,960
+for this kind of scheme is eventual
+
+225
+00:10:26,960 --> 00:10:31,370
+consistency and the reason for that is
+
+226
+00:10:31,370 --> 00:10:40,910
+that at least initially if you do a
+
+227
+00:10:40,910 --> 00:10:43,760
+write other readers and other data
+
+228
+00:10:43,760 --> 00:10:46,360
+centers are not guaranteed EC or right
+
+229
+00:10:46,360 --> 00:10:48,890
+but they will someday because you're
+
+230
+00:10:48,890 --> 00:10:50,180
+pushing out the rights so they'll
+
+231
+00:10:50,180 --> 00:10:53,180
+eventually see your data there's no
+
+232
+00:10:53,180 --> 00:10:56,120
+guarantee about order so for example if
+
+233
+00:10:56,120 --> 00:10:58,790
+I'm a client and I write he's starting
+
+234
+00:10:58,790 --> 00:11:00,020
+with them and then I write a key
+
+235
+00:11:00,020 --> 00:11:03,980
+starting with a sure you know M sends
+
+236
+00:11:03,980 --> 00:11:07,100
+out it's my right to shards of a rim
+
+237
+00:11:07,100 --> 00:11:09,440
+sends out one right and the server for a
+
+238
+00:11:09,440 --> 00:11:12,560
+sends out my right for a but you know
+
+239
+00:11:12,560 --> 00:11:14,240
+these may travel at different speeds or
+
+240
+00:11:14,240 --> 00:11:15,830
+different routes on the wide area
+
+241
+00:11:15,830 --> 00:11:17,750
+network and maybe I wrote maybe the
+
+242
+00:11:17,750 --> 00:11:19,880
+client wrote em first and then a but
+
+243
+00:11:19,880 --> 00:11:22,640
+maybe if they for a arrives first and
+
+244
+00:11:22,640 --> 00:11:24,260
+then the update for am and maybe I
+
+245
+00:11:24,260 --> 00:11:26,900
+arrive at the opposite order at the
+
+246
+00:11:26,900 --> 00:11:28,850
+other datacenter so different clients
+
+247
+00:11:28,850 --> 00:11:32,030
+are gonna observe updates in different
+
+248
+00:11:32,030 --> 00:11:36,470
+orders so there's you know no order
+
+249
+00:11:36,470 --> 00:11:39,040
+guarantee
+
+250
+00:11:40,230 --> 00:11:43,600
+the sense the sort of ultimate meaning
+
+251
+00:11:43,600 --> 00:11:46,209
+eventual consistency is that if things
+
+252
+00:11:46,209 --> 00:11:49,360
+settle down and people stop writing and
+
+253
+00:11:49,360 --> 00:11:51,880
+all of these write messages finally
+
+254
+00:11:51,880 --> 00:11:53,230
+arrive at their destinations are
+
+255
+00:11:53,230 --> 00:11:56,800
+processed then I'm an eventually an
+
+256
+00:11:56,800 --> 00:11:59,560
+eventually consistent system ought to
+
+257
+00:11:59,560 --> 00:12:03,370
+end up with the same value stored at all
+
+258
+00:12:03,370 --> 00:12:11,230
+of the all of the replicas that's the
+
+259
+00:12:11,230 --> 00:12:12,880
+sense of which it's eventually
+
+260
+00:12:12,880 --> 00:12:14,920
+consistent if you wait for the dust to
+
+261
+00:12:14,920 --> 00:12:16,870
+settle you're gonna end up with
+
+262
+00:12:16,870 --> 00:12:18,269
+everybody having the same data and
+
+263
+00:12:18,269 --> 00:12:20,889
+that's a pretty weak spec that's a very
+
+264
+00:12:20,889 --> 00:12:24,670
+weak spec but you know because it's a
+
+265
+00:12:24,670 --> 00:12:26,620
+loose spec there's a lot of freedom in
+
+266
+00:12:26,620 --> 00:12:28,630
+the implementation and a lot of
+
+267
+00:12:28,630 --> 00:12:30,250
+opportunities to get good performance
+
+268
+00:12:30,250 --> 00:12:31,899
+because the system basically doesn't
+
+269
+00:12:31,899 --> 00:12:34,449
+require you to instantly do anything or
+
+270
+00:12:34,449 --> 00:12:38,079
+to observe any ordering rules it's quite
+
+271
+00:12:38,079 --> 00:12:40,029
+different from most of the consistency
+
+272
+00:12:40,029 --> 00:12:43,420
+schemes we've seen so far again as I
+
+273
+00:12:43,420 --> 00:12:45,240
+mentioned it's used in deployed systems
+
+274
+00:12:45,240 --> 00:12:48,550
+eventual consistency is but it can be
+
+275
+00:12:48,550 --> 00:12:50,319
+quite tricky for application programmers
+
+276
+00:12:50,319 --> 00:12:53,139
+so let me sketch out a an example of
+
+277
+00:12:53,139 --> 00:12:54,910
+something you might want to do in a web
+
+278
+00:12:54,910 --> 00:12:58,630
+and the website where you would have to
+
+279
+00:12:58,630 --> 00:13:04,149
+be pretty careful you might be surprised
+
+280
+00:13:04,149 --> 00:13:09,880
+if this is an eventual consistency app
+
+281
+00:13:09,880 --> 00:13:13,569
+example suppose we're building a website
+
+282
+00:13:13,569 --> 00:13:16,269
+that stores photos and every user has a
+
+283
+00:13:16,269 --> 00:13:19,959
+you know set of photo photos stored as
+
+284
+00:13:19,959 --> 00:13:21,519
+you know key value pairs with some sort
+
+285
+00:13:21,519 --> 00:13:26,170
+of unique ID is the key and every user
+
+286
+00:13:26,170 --> 00:13:29,980
+has a list of maintains a list of their
+
+287
+00:13:29,980 --> 00:13:31,689
+public photos that they allow other
+
+288
+00:13:31,689 --> 00:13:34,120
+people to see so supposing I take a
+
+289
+00:13:34,120 --> 00:13:37,899
+photograph and I want to insert it into
+
+290
+00:13:37,899 --> 00:13:40,720
+this system or you know I human contact
+
+291
+00:13:40,720 --> 00:13:43,329
+the web server and the web server runs
+
+292
+00:13:43,329 --> 00:13:45,850
+code that's gonna insert my photo into
+
+293
+00:13:45,850 --> 00:13:47,589
+the storage system and then add a
+
+294
+00:13:47,589 --> 00:13:50,620
+reference to my photo to my photo list
+
+295
+00:13:50,620 --> 00:13:51,540
+so maybe
+
+296
+00:13:51,540 --> 00:13:54,149
+run maybe this happens we'll say it
+
+297
+00:13:54,149 --> 00:13:57,240
+happens on clients c1 which is the web
+
+298
+00:13:57,240 --> 00:14:00,779
+server I'm talking to and maybe but the
+
+299
+00:14:00,779 --> 00:14:03,899
+code looks like is there's a code calls
+
+300
+00:14:03,899 --> 00:14:07,550
+the put operation for my photo
+
+301
+00:14:07,550 --> 00:14:09,290
+and it really should be a keen about you
+
+302
+00:14:09,290 --> 00:14:13,190
+I'm just gonna candidates just a few
+
+303
+00:14:13,190 --> 00:14:15,500
+plus value so I insert my photograph and
+
+304
+00:14:15,500 --> 00:14:19,910
+then when this put finishes then I I add
+
+305
+00:14:19,910 --> 00:14:22,770
+the photo to my list
+
+306
+00:14:22,770 --> 00:14:25,980
+right that's what my my clients code
+
+307
+00:14:25,980 --> 00:14:28,020
+looks like somebody else is looking at
+
+308
+00:14:28,020 --> 00:14:30,630
+my photographs loosely gonna look fetch
+
+309
+00:14:30,630 --> 00:14:34,080
+a copy of my list of photos and then
+
+310
+00:14:34,080 --> 00:14:35,310
+they're gonna look at the photos that
+
+311
+00:14:35,310 --> 00:14:39,120
+are on the list so client to maybe calls
+
+312
+00:14:39,120 --> 00:14:44,100
+get for my list and then looks down the
+
+313
+00:14:44,100 --> 00:14:48,570
+list and then calls get on that photo
+
+314
+00:14:48,570 --> 00:14:50,430
+maybe they see the photo I just uploaded
+
+315
+00:14:50,430 --> 00:14:51,209
+it on the list
+
+316
+00:14:51,209 --> 00:14:53,279
+and they're gonna do a get it for the
+
+317
+00:14:53,279 --> 00:14:57,089
+you know key for that photo yeah so this
+
+318
+00:14:57,089 --> 00:14:59,450
+is like totally straightforward code
+
+319
+00:14:59,450 --> 00:15:02,910
+looks like it ought to work but in an
+
+320
+00:15:02,910 --> 00:15:05,730
+eventually consistent system it's not
+
+321
+00:15:05,730 --> 00:15:07,589
+necessarily going to work and the
+
+322
+00:15:07,589 --> 00:15:10,500
+problem is that these two puts even
+
+323
+00:15:10,500 --> 00:15:12,899
+though the client did them in such an
+
+324
+00:15:12,899 --> 00:15:15,089
+obvious order first insert the photo and
+
+325
+00:15:15,089 --> 00:15:17,670
+then add a reference to that photo to my
+
+326
+00:15:17,670 --> 00:15:20,190
+list of photos the fact is that in this
+
+327
+00:15:20,190 --> 00:15:22,380
+event early consistent scheme that I
+
+328
+00:15:22,380 --> 00:15:25,680
+outlined this second put could arrive at
+
+329
+00:15:25,680 --> 00:15:29,570
+other data centers before the first put
+
+330
+00:15:29,570 --> 00:15:31,920
+so this other client if it's reading at
+
+331
+00:15:31,920 --> 00:15:34,770
+a different data center might see the
+
+332
+00:15:34,770 --> 00:15:37,560
+updated list with my new photo in it but
+
+333
+00:15:37,560 --> 00:15:40,500
+when that other client and another data
+
+334
+00:15:40,500 --> 00:15:42,540
+center goes to fetch the photo that's in
+
+335
+00:15:42,540 --> 00:15:44,490
+the list this photo may not exist yet
+
+336
+00:15:44,490 --> 00:15:47,550
+because the first right may not have
+
+337
+00:15:47,550 --> 00:15:50,670
+arrived over the wife of the client
+
+338
+00:15:50,670 --> 00:15:56,160
+Tuesday's so if this is just gonna be
+
+339
+00:15:56,160 --> 00:15:57,870
+routine occurrence in an eventually
+
+340
+00:15:57,870 --> 00:16:01,800
+consistent system if we don't sort of
+
+341
+00:16:01,800 --> 00:16:05,399
+think of anything more clever this kind
+
+342
+00:16:05,399 --> 00:16:07,529
+of behavior where it sort of looks like
+
+343
+00:16:07,529 --> 00:16:09,390
+the code out of work you know at some
+
+344
+00:16:09,390 --> 00:16:11,399
+intuitive level but when you actually go
+
+345
+00:16:11,399 --> 00:16:13,050
+and read the spec for the system which
+
+346
+00:16:13,050 --> 00:16:15,300
+is to say no guarantees you realize that
+
+347
+00:16:15,300 --> 00:16:18,810
+ah you know this obviously this correct
+
+348
+00:16:18,810 --> 00:16:20,820
+looking code may totally not do it I
+
+349
+00:16:20,820 --> 00:16:23,100
+think it's going to do these are often
+
+350
+00:16:23,100 --> 00:16:27,890
+called anomalies and
+
+351
+00:16:29,490 --> 00:16:31,480
+you know the way to think about it is
+
+352
+00:16:31,480 --> 00:16:33,399
+not necessarily that this behavior you
+
+353
+00:16:33,399 --> 00:16:35,230
+know you saw the list third on a list
+
+354
+00:16:35,230 --> 00:16:37,360
+but the photo didn't exist yet it's not
+
+355
+00:16:37,360 --> 00:16:39,040
+an error it's not incorrect because
+
+356
+00:16:39,040 --> 00:16:41,050
+after all the system never guaranteed
+
+357
+00:16:41,050 --> 00:16:43,750
+that this food was gonna do that it's
+
+358
+00:16:43,750 --> 00:16:46,389
+gonna actually yield the photo here so
+
+359
+00:16:46,389 --> 00:16:50,050
+it's not that it's incorrect it's just
+
+360
+00:16:50,050 --> 00:16:52,630
+that it's weaker than you might have
+
+361
+00:16:52,630 --> 00:16:55,959
+hoped so it's still possible to program
+
+362
+00:16:55,959 --> 00:16:58,180
+such a system and people do it all the
+
+363
+00:16:58,180 --> 00:17:00,610
+time and there's a whole lot of tricks
+
+364
+00:17:00,610 --> 00:17:03,699
+you can use for example you know a
+
+365
+00:17:03,699 --> 00:17:05,380
+defensive programmer might observe
+
+366
+00:17:05,380 --> 00:17:07,750
+programmer might might write code
+
+367
+00:17:07,750 --> 00:17:09,189
+knowing that well if you say something I
+
+368
+00:17:09,189 --> 00:17:11,049
+mean list it may not really exist yet
+
+369
+00:17:11,049 --> 00:17:13,150
+and so if you see a reference to a photo
+
+370
+00:17:13,150 --> 00:17:14,799
+in the list you get a photograph that's
+
+371
+00:17:14,799 --> 00:17:17,770
+not there you just retry just wait a
+
+372
+00:17:17,770 --> 00:17:19,799
+little bit and retry because by and by
+
+373
+00:17:19,799 --> 00:17:22,179
+the photo will probably show up and if
+
+374
+00:17:22,179 --> 00:17:24,309
+it doesn't we'll just skip it and don't
+
+375
+00:17:24,309 --> 00:17:27,010
+display it to the user so it's totally
+
+376
+00:17:27,010 --> 00:17:31,120
+possible to program in this style but we
+
+377
+00:17:31,120 --> 00:17:33,580
+could definitely hope for behavior from
+
+378
+00:17:33,580 --> 00:17:35,470
+the storage system that's more intuitive
+
+379
+00:17:35,470 --> 00:17:37,030
+than this that would make the
+
+380
+00:17:37,030 --> 00:17:40,809
+programmers lie life easier sort of we
+
+381
+00:17:40,809 --> 00:17:42,580
+could imagine systems that have fewer
+
+382
+00:17:42,580 --> 00:17:46,650
+anomalies then yes very simple
+
+383
+00:17:46,650 --> 00:17:50,260
+eventually consistent system okay before
+
+384
+00:17:50,260 --> 00:17:54,309
+I go on to talking about how to maybe
+
+385
+00:17:54,309 --> 00:17:56,140
+make the consistency a little bit better
+
+386
+00:17:56,140 --> 00:17:59,230
+I want to discuss something important I
+
+387
+00:17:59,230 --> 00:18:01,030
+left out about this current eventual
+
+388
+00:18:01,030 --> 00:18:02,860
+consistency system and that's how to
+
+389
+00:18:02,860 --> 00:18:07,830
+decide on which right is most recent so
+
+390
+00:18:07,830 --> 00:18:12,309
+for some data if data might ever be
+
+391
+00:18:12,309 --> 00:18:15,610
+written by more than one party there's
+
+392
+00:18:15,610 --> 00:18:20,080
+the possibility that we might have to
+
+393
+00:18:20,080 --> 00:18:22,360
+decide which data item is newer so
+
+394
+00:18:22,360 --> 00:18:27,320
+suppose we have some key or call okay
+
+395
+00:18:27,320 --> 00:18:32,420
+and to rights for it you know to clients
+
+396
+00:18:32,420 --> 00:18:35,120
+launch rates for K so when client writes
+
+397
+00:18:35,120 --> 00:18:36,950
+a value one another client writes a
+
+398
+00:18:36,950 --> 00:18:42,350
+value of two we need to set up a system
+
+399
+00:18:42,350 --> 00:18:46,040
+so that all three data centers agree on
+
+400
+00:18:46,040 --> 00:18:50,570
+what the final value of key K is because
+
+401
+00:18:50,570 --> 00:18:51,770
+after all we're at least guaranteeing
+
+402
+00:18:51,770 --> 00:18:53,240
+eventual consistency when the dust
+
+403
+00:18:53,240 --> 00:18:55,610
+settles all the data centers all have
+
+404
+00:18:55,610 --> 00:18:58,520
+the same data so you know data center
+
+405
+00:18:58,520 --> 00:19:01,130
+three is gonna get these two rights and
+
+406
+00:19:01,130 --> 00:19:02,510
+it's gonna pick one of them as the final
+
+407
+00:19:02,510 --> 00:19:06,110
+value for K well of course um datacenter
+
+408
+00:19:06,110 --> 00:19:08,090
+- sees the same rights right it sees its
+
+409
+00:19:08,090 --> 00:19:13,460
+own right so they're all seeing this
+
+410
+00:19:13,460 --> 00:19:14,810
+pair breaks and they all had better make
+
+411
+00:19:14,810 --> 00:19:18,470
+the same decision about which one that'd
+
+412
+00:19:18,470 --> 00:19:20,780
+be the final value regardless and the
+
+413
+00:19:20,780 --> 00:19:22,970
+order that they arrived in right because
+
+414
+00:19:22,970 --> 00:19:26,150
+we don't know you know the data center
+
+415
+00:19:26,150 --> 00:19:28,040
+three may observe these to arrive in one
+
+416
+00:19:28,040 --> 00:19:29,810
+order and some other data center may
+
+417
+00:19:29,810 --> 00:19:31,730
+observe them to arrive in a different
+
+418
+00:19:31,730 --> 00:19:33,920
+order we can't just accept the second
+
+419
+00:19:33,920 --> 00:19:35,390
+one and have that be the final value
+
+420
+00:19:35,390 --> 00:19:38,240
+meet a more robust scheme for deciding
+
+421
+00:19:38,240 --> 00:19:42,170
+what the final the most recent value is
+
+422
+00:19:42,170 --> 00:19:46,550
+for a key so we're gonna need some
+
+423
+00:19:46,550 --> 00:19:50,600
+notion of version numbers and the the
+
+424
+00:19:50,600 --> 00:19:52,340
+most straightforward way to sign version
+
+425
+00:19:52,340 --> 00:19:58,180
+numbers is to use the wall clock time so
+
+426
+00:19:58,180 --> 00:20:01,520
+so why not wall clock time and the idea
+
+427
+00:20:01,520 --> 00:20:04,310
+is that when a what a client generates a
+
+428
+00:20:04,310 --> 00:20:07,490
+put either it or the shard server the
+
+429
+00:20:07,490 --> 00:20:09,620
+local chart server talks to will look at
+
+430
+00:20:09,620 --> 00:20:12,250
+the current time oh it's you know it's
+
+431
+00:20:12,250 --> 00:20:15,320
+125 right now and it'll sort of
+
+432
+00:20:15,320 --> 00:20:17,740
+associate that time as a version number
+
+433
+00:20:17,740 --> 00:20:20,120
+on its version of the key so then we'd
+
+434
+00:20:20,120 --> 00:20:25,060
+annotate these these write messages
+
+435
+00:20:25,060 --> 00:20:28,580
+these actually both store the timestamp
+
+436
+00:20:28,580 --> 00:20:30,470
+in the database and annotate these write
+
+437
+00:20:30,470 --> 00:20:33,140
+messages sent between data centers with
+
+438
+00:20:33,140 --> 00:20:35,360
+the time so you know maybe this one was
+
+439
+00:20:35,360 --> 00:20:37,970
+written at 102 and this right occurred
+
+440
+00:20:37,970 --> 00:20:40,390
+at 103
+
+441
+00:20:41,049 --> 00:20:47,409
+and so if if 102 writer or suppose the
+
+442
+00:20:47,409 --> 00:20:49,269
+one of three right arrives first then
+
+443
+00:20:49,269 --> 00:20:51,279
+the data center three will put in its
+
+444
+00:20:51,279 --> 00:20:56,139
+database this key and the timestamp one
+
+445
+00:20:56,139 --> 00:20:56,909
+two three
+
+446
+00:20:56,909 --> 00:21:00,070
+and when the right for 102 arrives the
+
+447
+00:21:00,070 --> 00:21:01,350
+standard Center will say oh actually
+
+448
+00:21:01,350 --> 00:21:04,269
+that's an older right I'm just gonna
+
+449
+00:21:04,269 --> 00:21:05,889
+ignore this right because it has a lower
+
+450
+00:21:05,889 --> 00:21:08,019
+timestamp and the time step I already
+
+451
+00:21:08,019 --> 00:21:09,460
+have and of course if they arrive and
+
+452
+00:21:09,460 --> 00:21:11,919
+the other order did a sentence we would
+
+453
+00:21:11,919 --> 00:21:13,389
+have actually stored this right briefly
+
+454
+00:21:13,389 --> 00:21:16,239
+until the right with the higher
+
+455
+00:21:16,239 --> 00:21:17,499
+timestamp arrived but then it would
+
+456
+00:21:17,499 --> 00:21:19,389
+replace it I mean since everybody sees
+
+457
+00:21:19,389 --> 00:21:22,840
+it some time stamps at least you know
+
+458
+00:21:22,840 --> 00:21:24,609
+when they finally receive whatever all
+
+459
+00:21:24,609 --> 00:21:26,950
+these great messages over the Internet
+
+460
+00:21:26,950 --> 00:21:29,289
+they're all gonna end up with the
+
+461
+00:21:29,289 --> 00:21:32,759
+databases that have the highest numbered
+
+462
+00:21:32,759 --> 00:21:39,600
+values okay so this almost works and
+
+463
+00:21:39,600 --> 00:21:42,159
+there's two there's two little problems
+
+464
+00:21:42,159 --> 00:21:47,889
+with it one is that the two data centers
+
+465
+00:21:47,889 --> 00:21:49,359
+if they do writes at the same time may
+
+466
+00:21:49,359 --> 00:21:51,009
+actually assign this little time stamp
+
+467
+00:21:51,009 --> 00:21:54,249
+this is relatively easy to solve and the
+
+468
+00:21:54,249 --> 00:21:57,190
+way it's typically done is the time
+
+469
+00:21:57,190 --> 00:22:00,190
+stamps are actually pairs of time or
+
+470
+00:22:00,190 --> 00:22:02,080
+whatever and the High bits essentially
+
+471
+00:22:02,080 --> 00:22:04,960
+hand some sort of identifier could
+
+472
+00:22:04,960 --> 00:22:06,399
+actually be almost anything as long as
+
+473
+00:22:06,399 --> 00:22:08,440
+it's unique some sort of identifier like
+
+474
+00:22:08,440 --> 00:22:11,769
+the data center name or ID or something
+
+475
+00:22:11,769 --> 00:22:18,220
+in the low bits just to cause all pipe
+
+476
+00:22:18,220 --> 00:22:19,600
+signs from different data centers or
+
+477
+00:22:19,600 --> 00:22:22,239
+different servers to be you want and
+
+478
+00:22:22,239 --> 00:22:23,889
+then if two rights ride with the same
+
+479
+00:22:23,889 --> 00:22:26,230
+time in them from different data centers
+
+480
+00:22:26,230 --> 00:22:28,330
+are gonna have different low bits and
+
+481
+00:22:28,330 --> 00:22:30,009
+these little bits will be used to
+
+482
+00:22:30,009 --> 00:22:33,549
+disambiguate which of the two right says
+
+483
+00:22:33,549 --> 00:22:36,340
+is the lower timestamp and therefore
+
+484
+00:22:36,340 --> 00:22:40,090
+should yield to the other with the
+
+485
+00:22:40,090 --> 00:22:44,739
+higher okay so we're gonna stick some
+
+486
+00:22:44,739 --> 00:22:46,090
+sort of ID in the bottom bits and the
+
+487
+00:22:46,090 --> 00:22:47,440
+paper actually talks about doing this
+
+488
+00:22:47,440 --> 00:22:50,499
+it's very common the other problem is
+
+489
+00:22:50,499 --> 00:22:53,859
+that this system works okay if all of
+
+490
+00:22:53,859 --> 00:22:56,009
+the data centers are exactly
+
+491
+00:22:56,009 --> 00:22:58,450
+synchronized in time and this is
+
+492
+00:22:58,450 --> 00:23:00,340
+something a spanner paper stressed a
+
+493
+00:23:00,340 --> 00:23:02,769
+great length so if the clocks on all the
+
+494
+00:23:02,769 --> 00:23:04,799
+servers that all the data centers agree
+
+495
+00:23:04,799 --> 00:23:08,470
+and this is gonna this is gonna be okay
+
+496
+00:23:08,470 --> 00:23:11,200
+but if the clocks are off by seconds or
+
+497
+00:23:11,200 --> 00:23:13,029
+maybe even minutes then we have a
+
+498
+00:23:13,029 --> 00:23:16,899
+serious problem here one not so
+
+499
+00:23:16,899 --> 00:23:23,409
+important problem is that rights that
+
+500
+00:23:23,409 --> 00:23:26,710
+come earlier in time you know that
+
+501
+00:23:26,710 --> 00:23:28,419
+should be overwritten by later right so
+
+502
+00:23:28,419 --> 00:23:30,879
+it could be the rights that came earlier
+
+503
+00:23:30,879 --> 00:23:33,279
+in real time are because the clocks are
+
+504
+00:23:33,279 --> 00:23:35,710
+on are assigned high time stamps and
+
+505
+00:23:35,710 --> 00:23:38,440
+therefore not superseded by rights that
+
+506
+00:23:38,440 --> 00:23:43,480
+came later in time now we never made any
+
+507
+00:23:43,480 --> 00:23:45,580
+guarantees about this ID eventual
+
+508
+00:23:45,580 --> 00:23:49,359
+consistency and we never said oh rights
+
+509
+00:23:49,359 --> 00:23:51,720
+that come later in time we're gonna win
+
+510
+00:23:51,720 --> 00:23:58,409
+over rightfully the clients nevertheless
+
+511
+00:23:58,409 --> 00:24:02,889
+we don't want to be already weak enough
+
+512
+00:24:02,889 --> 00:24:04,840
+consistency we don't want to have it
+
+513
+00:24:04,840 --> 00:24:06,539
+have needlessly
+
+514
+00:24:06,539 --> 00:24:09,519
+strange behavior like users really well
+
+515
+00:24:09,519 --> 00:24:11,320
+notice they eat something and then they
+
+516
+00:24:11,320 --> 00:24:14,499
+updated later doesn't seem to take
+
+517
+00:24:14,499 --> 00:24:16,929
+effect because the earlier update was
+
+518
+00:24:16,929 --> 00:24:19,169
+assigned two times thinks it's too large
+
+519
+00:24:19,169 --> 00:24:23,830
+in addition if some servers clock is too
+
+520
+00:24:23,830 --> 00:24:26,169
+high and it doesn't right you know if
+
+521
+00:24:26,169 --> 00:24:29,019
+it's caucus say a minute fast then it'll
+
+522
+00:24:29,019 --> 00:24:37,389
+be a whole minute when no other we have
+
+523
+00:24:37,389 --> 00:24:38,830
+to wait for all the service thoughts to
+
+524
+00:24:38,830 --> 00:24:41,649
+catch up to the minute fast servers
+
+525
+00:24:41,649 --> 00:24:43,269
+clock before anybody else can do the
+
+526
+00:24:43,269 --> 00:24:46,419
+write about heat in order to solve that
+
+527
+00:24:46,419 --> 00:24:51,309
+problem one way to solve that problem is
+
+528
+00:24:51,309 --> 00:24:54,549
+this idea called Lamport clocks the
+
+529
+00:24:54,549 --> 00:24:57,310
+paper talks about this
+
+530
+00:24:57,310 --> 00:24:59,440
+although the paper doesn't really say
+
+531
+00:24:59,440 --> 00:25:00,880
+why they use the lamp or clocks I'm
+
+532
+00:25:00,880 --> 00:25:02,890
+guessing it's at least partially for the
+
+533
+00:25:02,890 --> 00:25:05,410
+reason I just I don't mind
+
+534
+00:25:05,410 --> 00:25:08,770
+Flambeau clock is Wade assigned time
+
+535
+00:25:08,770 --> 00:25:12,100
+stamps that are related to real time but
+
+536
+00:25:12,100 --> 00:25:14,560
+which hope would this problem at some
+
+537
+00:25:14,560 --> 00:25:16,090
+servers having clocks that are running
+
+538
+00:25:16,090 --> 00:25:22,360
+too fast so every server keeps a value
+
+539
+00:25:22,360 --> 00:25:26,800
+called this T max which is the highest
+
+540
+00:25:26,800 --> 00:25:28,570
+version number it seems so far from
+
+541
+00:25:28,570 --> 00:25:31,980
+anywhere else so
+
+542
+00:25:34,390 --> 00:25:36,470
+so if somebody else is generating
+
+543
+00:25:36,470 --> 00:25:37,909
+timestamps that are you know ahead of
+
+544
+00:25:37,909 --> 00:25:40,039
+real-time you know the other servers to
+
+545
+00:25:40,039 --> 00:25:41,600
+see this timestamps their team axes will
+
+546
+00:25:41,600 --> 00:25:46,190
+reflect ahead of real time and then when
+
+547
+00:25:46,190 --> 00:25:48,500
+a server needs to assign a timestamp of
+
+548
+00:25:48,500 --> 00:25:52,850
+version number to a new put the way it
+
+549
+00:25:52,850 --> 00:25:56,500
+will do that is it'll take the max of
+
+550
+00:25:56,500 --> 00:26:03,350
+this team ax plus one and the wall clock
+
+551
+00:26:03,350 --> 00:26:05,380
+time
+
+552
+00:26:05,850 --> 00:26:10,019
+the real-time so that means that new
+
+553
+00:26:10,019 --> 00:26:13,350
+version number so this is the version
+
+554
+00:26:13,350 --> 00:26:16,470
+numbers that we need to accompany the
+
+555
+00:26:16,470 --> 00:26:18,379
+values in our venturi consistent system
+
+556
+00:26:18,379 --> 00:26:20,909
+so each new version number is going to
+
+557
+00:26:20,909 --> 00:26:22,649
+be higher than the highest version
+
+558
+00:26:22,649 --> 00:26:26,070
+number seen so higher than whatever the
+
+559
+00:26:26,070 --> 00:26:28,859
+last Rite was for example to the data
+
+560
+00:26:28,859 --> 00:26:31,559
+that we're updating and at least as high
+
+561
+00:26:31,559 --> 00:26:35,369
+as real-time so if nobody's clock is
+
+562
+00:26:35,369 --> 00:26:37,200
+ahead this Tmax plus one will probably
+
+563
+00:26:37,200 --> 00:26:38,999
+actually be smaller than real time and
+
+564
+00:26:38,999 --> 00:26:41,460
+the time stamp tool end up in real time
+
+565
+00:26:41,460 --> 00:26:43,979
+if some server has a crazy clock that's
+
+566
+00:26:43,979 --> 00:26:46,169
+too fast then that will cause all other
+
+567
+00:26:46,169 --> 00:26:48,779
+servers all the ones it's updates
+
+568
+00:26:48,779 --> 00:26:51,809
+advanced the team axes so that when they
+
+569
+00:26:51,809 --> 00:26:53,700
+allocate new version numbers higher than
+
+570
+00:26:53,700 --> 00:26:56,879
+the version number of whatever ladies
+
+571
+00:26:56,879 --> 00:26:58,919
+rate they saw from the server whose
+
+572
+00:26:58,919 --> 00:27:03,869
+clock is too fast okay so this is
+
+573
+00:27:03,869 --> 00:27:08,720
+Lampert clocks and this is how the paper
+
+574
+00:27:08,720 --> 00:27:11,220
+assigns version numbers come up all the
+
+575
+00:27:11,220 --> 00:27:16,229
+time in distributed systems alright so
+
+576
+00:27:16,229 --> 00:27:18,359
+another problem I want to bring up about
+
+577
+00:27:18,359 --> 00:27:25,229
+our eventually consistent system is the
+
+578
+00:27:25,229 --> 00:27:27,899
+problem of what to do about concurrent
+
+579
+00:27:27,899 --> 00:27:32,639
+rates to the same key it's actually even
+
+580
+00:27:32,639 --> 00:27:35,879
+worse the possibility that concurrent
+
+581
+00:27:35,879 --> 00:27:38,609
+rates might carry might both carry
+
+582
+00:27:38,609 --> 00:27:40,700
+important information that ought to be
+
+583
+00:27:40,700 --> 00:27:49,799
+preserved so for exam a client of both
+
+584
+00:27:49,799 --> 00:27:51,299
+did both of these you know different
+
+585
+00:27:51,299 --> 00:27:54,479
+clients client one and client - they
+
+586
+00:27:54,479 --> 00:27:59,960
+both issue a put to the same key
+
+587
+00:28:04,370 --> 00:28:09,870
+and both of these let's get sent it to
+
+588
+00:28:09,870 --> 00:28:14,190
+datacenter 3 the question is what's a
+
+589
+00:28:14,190 --> 00:28:16,500
+data center 3 do about the information
+
+590
+00:28:16,500 --> 00:28:24,059
+here and the information here this is a
+
+591
+00:28:24,059 --> 00:28:25,380
+real puzzle actually there's not a good
+
+592
+00:28:25,380 --> 00:28:26,429
+answer
+
+593
+00:28:26,429 --> 00:28:28,679
+the what the paper uses is the last
+
+594
+00:28:28,679 --> 00:28:30,570
+Raider wins that is datacenter 3 he's
+
+595
+00:28:30,570 --> 00:28:32,580
+gonna look at the version number that is
+
+596
+00:28:32,580 --> 00:28:33,870
+signed here and the version number is
+
+597
+00:28:33,870 --> 00:28:35,929
+assigned here one of them will be higher
+
+598
+00:28:35,929 --> 00:28:39,600
+slightly later in time data center ID
+
+599
+00:28:39,600 --> 00:28:41,700
+and a little bit higher or something I'm
+
+600
+00:28:41,700 --> 00:28:44,400
+a datacenter 3 you will simply throw
+
+601
+00:28:44,400 --> 00:28:47,490
+away the data with the lower timestamp
+
+602
+00:28:47,490 --> 00:28:49,350
+and accept the data with the higher
+
+603
+00:28:49,350 --> 00:28:51,750
+pants that stampin and that's it so it's
+
+604
+00:28:51,750 --> 00:28:58,700
+using this last Raider wins policy and
+
+605
+00:28:58,700 --> 00:29:03,860
+in that has the virtue that it's
+
+606
+00:29:03,860 --> 00:29:05,730
+deterministic and everybody's gonna get
+
+607
+00:29:05,730 --> 00:29:13,890
+the same answer you can think of
+
+608
+00:29:13,890 --> 00:29:17,070
+examples in which it's people so you
+
+609
+00:29:17,070 --> 00:29:18,270
+know for example supposing what these
+
+610
+00:29:18,270 --> 00:29:20,880
+puts are trying to do is increment a
+
+611
+00:29:20,880 --> 00:29:24,900
+counter so these clients both saw near
+
+612
+00:29:24,900 --> 00:29:27,809
+the counter with value 10 they both had
+
+613
+00:29:27,809 --> 00:29:30,720
+one and maybe we've put 11 right and but
+
+614
+00:29:30,720 --> 00:29:32,130
+you know what we really wanted to do is
+
+615
+00:29:32,130 --> 00:29:33,870
+have them both increment the counter and
+
+616
+00:29:33,870 --> 00:29:35,070
+have it had value 12
+
+617
+00:29:35,070 --> 00:29:37,950
+so in that case last Raider wins is
+
+618
+00:29:37,950 --> 00:29:39,600
+really not that great what we really
+
+619
+00:29:39,600 --> 00:29:41,100
+would have wanted was for datacenter 3
+
+620
+00:29:41,100 --> 00:29:43,350
+to sort of combine this increment and
+
+621
+00:29:43,350 --> 00:29:46,140
+that increment end up with the value of
+
+622
+00:29:46,140 --> 00:29:53,929
+12 so you know these systems are really
+
+623
+00:29:53,929 --> 00:29:58,159
+generally powerful enough to do that but
+
+624
+00:29:58,159 --> 00:30:01,200
+we would like better what we'd really
+
+625
+00:30:01,200 --> 00:30:05,360
+like is more sophisticated conflict
+
+626
+00:30:05,360 --> 00:30:08,360
+resolution
+
+627
+00:30:08,860 --> 00:30:10,440
+you
+
+628
+00:30:10,440 --> 00:30:13,649
+and the way other systems we've seen saw
+
+629
+00:30:13,649 --> 00:30:15,870
+this the most powerful system to support
+
+630
+00:30:15,870 --> 00:30:20,820
+real transactions so instead of instead
+
+631
+00:30:20,820 --> 00:30:22,019
+of just having put in get it actually
+
+632
+00:30:22,019 --> 00:30:24,379
+has increment operators that do atomic
+
+633
+00:30:24,379 --> 00:30:27,870
+transactional increments increments
+
+634
+00:30:27,870 --> 00:30:30,269
+weren't lost and that's sort of a
+
+635
+00:30:30,269 --> 00:30:32,279
+transactions of maybe the most powerful
+
+636
+00:30:32,279 --> 00:30:35,759
+way of doing resolving conflicting
+
+637
+00:30:35,759 --> 00:30:38,250
+updates we've also seen some systems
+
+638
+00:30:38,250 --> 00:30:39,539
+that support a notion of mini
+
+639
+00:30:39,539 --> 00:30:43,080
+transactions where at least on a single
+
+640
+00:30:43,080 --> 00:30:44,850
+piece of data you can have atomic
+
+641
+00:30:44,850 --> 00:30:48,080
+operations like atomic increment or
+
+642
+00:30:48,080 --> 00:30:52,559
+atomic test and set you can also imagine
+
+643
+00:30:52,559 --> 00:30:55,679
+wanting to have a system that does come
+
+644
+00:30:55,679 --> 00:30:57,720
+sort of custom conflict resolution so
+
+645
+00:30:57,720 --> 00:30:59,399
+exposing this value that we're keeping
+
+646
+00:30:59,399 --> 00:31:01,320
+here is a shopping cart you know with a
+
+647
+00:31:01,320 --> 00:31:04,379
+bunch of items in it and our user may
+
+648
+00:31:04,379 --> 00:31:05,730
+because they're running you know two
+
+649
+00:31:05,730 --> 00:31:06,960
+windows in the wind browser
+
+650
+00:31:06,960 --> 00:31:08,669
+adds two different items to their
+
+651
+00:31:08,669 --> 00:31:11,250
+shopping cart from two different web
+
+652
+00:31:11,250 --> 00:31:11,730
+servers
+
+653
+00:31:11,730 --> 00:31:14,399
+we'd like these two conflicting writes
+
+654
+00:31:14,399 --> 00:31:16,590
+to the same shopping cart to resolve
+
+655
+00:31:16,590 --> 00:31:19,980
+probably by taking set union of the two
+
+656
+00:31:19,980 --> 00:31:21,509
+shopping carts and ball instead of
+
+657
+00:31:21,509 --> 00:31:24,240
+throwing one away and accepting the
+
+658
+00:31:24,240 --> 00:31:29,330
+other I'm bringing this up
+
+659
+00:31:30,210 --> 00:31:33,930
+satisfying solution indeed the paper
+
+660
+00:31:33,930 --> 00:31:35,250
+doesn't really propose much of a
+
+661
+00:31:35,250 --> 00:31:38,790
+solution it's just a drawback of weekly
+
+662
+00:31:38,790 --> 00:31:43,590
+consistent systems that it's easy to get
+
+663
+00:31:43,590 --> 00:31:45,740
+into a situation where you might have
+
+664
+00:31:45,740 --> 00:31:47,730
+conflicting rights to the same data that
+
+665
+00:31:47,730 --> 00:31:50,090
+you would like to have sophisticated
+
+666
+00:31:50,090 --> 00:31:52,680
+sort of application specific resolution
+
+667
+00:31:52,680 --> 00:31:55,830
+to but it's generally quite hard and
+
+668
+00:31:55,830 --> 00:31:58,260
+it's just like a thorn in people's sides
+
+669
+00:31:58,260 --> 00:32:04,020
+that has to be lived with typically and
+
+670
+00:32:04,020 --> 00:32:05,610
+that that goes for both the eventual
+
+671
+00:32:05,610 --> 00:32:07,770
+consistency my straw man here hand for
+
+672
+00:32:07,770 --> 00:32:10,350
+the and for the P versus the paper dance
+
+673
+00:32:10,350 --> 00:32:12,360
+and a couple of paragraphs it it could
+
+674
+00:32:12,360 --> 00:32:13,560
+be used to do better
+
+675
+00:32:13,560 --> 00:32:15,930
+they don't really explore that because
+
+676
+00:32:15,930 --> 00:32:21,090
+it's difficult okay back to eventual
+
+677
+00:32:21,090 --> 00:32:26,670
+consistency my straw man system if you
+
+678
+00:32:26,670 --> 00:32:32,280
+recall it had a real problem with even
+
+679
+00:32:32,280 --> 00:32:36,170
+very simple this very simple scenario I
+
+680
+00:32:36,170 --> 00:32:38,880
+know we did put a photo and put a photo
+
+681
+00:32:38,880 --> 00:32:40,770
+list and then somebody else in a
+
+682
+00:32:40,770 --> 00:32:42,900
+difference and it reads the new this but
+
+683
+00:32:42,900 --> 00:32:44,520
+when they read the photo they find
+
+684
+00:32:44,520 --> 00:32:47,100
+there's nothing there so can we do
+
+685
+00:32:47,100 --> 00:32:49,700
+better can we build a system of it's
+
+686
+00:32:49,700 --> 00:32:52,800
+still allows local reads and local
+
+687
+00:32:52,800 --> 00:32:59,040
+rights but is has slightly mini-lesson
+
+688
+00:32:59,040 --> 00:33:03,290
+Thomas I'm going to propose one that's
+
+689
+00:33:03,290 --> 00:33:05,640
+strong me into this kind of one step
+
+690
+00:33:05,640 --> 00:33:08,790
+closer to papers so this is straw man
+
+691
+00:33:08,790 --> 00:33:11,030
+too
+
+692
+00:33:12,300 --> 00:33:14,269
+and
+
+693
+00:33:14,269 --> 00:33:19,129
+in this scheme I'm gonna propose a new
+
+694
+00:33:19,129 --> 00:33:21,200
+operator not just put and get but also a
+
+695
+00:33:21,200 --> 00:33:24,580
+sink operator that clients can use and
+
+696
+00:33:24,580 --> 00:33:29,299
+the sink operator will do will be the
+
+697
+00:33:29,299 --> 00:33:34,339
+key and a version number and what sink
+
+698
+00:33:34,339 --> 00:33:36,259
+does when a client calls it is sink
+
+699
+00:33:36,259 --> 00:33:40,159
+waits until all data centers copies of
+
+700
+00:33:40,159 --> 00:33:44,269
+key K are at least up to date as of the
+
+701
+00:33:44,269 --> 00:33:47,690
+specified version number so it's a way
+
+702
+00:33:47,690 --> 00:33:50,179
+of forcing order the client can say look
+
+703
+00:33:50,179 --> 00:33:51,379
+I'm gonna wait as well everybody knows
+
+704
+00:33:51,379 --> 00:33:54,499
+about this value and I wanna only see
+
+705
+00:33:54,499 --> 00:33:56,719
+after every one everything is Center
+
+706
+00:33:56,719 --> 00:33:58,700
+knows about this value and in order for
+
+707
+00:33:58,700 --> 00:34:02,169
+clients to know what version numbers to
+
+708
+00:34:02,169 --> 00:34:06,799
+to pass the sink we're gonna change the
+
+709
+00:34:06,799 --> 00:34:08,659
+put call a bit so that you say put key
+
+710
+00:34:08,659 --> 00:34:14,869
+value and put returns the version number
+
+711
+00:34:14,869 --> 00:34:21,260
+of the of this updated K you could call
+
+712
+00:34:21,260 --> 00:34:23,449
+this this sink is asking that acting is
+
+713
+00:34:23,449 --> 00:34:28,129
+a sort of a barrier offense we could
+
+714
+00:34:28,129 --> 00:34:34,659
+call this eventual consistency plus
+
+715
+00:34:36,069 --> 00:34:41,169
+barriers see calls the barrier
+
+716
+00:34:46,400 --> 00:34:48,260
+I'm gonna talk about how to users in a
+
+717
+00:34:48,260 --> 00:34:49,850
+moment but just keep in mind this thing
+
+718
+00:34:49,850 --> 00:34:51,380
+calls likely to be pretty slow because
+
+719
+00:34:51,380 --> 00:34:54,949
+the natural implementation of it is that
+
+720
+00:34:54,949 --> 00:34:56,960
+it actually goes out and talks to all
+
+721
+00:34:56,960 --> 00:34:58,610
+the other data centers and asked them
+
+722
+00:34:58,610 --> 00:35:01,820
+you know is your version of key pay up
+
+723
+00:35:01,820 --> 00:35:03,950
+to at least you know this version number
+
+724
+00:35:03,950 --> 00:35:06,350
+and then have to wait booth for the data
+
+725
+00:35:06,350 --> 00:35:07,730
+centers to respond and if any of them
+
+726
+00:35:07,730 --> 00:35:10,130
+say no it's got to then read that data
+
+727
+00:35:10,130 --> 00:35:13,270
+yes all right so how would you use this
+
+728
+00:35:13,270 --> 00:35:16,670
+well again for our photo list
+
+729
+00:35:16,670 --> 00:35:19,940
+now maybe client one that's updating
+
+730
+00:35:19,940 --> 00:35:22,520
+photos it's going to call put to insert
+
+731
+00:35:22,520 --> 00:35:23,690
+the photo it's gonna get a version
+
+732
+00:35:23,690 --> 00:35:31,640
+number now you know the programmer now
+
+733
+00:35:31,640 --> 00:35:36,920
+has to there's a danger here that update
+
+734
+00:35:36,920 --> 00:35:39,350
+the photo this but you know what if some
+
+735
+00:35:39,350 --> 00:35:40,760
+other data center you know hasn't seen
+
+736
+00:35:40,760 --> 00:35:43,010
+my photo yet so then the programmer is
+
+737
+00:35:43,010 --> 00:35:48,590
+gonna say sync and you're gonna sink the
+
+738
+00:35:48,590 --> 00:35:51,920
+photo wait for all data centers to have
+
+739
+00:35:51,920 --> 00:35:53,480
+that version number that was returned by
+
+740
+00:35:53,480 --> 00:35:56,630
+put and only after the sync return will
+
+741
+00:35:56,630 --> 00:36:00,440
+client one call put update update the
+
+742
+00:36:00,440 --> 00:36:03,770
+photo list and now if client two comes
+
+743
+00:36:03,770 --> 00:36:05,210
+along I must read the photo list and
+
+744
+00:36:05,210 --> 00:36:07,040
+then to be in the photo you know who
+
+745
+00:36:07,040 --> 00:36:09,800
+knows client two is going to do a get of
+
+746
+00:36:09,800 --> 00:36:15,580
+the photo list let's say time is
+
+747
+00:36:15,580 --> 00:36:18,560
+passing the same for them it's gonna do
+
+748
+00:36:18,560 --> 00:36:20,810
+a get at the photo list and if it sees
+
+749
+00:36:20,810 --> 00:36:23,120
+the photo on that list it'll do a get
+
+750
+00:36:23,120 --> 00:36:25,760
+you know again in its local data center
+
+751
+00:36:25,760 --> 00:36:29,330
+of the photo and now we're actually in
+
+752
+00:36:29,330 --> 00:36:32,630
+much better situation if client to in a
+
+753
+00:36:32,630 --> 00:36:36,260
+different data center saw the photo in
+
+754
+00:36:36,260 --> 00:36:43,880
+this list then that means that client
+
+755
+00:36:43,880 --> 00:36:45,770
+want had already called put on this list
+
+756
+00:36:45,770 --> 00:36:48,290
+because it's this put that adds the
+
+757
+00:36:48,290 --> 00:36:50,300
+footage of the list if client wanted
+
+758
+00:36:50,300 --> 00:36:51,770
+already called put on this list that
+
+759
+00:36:51,770 --> 00:36:54,290
+means the client one now given the way
+
+760
+00:36:54,290 --> 00:36:56,210
+this code works right had already called
+
+761
+00:36:56,210 --> 00:36:58,580
+sink and sink doesn't return until the
+
+762
+00:36:58,580 --> 00:37:01,460
+photo is present at all data centers so
+
+763
+00:37:01,460 --> 00:37:03,500
+that means that client two can the
+
+764
+00:37:03,500 --> 00:37:06,080
+programmer for client two can rely on
+
+765
+00:37:06,080 --> 00:37:09,200
+well the photos in the list that means
+
+766
+00:37:09,200 --> 00:37:11,240
+this whoever added the footage to the
+
+767
+00:37:11,240 --> 00:37:16,160
+list their sync completed and the fact
+
+768
+00:37:16,160 --> 00:37:17,360
+that this thing completed means the
+
+769
+00:37:17,360 --> 00:37:18,680
+photo is present everywhere and
+
+770
+00:37:18,680 --> 00:37:21,020
+therefore we can rely on this get photo
+
+771
+00:37:21,020 --> 00:37:28,270
+actually returning the photograph ok so
+
+772
+00:37:28,270 --> 00:37:32,830
+this works and it's actually reasonably
+
+773
+00:37:32,830 --> 00:37:37,100
+practical it does require fairly careful
+
+774
+00:37:37,100 --> 00:37:38,690
+thought on the part of the program or
+
+775
+00:37:38,690 --> 00:37:40,520
+the programmer you know has to think aha
+
+776
+00:37:40,520 --> 00:37:43,790
+I need a sink here I need to put sink
+
+777
+00:37:43,790 --> 00:37:45,770
+put in order for things to work out
+
+778
+00:37:45,770 --> 00:37:48,290
+right the reader for the readers much
+
+779
+00:37:48,290 --> 00:37:50,330
+faster but the reader still needs to
+
+780
+00:37:50,330 --> 00:37:52,280
+think oh you know I'm gonna at least
+
+781
+00:37:52,280 --> 00:37:56,570
+tested that the programmer has to you
+
+782
+00:37:56,570 --> 00:37:58,400
+know check with it if he's if the
+
+783
+00:37:58,400 --> 00:37:59,780
+programmer does a get list and then I
+
+784
+00:37:59,780 --> 00:38:01,730
+get photo from that list that uh you
+
+785
+00:38:01,730 --> 00:38:03,580
+know verify that indeed the code
+
+786
+00:38:03,580 --> 00:38:05,900
+modified the list called sink before
+
+787
+00:38:05,900 --> 00:38:08,390
+adding some things for list that is
+
+788
+00:38:08,390 --> 00:38:11,020
+quite a bit of thought
+
+789
+00:38:11,190 --> 00:38:13,410
+with this is all about the sink cause
+
+790
+00:38:13,410 --> 00:38:15,090
+all about is enforcing order make sure
+
+791
+00:38:15,090 --> 00:38:17,790
+that this completely finishes before
+
+792
+00:38:17,790 --> 00:38:22,830
+this happens the readers so that sink
+
+793
+00:38:22,830 --> 00:38:24,600
+and sort of explicitly forces order for
+
+794
+00:38:24,600 --> 00:38:26,580
+writers readers also have to think about
+
+795
+00:38:26,580 --> 00:38:28,980
+order the order is actually obvious in
+
+796
+00:38:28,980 --> 00:38:31,590
+this example but it is true that if the
+
+797
+00:38:31,590 --> 00:38:34,140
+writer did put a put then sink and then
+
+798
+00:38:34,140 --> 00:38:36,390
+put of a second thing then almost always
+
+799
+00:38:36,390 --> 00:38:38,280
+readers need to read the second thing
+
+800
+00:38:38,280 --> 00:38:41,580
+and then read the first thing because
+
+801
+00:38:41,580 --> 00:38:43,560
+guarantees you get out of this out of
+
+802
+00:38:43,560 --> 00:38:46,110
+this sink scheme these barriers is that
+
+803
+00:38:46,110 --> 00:38:49,320
+if a reader sees the second piece of
+
+804
+00:38:49,320 --> 00:38:51,780
+data then they're guaranteed to also see
+
+805
+00:38:51,780 --> 00:38:53,610
+the first piece of data so that means
+
+806
+00:38:53,610 --> 00:38:55,140
+the reader sort of need to be the second
+
+807
+00:38:55,140 --> 00:38:57,480
+piece of data first and then and then
+
+808
+00:38:57,480 --> 00:39:03,330
+the first item of data okay so there's a
+
+809
+00:39:03,330 --> 00:39:05,040
+there's a question about fault tolerance
+
+810
+00:39:05,040 --> 00:39:07,080
+mainly at if one data center goes down
+
+811
+00:39:07,080 --> 00:39:09,420
+that means the sink blocks until the
+
+812
+00:39:09,420 --> 00:39:10,590
+other data centers brought up
+
+813
+00:39:10,590 --> 00:39:12,870
+that's absolutely right so you're
+
+814
+00:39:12,870 --> 00:39:16,680
+totally correct this is a this is not a
+
+815
+00:39:16,680 --> 00:39:19,050
+great scheme alright this is sort of a
+
+816
+00:39:19,050 --> 00:39:21,450
+straw man on the way the cops this sink
+
+817
+00:39:21,450 --> 00:39:24,630
+called would block the way this actually
+
+818
+00:39:24,630 --> 00:39:26,760
+that sort of version of this that people
+
+819
+00:39:26,760 --> 00:39:30,060
+use in the real world to avoid this
+
+820
+00:39:30,060 --> 00:39:31,920
+problem will you know whatever data
+
+821
+00:39:31,920 --> 00:39:33,240
+centers down will the sink block forever
+
+822
+00:39:33,240 --> 00:39:37,080
+is that puts and gets both actually
+
+823
+00:39:37,080 --> 00:39:41,480
+consult a quorum of data center so that
+
+824
+00:39:41,480 --> 00:39:45,450
+this a sink will only wait for you know
+
+825
+00:39:45,450 --> 00:39:48,930
+say a majority year of data centers to
+
+826
+00:39:48,930 --> 00:39:50,580
+acknowledge that they have the latest
+
+827
+00:39:50,580 --> 00:39:52,410
+version of the photo and it get will
+
+828
+00:39:52,410 --> 00:39:55,260
+actually have to consult an overlapping
+
+829
+00:39:55,260 --> 00:39:58,560
+majority of data centers to in order to
+
+830
+00:39:58,560 --> 00:40:01,590
+get the data so things are not really
+
+831
+00:40:01,590 --> 00:40:03,840
+real versions of this are not perhaps as
+
+832
+00:40:03,840 --> 00:40:08,520
+rosy aasaiya as I may be implying again
+
+833
+00:40:08,520 --> 00:40:14,050
+the the systems that work in this way is
+
+834
+00:40:14,050 --> 00:40:16,440
+you're interested it's dynamo
+
+835
+00:40:16,440 --> 00:40:21,720
+and Cassandra and they use quorums to
+
+836
+00:40:21,720 --> 00:40:28,140
+avoid the wall talks pop okay okay so
+
+837
+00:40:28,140 --> 00:40:30,900
+this is a straightforward design and has
+
+838
+00:40:30,900 --> 00:40:32,910
+decent semantics even though it's slow
+
+839
+00:40:32,910 --> 00:40:34,740
+and this as you observe not very fault
+
+840
+00:40:34,740 --> 00:40:36,540
+tolerant the read performance is
+
+841
+00:40:36,540 --> 00:40:38,780
+outstanding because the reads are still
+
+842
+00:40:38,780 --> 00:40:41,819
+for local at least if we if the quorum
+
+843
+00:40:41,819 --> 00:40:45,569
+setup is read one write all and the
+
+844
+00:40:45,569 --> 00:40:47,190
+write performance is not great but it's
+
+845
+00:40:47,190 --> 00:40:49,680
+okay if you don't write very much or if
+
+846
+00:40:49,680 --> 00:40:52,020
+you don't mind great waiting and the
+
+847
+00:40:52,020 --> 00:40:53,369
+reason why you can maybe convince
+
+848
+00:40:53,369 --> 00:40:55,849
+yourself that the rate performance is
+
+849
+00:40:55,849 --> 00:40:58,829
+not a disaster is that after all the
+
+850
+00:40:58,829 --> 00:41:01,230
+Facebook memcache D paper has to send
+
+851
+00:41:01,230 --> 00:41:02,910
+all rights through the primary data
+
+852
+00:41:02,910 --> 00:41:04,470
+center so yeah you know Facebook runs
+
+853
+00:41:04,470 --> 00:41:07,050
+multiple data centers and clients talk
+
+854
+00:41:07,050 --> 00:41:08,760
+to all of them but the rates have to all
+
+855
+00:41:08,760 --> 00:41:11,430
+be sent to the my sequel databases at
+
+856
+00:41:11,430 --> 00:41:13,490
+the one primary data center
+
+857
+00:41:13,490 --> 00:41:15,839
+similarly spanner writes have to wait
+
+858
+00:41:15,839 --> 00:41:18,119
+for a majority of replica sites to
+
+859
+00:41:18,119 --> 00:41:19,530
+acknowledge the rights before the
+
+860
+00:41:19,530 --> 00:41:21,630
+clients thought to proceed so the notion
+
+861
+00:41:21,630 --> 00:41:23,280
+that clients might have dis rule that
+
+862
+00:41:23,280 --> 00:41:25,859
+the rights might have to wait to talk to
+
+863
+00:41:25,859 --> 00:41:27,359
+other data centers in order to allow the
+
+864
+00:41:27,359 --> 00:41:30,540
+reads to be fast is does not appear to
+
+865
+00:41:30,540 --> 00:41:35,000
+be outrageous in practice mom still I
+
+866
+00:41:35,000 --> 00:41:38,040
+you know you might like to nevertheless
+
+867
+00:41:38,040 --> 00:41:39,630
+have a system that does better than this
+
+868
+00:41:39,630 --> 00:41:42,900
+to somehow have semantics of sync that
+
+869
+00:41:42,900 --> 00:41:46,020
+sort of or sync is forcing this put
+
+870
+00:41:46,020 --> 00:41:48,270
+definitely appears to everyone to happen
+
+871
+00:41:48,270 --> 00:41:49,770
+before the second put you might like to
+
+872
+00:41:49,770 --> 00:41:54,329
+have that and without the cost so we'll
+
+873
+00:41:54,329 --> 00:41:56,970
+be interested in systems and this is
+
+874
+00:41:56,970 --> 00:41:58,440
+starting to get close to what cops does
+
+875
+00:41:58,440 --> 00:42:00,720
+interested in systems in which instead
+
+876
+00:42:00,720 --> 00:42:02,790
+of sort of forcing the clients to wait
+
+877
+00:42:02,790 --> 00:42:04,829
+at this point we somehow just encode the
+
+878
+00:42:04,829 --> 00:42:06,780
+order as a piece of information that
+
+879
+00:42:06,780 --> 00:42:08,970
+we're going to tell the readers or tell
+
+880
+00:42:08,970 --> 00:42:16,010
+the other data centers and a simple
+
+881
+00:42:16,010 --> 00:42:21,040
+do that which the paper mentions as a
+
+882
+00:42:21,040 --> 00:42:24,710
+non scalable implementation is that at
+
+883
+00:42:24,710 --> 00:42:27,050
+each data center so this is a logging
+
+884
+00:42:27,050 --> 00:42:31,490
+approach at each data center instead of
+
+885
+00:42:31,490 --> 00:42:34,550
+having the different shard servers talk
+
+886
+00:42:34,550 --> 00:42:36,140
+to their counterparts in other data
+
+887
+00:42:36,140 --> 00:42:42,440
+servers sort of independently instead at
+
+888
+00:42:42,440 --> 00:42:43,700
+every day the center we're gonna have a
+
+889
+00:42:43,700 --> 00:42:47,120
+designated log server that's in charge
+
+890
+00:42:47,120 --> 00:42:49,700
+of communicating of sending writes to
+
+891
+00:42:49,700 --> 00:42:52,400
+the other data center so that means if a
+
+892
+00:42:52,400 --> 00:42:56,300
+client does it right does it put to its
+
+893
+00:42:56,300 --> 00:42:59,000
+local shard and that's chart that shard
+
+894
+00:42:59,000 --> 00:43:00,680
+instead of just sending that the data
+
+895
+00:43:00,680 --> 00:43:02,090
+out sort of separately to the other data
+
+896
+00:43:02,090 --> 00:43:07,010
+centers will talk to his local log
+
+897
+00:43:07,010 --> 00:43:11,900
+server and append the right to the one
+
+898
+00:43:11,900 --> 00:43:13,280
+log that this data center is
+
+899
+00:43:13,280 --> 00:43:15,110
+accumulating and then if a client say
+
+900
+00:43:15,110 --> 00:43:18,650
+does a write to a different key maybe
+
+901
+00:43:18,650 --> 00:43:22,300
+we're writing key a and key B here
+
+902
+00:43:22,300 --> 00:43:25,520
+instead of again instead of this shard
+
+903
+00:43:25,520 --> 00:43:27,350
+server sending the right to key B sort
+
+904
+00:43:27,350 --> 00:43:31,010
+of independently it's gonna tell the
+
+905
+00:43:31,010 --> 00:43:34,220
+local log server to append the right to
+
+906
+00:43:34,220 --> 00:43:37,280
+the log and then the log server send out
+
+907
+00:43:37,280 --> 00:43:40,250
+their log to the other data centers in
+
+908
+00:43:40,250 --> 00:43:45,080
+log order so that all data centers are
+
+909
+00:43:45,080 --> 00:43:46,910
+guaranteed to see the right to a first
+
+910
+00:43:46,910 --> 00:43:49,400
+and they're gonna hope process that rate
+
+911
+00:43:49,400 --> 00:43:52,430
+to a first and then all data centers are
+
+912
+00:43:52,430 --> 00:43:53,630
+going to see our right to B and that
+
+913
+00:43:53,630 --> 00:43:54,920
+means if a client does a right to a
+
+914
+00:43:54,920 --> 00:43:57,950
+first and then does it right to be the
+
+915
+00:43:57,950 --> 00:43:59,630
+writes will show up in that order and it
+
+916
+00:43:59,630 --> 00:44:01,640
+in its log a and B and they'll be sent
+
+917
+00:44:01,640 --> 00:44:04,160
+the right to a first and then the right
+
+918
+00:44:04,160 --> 00:44:06,200
+to be to each of the t's data centers
+
+919
+00:44:06,200 --> 00:44:08,060
+and they probably actually have to be
+
+920
+00:44:08,060 --> 00:44:11,870
+sent to a kind of single log receiving
+
+921
+00:44:11,870 --> 00:44:15,410
+server which plays out the rates one at
+
+922
+00:44:15,410 --> 00:44:19,550
+a time as they arrive in log order so
+
+923
+00:44:19,550 --> 00:44:20,990
+this is the logging strategy if the
+
+924
+00:44:20,990 --> 00:44:23,810
+paper criticizes
+
+925
+00:44:23,810 --> 00:44:26,270
+it's actually regain some of the
+
+926
+00:44:26,270 --> 00:44:29,240
+performance we want because now clients
+
+927
+00:44:29,240 --> 00:44:31,550
+we're no longer we now eliminate the
+
+928
+00:44:31,550 --> 00:44:33,380
+sinks the clients can go back to this
+
+929
+00:44:33,380 --> 00:44:38,860
+going put of a and then put B and they
+
+930
+00:44:38,860 --> 00:44:41,450
+client puts can return as soon as the
+
+931
+00:44:41,450 --> 00:44:43,760
+data is sitting in the log at the local
+
+932
+00:44:43,760 --> 00:44:46,670
+log server so now client puts and gets
+
+933
+00:44:46,670 --> 00:44:48,860
+are now quite fast again
+
+934
+00:44:48,860 --> 00:44:51,620
+but we're preserving order sort of by
+
+935
+00:44:51,620 --> 00:44:54,470
+basically through the sequence numbers
+
+936
+00:44:54,470 --> 00:44:56,480
+of the entries and the logs rather than
+
+937
+00:44:56,480 --> 00:44:59,630
+by having the clients wait so that's
+
+938
+00:44:59,630 --> 00:45:01,640
+nice we get the order you know now we're
+
+939
+00:45:01,640 --> 00:45:05,810
+forcing ordered writes and we're causing
+
+940
+00:45:05,810 --> 00:45:08,180
+the rights to show up in order at the
+
+941
+00:45:08,180 --> 00:45:09,530
+other data center so that reading
+
+942
+00:45:09,530 --> 00:45:11,720
+clients will see them in order and so
+
+943
+00:45:11,720 --> 00:45:13,610
+our my example application might
+
+944
+00:45:13,610 --> 00:45:16,990
+actually work them out with this scheme
+
+945
+00:45:17,770 --> 00:45:20,720
+the drawback that the paper points to
+
+946
+00:45:20,720 --> 00:45:24,170
+about this style of solution is that the
+
+947
+00:45:24,170 --> 00:45:26,690
+log server now all the rights have to go
+
+948
+00:45:26,690 --> 00:45:29,420
+through this one log server and so if we
+
+949
+00:45:29,420 --> 00:45:31,250
+have a big big database with maybe
+
+950
+00:45:31,250 --> 00:45:34,700
+hundreds of servers serving at least in
+
+951
+00:45:34,700 --> 00:45:37,010
+total a reasonably high workload the
+
+952
+00:45:37,010 --> 00:45:39,200
+right workload all the rights have to go
+
+953
+00:45:39,200 --> 00:45:42,080
+through this log server and possibly all
+
+954
+00:45:42,080 --> 00:45:45,170
+the rights have to be played out through
+
+955
+00:45:45,170 --> 00:45:47,960
+a single receiving log server at the far
+
+956
+00:45:47,960 --> 00:45:50,900
+end and a single log server as the
+
+957
+00:45:50,900 --> 00:45:52,340
+system grows there get to be more and
+
+958
+00:45:52,340 --> 00:45:54,410
+more shards a single log server may stop
+
+959
+00:45:54,410 --> 00:45:57,980
+being fast enough to process all these
+
+960
+00:45:57,980 --> 00:46:01,880
+rates and so cops does not follow this
+
+961
+00:46:01,880 --> 00:46:06,760
+approach to conveying the order
+
+962
+00:46:06,760 --> 00:46:10,870
+constraints to other data centers
+
+963
+00:46:10,870 --> 00:46:15,440
+okay so we want to build a system that
+
+964
+00:46:15,440 --> 00:46:17,120
+can at least from the clients point of
+
+965
+00:46:17,120 --> 00:46:18,770
+view process rates and reads purely
+
+966
+00:46:18,770 --> 00:46:20,600
+locally we don't want to have to wait
+
+967
+00:46:20,600 --> 00:46:22,550
+you don't want clients to wait in order
+
+968
+00:46:22,550 --> 00:46:25,610
+to get order we want a forward we like
+
+969
+00:46:25,610 --> 00:46:28,040
+the fact that these rates are being
+
+970
+00:46:28,040 --> 00:46:31,490
+forward asynchronously but we somehow
+
+971
+00:46:31,490 --> 00:46:36,050
+want to eliminate the central log server
+
+972
+00:46:36,050 --> 00:46:37,850
+so we want to somehow convey
+
+973
+00:46:37,850 --> 00:46:39,290
+order information to other data centers
+
+974
+00:46:39,290 --> 00:46:41,440
+without having to funnel all our rates
+
+975
+00:46:41,440 --> 00:46:45,590
+through a single logs alright so now
+
+976
+00:46:45,590 --> 00:46:48,560
+that brings us to what cops is actually
+
+977
+00:46:48,560 --> 00:46:51,700
+up to so when I can talk about now is
+
+978
+00:46:51,700 --> 00:46:54,410
+starting to be what cops does and what
+
+979
+00:46:54,410 --> 00:46:56,390
+I'm talking about though is the non GTE
+
+980
+00:46:56,390 --> 00:47:00,740
+version of cops cops without get
+
+981
+00:47:00,740 --> 00:47:09,380
+transactions ok so the cops is the basic
+
+982
+00:47:09,380 --> 00:47:11,600
+strategy here is that when cops clients
+
+983
+00:47:11,600 --> 00:47:14,630
+read and write locally they accumulate
+
+984
+00:47:14,630 --> 00:47:16,130
+information about the order in which
+
+985
+00:47:16,130 --> 00:47:19,130
+they're doing things that's a little
+
+986
+00:47:19,130 --> 00:47:21,050
+more fine-grain than the logging scheme
+
+987
+00:47:21,050 --> 00:47:24,220
+and that information is sent to the
+
+988
+00:47:24,220 --> 00:47:26,750
+remote data centers whenever a client
+
+989
+00:47:26,750 --> 00:47:29,060
+doesn't quote so this we have this
+
+990
+00:47:29,060 --> 00:47:34,580
+notion of client context and as a client
+
+991
+00:47:34,580 --> 00:47:36,590
+does get some puts you know maybe a
+
+992
+00:47:36,590 --> 00:47:42,070
+client as a get of X and then I get it Y
+
+993
+00:47:42,070 --> 00:47:48,430
+and then a put of Z with some value
+
+994
+00:47:49,569 --> 00:47:55,009
+the context the library that the client
+
+995
+00:47:55,009 --> 00:47:57,499
+uses that implements Budhan get is going
+
+996
+00:47:57,499 --> 00:47:59,239
+to be accumulated in this context
+
+997
+00:47:59,239 --> 00:48:01,789
+information on the side as the put sand
+
+998
+00:48:01,789 --> 00:48:05,089
+gets occur so if a client doesn't get
+
+999
+00:48:05,089 --> 00:48:07,069
+and that yields some value with version
+
+1000
+00:48:07,069 --> 00:48:11,239
+2 I'm just going to save that as an
+
+1001
+00:48:11,239 --> 00:48:13,249
+example maybe get returns the current
+
+1002
+00:48:13,249 --> 00:48:14,539
+value of x and that current value House
+
+1003
+00:48:14,539 --> 00:48:20,179
+version 2 and maybe Y returns the
+
+1004
+00:48:20,179 --> 00:48:22,549
+current value of version for what's
+
+1005
+00:48:22,549 --> 00:48:25,459
+going to be accumulated in the context
+
+1006
+00:48:25,459 --> 00:48:32,359
+is that this client has read X and a got
+
+1007
+00:48:32,359 --> 00:48:37,119
+version 2 then after the get for why the
+
+1008
+00:48:37,119 --> 00:48:39,920
+cops client libraries gonna add to the
+
+1009
+00:48:39,920 --> 00:48:43,099
+context so that it's not just we've read
+
+1010
+00:48:43,099 --> 00:48:44,599
+X and gotten version 2 but also now
+
+1011
+00:48:44,599 --> 00:48:47,739
+we've read Y and gotten version 4 and
+
+1012
+00:48:47,739 --> 00:48:53,089
+when the client does a put the
+
+1013
+00:48:53,089 --> 00:48:57,009
+information that's sent to the local
+
+1014
+00:48:57,009 --> 00:49:02,869
+shard server is not just put key and
+
+1015
+00:49:02,869 --> 00:49:06,589
+what if the value is but also these
+
+1016
+00:49:06,589 --> 00:49:08,749
+dependencies so we're going to tell the
+
+1017
+00:49:08,749 --> 00:49:12,589
+local shard server for Z that this
+
+1018
+00:49:12,589 --> 00:49:15,049
+client has already read before doing the
+
+1019
+00:49:15,049 --> 00:49:19,189
+put X and got version 2 and Y and got
+
+1020
+00:49:19,189 --> 00:49:21,819
+version 4
+
+1021
+00:49:23,220 --> 00:49:26,110
+and you know what's going on here is
+
+1022
+00:49:26,110 --> 00:49:28,540
+that we're telling where the client is
+
+1023
+00:49:28,540 --> 00:49:30,790
+expressing this ordering information
+
+1024
+00:49:30,790 --> 00:49:34,600
+that this put to Z now the client had
+
+1025
+00:49:34,600 --> 00:49:37,210
+seemed X version 2 and Y version 4
+
+1026
+00:49:37,210 --> 00:49:39,040
+before doing the foot so anybody else
+
+1027
+00:49:39,040 --> 00:49:41,800
+who reads this version of Z had also
+
+1028
+00:49:41,800 --> 00:49:44,140
+better be seeing X&Y with the Beasties
+
+1029
+00:49:44,140 --> 00:49:48,670
+versions and similarly if the client
+
+1030
+00:49:48,670 --> 00:49:54,450
+then does a put of something else say Q
+
+1031
+00:49:54,960 --> 00:49:57,010
+what's going to be sent to the local
+
+1032
+00:49:57,010 --> 00:50:01,630
+shard server is not just the Q and this
+
+1033
+00:50:01,630 --> 00:50:05,260
+but also the fact that this client had
+
+1034
+00:50:05,260 --> 00:50:08,020
+previously done some gets input so let's
+
+1035
+00:50:08,020 --> 00:50:12,880
+suppose this put yields version 3 you
+
+1036
+00:50:12,880 --> 00:50:14,950
+know the local shard server says a high
+
+1037
+00:50:14,950 --> 00:50:16,960
+assigned version three to your new value
+
+1038
+00:50:16,960 --> 00:50:19,390
+for Z then when we come to do the quit
+
+1039
+00:50:19,390 --> 00:50:21,280
+of Q is going to be accompanied with
+
+1040
+00:50:21,280 --> 00:50:22,990
+dependency information that says this
+
+1041
+00:50:22,990 --> 00:50:25,630
+put comes after this put of Q comes
+
+1042
+00:50:25,630 --> 00:50:29,020
+after the put of Z that created Z
+
+1043
+00:50:29,020 --> 00:50:33,070
+version three and at least notionally
+
+1044
+00:50:33,070 --> 00:50:36,750
+the rest of the context
+
+1045
+00:50:38,079 --> 00:50:40,640
+ought to be passed as well although
+
+1046
+00:50:40,640 --> 00:50:46,670
+we'll see that for various reasons cops
+
+1047
+00:50:46,670 --> 00:50:49,369
+can optimize away this information and
+
+1048
+00:50:49,369 --> 00:50:51,980
+if there's a proceeding put only sends
+
+1049
+00:50:51,980 --> 00:50:56,750
+the version information for the point so
+
+1050
+00:50:56,750 --> 00:50:58,010
+the question is is it important for the
+
+1051
+00:50:58,010 --> 00:51:03,200
+context to be ordered I don't believe so
+
+1052
+00:51:03,200 --> 00:51:09,109
+I think I think it's sufficient to treat
+
+1053
+00:51:09,109 --> 00:51:10,849
+the context or at least the information
+
+1054
+00:51:10,849 --> 00:51:15,770
+that's sent in the put as just a big bag
+
+1055
+00:51:15,770 --> 00:51:20,809
+of dependencies for at least four
+
+1056
+00:51:20,809 --> 00:51:25,819
+non-transactional cops okay so the
+
+1057
+00:51:25,819 --> 00:51:27,559
+clients are community this context and
+
+1058
+00:51:27,559 --> 00:51:29,300
+basically send the context with each put
+
+1059
+00:51:29,300 --> 00:51:34,040
+and the context is encoding this order
+
+1060
+00:51:34,040 --> 00:51:36,829
+information that in my previous straw
+
+1061
+00:51:36,829 --> 00:51:39,980
+man straw man 2 was sort of forced by
+
+1062
+00:51:39,980 --> 00:51:41,359
+sink instead of doing that we're not
+
+1063
+00:51:41,359 --> 00:51:43,549
+waiting for accompanying these puts with
+
+1064
+00:51:43,549 --> 00:51:47,089
+oh this put needs to come after these
+
+1065
+00:51:47,089 --> 00:51:48,950
+previous values and this put needs to
+
+1066
+00:51:48,950 --> 00:51:56,119
+come after these previous values cops
+
+1067
+00:51:56,119 --> 00:51:58,940
+calls these relationships that this put
+
+1068
+00:51:58,940 --> 00:52:00,890
+needs to come after these previous
+
+1069
+00:52:00,890 --> 00:52:04,270
+values of dependency
+
+1070
+00:52:05,900 --> 00:52:12,010
+and dependency and it writes it as
+
+1071
+00:52:12,010 --> 00:52:14,779
+supposing this foot produces Z version
+
+1072
+00:52:14,779 --> 00:52:20,539
+three we express it as really there's
+
+1073
+00:52:20,539 --> 00:52:23,720
+two actually two dependencies here one
+
+1074
+00:52:23,720 --> 00:52:28,849
+is that X version two comes before Z
+
+1075
+00:52:28,849 --> 00:52:32,799
+version three and the other is that Y
+
+1076
+00:52:32,799 --> 00:52:38,020
+version four comes before Z version
+
+1077
+00:52:38,020 --> 00:52:42,859
+three and these are it's just definition
+
+1078
+00:52:42,859 --> 00:52:46,069
+or notation that the paper uses to talk
+
+1079
+00:52:46,069 --> 00:52:50,779
+about these individual pieces of order
+
+1080
+00:52:50,779 --> 00:52:53,619
+information that cops needs to enforce
+
+1081
+00:52:53,619 --> 00:52:58,339
+alright so so then what is this what is
+
+1082
+00:52:58,339 --> 00:52:59,869
+this dependency information this passed
+
+1083
+00:52:59,869 --> 00:53:02,000
+to the local shard server what does that
+
+1084
+00:53:02,000 --> 00:53:08,450
+actually cause cops to do well eats cops
+
+1085
+00:53:08,450 --> 00:53:12,289
+shard server when it receives a put from
+
+1086
+00:53:12,289 --> 00:53:15,020
+a local client first it assigns the new
+
+1087
+00:53:15,020 --> 00:53:18,710
+version number then it stores the new
+
+1088
+00:53:18,710 --> 00:53:21,200
+value you know it stores for Z this new
+
+1089
+00:53:21,200 --> 00:53:22,910
+value along with the version number that
+
+1090
+00:53:22,910 --> 00:53:30,559
+it long version number that allocated
+
+1091
+00:53:30,559 --> 00:53:33,260
+and then it sends the whole mess to each
+
+1092
+00:53:33,260 --> 00:53:35,420
+of the other data center so at least
+
+1093
+00:53:35,420 --> 00:53:38,599
+some non GT cops the local shard server
+
+1094
+00:53:38,599 --> 00:53:42,170
+only remembers the key value and latest
+
+1095
+00:53:42,170 --> 00:53:43,369
+version number doesn't actually remember
+
+1096
+00:53:43,369 --> 00:53:45,170
+the dependencies and only forwards them
+
+1097
+00:53:45,170 --> 00:53:46,609
+across the network to the other data
+
+1098
+00:53:46,609 --> 00:53:53,079
+centers so now the position were in is
+
+1099
+00:53:53,079 --> 00:53:57,319
+that let's say we had a client produced
+
+1100
+00:53:57,319 --> 00:54:03,380
+a put of Z and some value it was
+
+1101
+00:54:03,380 --> 00:54:08,900
+assigned version number v3 and it had
+
+1102
+00:54:08,900 --> 00:54:11,859
+these dependencies
+
+1103
+00:54:13,090 --> 00:54:19,960
+XV 2 + a YB 4 right and this is sent
+
+1104
+00:54:19,960 --> 00:54:22,630
+from datacenter 1 let's say to the other
+
+1105
+00:54:22,630 --> 00:54:25,870
+data center so we got a datacenter 2 and
+
+1106
+00:54:25,870 --> 00:54:29,020
+datacenter 3 both receive this now in
+
+1107
+00:54:29,020 --> 00:54:31,210
+fact this information is sent from The
+
+1108
+00:54:31,210 --> 00:54:34,360
+Shard server for ze so there's lots of
+
+1109
+00:54:34,360 --> 00:54:37,720
+shard servers but only the shard for Z
+
+1110
+00:54:37,720 --> 00:54:40,530
+is involved in this
+
+1111
+00:54:40,530 --> 00:54:43,570
+so here datacenter 3 the shirts are for
+
+1112
+00:54:43,570 --> 00:54:49,960
+Z is going to receive this put from sent
+
+1113
+00:54:49,960 --> 00:54:54,960
+by the client short server forwards it
+
+1114
+00:54:56,070 --> 00:55:00,160
+this short server the the with this
+
+1115
+00:55:00,160 --> 00:55:02,200
+dependency information that you know X V
+
+1116
+00:55:02,200 --> 00:55:04,510
+2 and Y before come before Z B 3 but
+
+1117
+00:55:04,510 --> 00:55:06,910
+that really means is operationally is
+
+1118
+00:55:06,910 --> 00:55:10,270
+that this new version of Z can't be
+
+1119
+00:55:10,270 --> 00:55:14,620
+revealed to clients until its
+
+1120
+00:55:14,620 --> 00:55:17,260
+dependencies these versions of x and y
+
+1121
+00:55:17,260 --> 00:55:22,180
+have already been revealed to clients in
+
+1122
+00:55:22,180 --> 00:55:24,640
+datacenter 3 so that means that the
+
+1123
+00:55:24,640 --> 00:55:27,070
+shard server visi must hold this right
+
+1124
+00:55:27,070 --> 00:55:30,010
+must delay applying this right to Z
+
+1125
+00:55:30,010 --> 00:55:33,370
+until it knows that these 2 dependencies
+
+1126
+00:55:33,370 --> 00:55:35,410
+are visible in the local data center so
+
+1127
+00:55:35,410 --> 00:55:38,920
+that means that Z has to go off let's
+
+1128
+00:55:38,920 --> 00:55:40,960
+say the you know we have these shard
+
+1129
+00:55:40,960 --> 00:55:43,180
+server for X and the shorts are for Y
+
+1130
+00:55:43,180 --> 00:55:45,550
+Z's gotta actually send a message to the
+
+1131
+00:55:45,550 --> 00:55:47,320
+shard server for X and the shard server
+
+1132
+00:55:47,320 --> 00:55:49,420
+for Y saying you know what's the version
+
+1133
+00:55:49,420 --> 00:55:52,330
+number for a current version for a
+
+1134
+00:55:52,330 --> 00:55:55,150
+number for x and y and has to wait for
+
+1135
+00:55:55,150 --> 00:55:58,030
+the result if both of these shards
+
+1136
+00:55:58,030 --> 00:55:59,620
+servers say oh you know they give a
+
+1137
+00:55:59,620 --> 00:56:01,450
+version number that's 2 or higher or 4
+
+1138
+00:56:01,450 --> 00:56:03,850
+or higher for Y then Z can go ahead and
+
+1139
+00:56:03,850 --> 00:56:09,420
+apply to put to its local table of data
+
+1140
+00:56:09,420 --> 00:56:13,840
+however you know maybe these two shard
+
+1141
+00:56:13,840 --> 00:56:16,390
+servers haven't received the updates
+
+1142
+00:56:16,390 --> 00:56:17,620
+that correspond to version 2 of
+
+1143
+00:56:17,620 --> 00:56:20,260
+extraversion for Y and that KC has to
+
+1144
+00:56:20,260 --> 00:56:22,150
+hold on to this update the shard server
+
+1145
+00:56:22,150 --> 00:56:23,890
+is he has to hold on to this update and
+
+1146
+00:56:23,890 --> 00:56:25,540
+tell
+
+1147
+00:56:25,540 --> 00:56:27,310
+the indicated versions of X or Y ever
+
+1148
+00:56:27,310 --> 00:56:29,680
+actually arrived and been installed on
+
+1149
+00:56:29,680 --> 00:56:32,020
+these two short servers so there may be
+
+1150
+00:56:32,020 --> 00:56:35,080
+some delays now and only after these
+
+1151
+00:56:35,080 --> 00:56:37,510
+dependencies are visible at datacenter 3
+
+1152
+00:56:37,510 --> 00:56:40,240
+only then can the shards of a4z go ahead
+
+1153
+00:56:40,240 --> 00:56:43,320
+and write updated stable for Z to have
+
+1154
+00:56:43,320 --> 00:56:52,570
+version 3 ok and what's what that means
+
+1155
+00:56:52,570 --> 00:56:54,640
+of course is that if a client the
+
+1156
+00:56:54,640 --> 00:56:56,920
+datacenter 3 does a read for Z and sees
+
+1157
+00:56:56,920 --> 00:56:59,170
+version 3 then because he already waited
+
+1158
+00:56:59,170 --> 00:57:01,870
+that means if that client then reads X
+
+1159
+00:57:01,870 --> 00:57:04,210
+or Y it's guaranteed to see at least
+
+1160
+00:57:04,210 --> 00:57:06,520
+version 2 of X and at least version 2 of
+
+1161
+00:57:06,520 --> 00:57:10,420
+Y because he didn't reveal the shards or
+
+1162
+00:57:10,420 --> 00:57:13,780
+didn't reveal Z until it was sure the
+
+1163
+00:57:13,780 --> 00:57:19,210
+dependencies would be visible ok so
+
+1164
+00:57:19,210 --> 00:57:20,860
+question what if x and y never get their
+
+1165
+00:57:20,860 --> 00:57:22,870
+values perhaps due to a network
+
+1166
+00:57:22,870 --> 00:57:24,820
+partition with the Z shard block forever
+
+1167
+00:57:24,820 --> 00:57:29,260
+yeah the um the semantics require the Z
+
+1168
+00:57:29,260 --> 00:57:34,720
+shard to block forever that's absolutely
+
+1169
+00:57:34,720 --> 00:57:36,400
+true so you know there's certainly an
+
+1170
+00:57:36,400 --> 00:57:40,870
+assumption here that well they're you
+
+1171
+00:57:40,870 --> 00:57:42,850
+know two ways that that might turn out
+
+1172
+00:57:42,850 --> 00:57:45,430
+ok one is somebody repairs the network
+
+1173
+00:57:45,430 --> 00:57:48,130
+or repairs whatever was broken and x and
+
+1174
+00:57:48,130 --> 00:57:50,740
+y do eventually get their updates that
+
+1175
+00:57:50,740 --> 00:57:52,420
+be one way to fix this and then z will
+
+1176
+00:57:52,420 --> 00:57:53,470
+finally be able to apply the update
+
+1177
+00:57:53,470 --> 00:57:57,640
+might have to wait a long time the other
+
+1178
+00:57:57,640 --> 00:57:59,050
+possibility is maybe the data center is
+
+1179
+00:57:59,050 --> 00:58:00,430
+entirely destroyed
+
+1180
+00:58:00,430 --> 00:58:02,710
+you mean the building burns down and so
+
+1181
+00:58:02,710 --> 00:58:04,500
+we don't have to worry about this at all
+
+1182
+00:58:04,500 --> 00:58:07,780
+but it does point out a problem that's
+
+1183
+00:58:07,780 --> 00:58:13,680
+real criticism of causal consistency and
+
+1184
+00:58:13,680 --> 00:58:18,850
+that's that these delays can actually be
+
+1185
+00:58:18,850 --> 00:58:21,370
+quite nasty because you can imagine oh
+
+1186
+00:58:21,370 --> 00:58:23,230
+you know Z is waiting for the correct
+
+1187
+00:58:23,230 --> 00:58:25,030
+value for X to arrive you know even if
+
+1188
+00:58:25,030 --> 00:58:26,590
+there's no failures and nothing burns
+
+1189
+00:58:26,590 --> 00:58:29,710
+down even mere slowness can be
+
+1190
+00:58:29,710 --> 00:58:31,840
+irritating Z mate you have to wait for X
+
+1191
+00:58:31,840 --> 00:58:34,570
+to show up well it could be that X has
+
+1192
+00:58:34,570 --> 00:58:38,110
+already showed up and has arrived at
+
+1193
+00:58:38,110 --> 00:58:38,980
+this charts
+
+1194
+00:58:38,980 --> 00:58:41,290
+but it itself had dependencies maybe on
+
+1195
+00:58:41,290 --> 00:58:43,630
+key a and so this chart server can't
+
+1196
+00:58:43,630 --> 00:58:45,970
+install it until the update for a
+
+1197
+00:58:45,970 --> 00:58:49,240
+arrives because X this put of X depended
+
+1198
+00:58:49,240 --> 00:58:52,570
+on some key a and Z still has to wait
+
+1199
+00:58:52,570 --> 00:58:54,339
+for that because what Z's waiting for is
+
+1200
+00:58:54,339 --> 00:58:57,160
+for this version of X to be visible to
+
+1201
+00:58:57,160 --> 00:58:59,500
+client so it has to be installed so if
+
+1202
+00:58:59,500 --> 00:59:00,940
+it's arrived if the update for X is
+
+1203
+00:59:00,940 --> 00:59:02,920
+arrived but itself is waiting for some
+
+1204
+00:59:02,920 --> 00:59:05,440
+other dependency then we may get these
+
+1205
+00:59:05,440 --> 00:59:09,880
+cascading dependency Waits and in real
+
+1206
+00:59:09,880 --> 00:59:11,859
+life actually these you know these
+
+1207
+00:59:11,859 --> 00:59:15,310
+probably would happen and it's one of
+
+1208
+00:59:15,310 --> 00:59:19,599
+the problems that people bring up and
+
+1209
+00:59:19,599 --> 00:59:21,460
+you know against calls are consistency
+
+1210
+00:59:21,460 --> 00:59:24,730
+when when you try to persuade them it's
+
+1211
+00:59:24,730 --> 00:59:27,070
+a good idea this problem of cascading
+
+1212
+00:59:27,070 --> 00:59:30,910
+delays so that's too bad um although on
+
+1213
+00:59:30,910 --> 00:59:33,760
+that note it is true that the authors of
+
+1214
+00:59:33,760 --> 00:59:37,240
+the cops paper have a follow on P
+
+1215
+00:59:37,240 --> 00:59:38,440
+actually a couple of interesting
+
+1216
+00:59:38,440 --> 00:59:41,589
+follow-on papers but one of them has
+
+1217
+00:59:41,589 --> 00:59:43,930
+some mitigations for this cascading
+
+1218
+00:59:43,930 --> 00:59:47,650
+weight problem okay so for a photo
+
+1219
+00:59:47,650 --> 00:59:50,589
+example this is the scheme this cop
+
+1220
+00:59:50,589 --> 00:59:51,970
+scheme will actually solve our photo
+
+1221
+00:59:51,970 --> 00:59:53,950
+example and the reason is that you know
+
+1222
+00:59:53,950 --> 00:59:55,359
+this put we're talking about is the put
+
+1223
+00:59:55,359 --> 00:59:58,359
+for the photo list the dependencies is
+
+1224
+00:59:58,359 --> 01:00:00,359
+gonna have and its dependency list is
+
+1225
+01:00:00,359 --> 01:00:05,020
+the insert of the photo and that means
+
+1226
+01:00:05,020 --> 01:00:06,339
+that when the put for the photo Willis
+
+1227
+01:00:06,339 --> 01:00:10,300
+arrives at the remote site the remote
+
+1228
+01:00:10,300 --> 01:00:11,950
+chard server is essentially going to
+
+1229
+01:00:11,950 --> 01:00:13,990
+wait for the photo to be inserted and
+
+1230
+01:00:13,990 --> 01:00:16,480
+visible before it updates the photo list
+
+1231
+01:00:16,480 --> 01:00:19,359
+so any client in a remote site that is
+
+1232
+01:00:19,359 --> 01:00:22,089
+able to see the new photo of the updated
+
+1233
+01:00:22,089 --> 01:00:25,810
+photo list is guaranteed to be able to
+
+1234
+01:00:25,810 --> 01:00:28,720
+see the photo as well so this cop scheme
+
+1235
+01:00:28,720 --> 01:00:33,780
+fixes the photo and photo list example
+
+1236
+01:00:33,990 --> 01:00:39,700
+this the scheme the cops is implementing
+
+1237
+01:00:39,700 --> 01:00:45,060
+is is usually called causal consistency
+
+1238
+01:00:52,270 --> 01:00:56,510
+so there's a question is it's off to the
+
+1239
+01:00:56,510 --> 01:00:58,310
+programmer to specify the dependencies
+
+1240
+01:00:58,310 --> 01:01:01,040
+no it turns out that though that context
+
+1241
+01:01:01,040 --> 01:01:04,760
+information this context information
+
+1242
+01:01:04,760 --> 01:01:08,810
+that's accumulated here the cops client
+
+1243
+01:01:08,810 --> 01:01:11,090
+library can accumulate it automatically
+
+1244
+01:01:11,090 --> 01:01:15,320
+so the program only does gets and puts
+
+1245
+01:01:15,320 --> 01:01:23,000
+and may not even need to see the version
+
+1246
+01:01:23,000 --> 01:01:25,220
+numbers so simple program we just do
+
+1247
+01:01:25,220 --> 01:01:28,910
+gets inputs and internally the cops
+
+1248
+01:01:28,910 --> 01:01:30,470
+library maintains these contexts and
+
+1249
+01:01:30,470 --> 01:01:32,870
+adds this extra information to the put
+
+1250
+01:01:32,870 --> 01:01:38,690
+our pcs so that the programmer just just
+
+1251
+01:01:38,690 --> 01:01:41,750
+does get some puts and system kind of
+
+1252
+01:01:41,750 --> 01:01:43,640
+automatically tracks the dependency
+
+1253
+01:01:43,640 --> 01:01:47,740
+information so that's very convenient I
+
+1254
+01:01:47,740 --> 01:01:51,920
+mean just a you know pop up a level for
+
+1255
+01:01:51,920 --> 01:01:53,330
+a moment you know we now built a system
+
+1256
+01:01:53,330 --> 01:01:57,740
+that's that is as semantics powerful
+
+1257
+01:01:57,740 --> 01:02:00,500
+enough to make the photo example code
+
+1258
+01:02:00,500 --> 01:02:02,750
+work out correctly to have it sort of
+
+1259
+01:02:02,750 --> 01:02:04,450
+had the expected result instead of
+
+1260
+01:02:04,450 --> 01:02:08,540
+anomalous results and at least arguably
+
+1261
+01:02:08,540 --> 01:02:10,670
+it's reasonably efficient because nobody
+
+1262
+01:02:10,670 --> 01:02:12,590
+was you know the client never has to
+
+1263
+01:02:12,590 --> 01:02:14,300
+wait for rights to complete there's none
+
+1264
+01:02:14,300 --> 01:02:16,220
+of this sink business and also the
+
+1265
+01:02:16,220 --> 01:02:19,280
+communication is mostly independent
+
+1266
+01:02:19,280 --> 01:02:20,840
+there's no central log server so
+
+1267
+01:02:20,840 --> 01:02:22,790
+arguably this is both reasonably high
+
+1268
+01:02:22,790 --> 01:02:26,950
+performance and has reasonably good
+
+1269
+01:02:26,950 --> 01:02:31,580
+semantics reasonably good consistency so
+
+1270
+01:02:31,580 --> 01:02:36,380
+the the consistency that this design
+
+1271
+01:02:36,380 --> 01:02:38,270
+produces is usually called causal
+
+1272
+01:02:38,270 --> 01:02:42,890
+consistency and it's actually a much
+
+1273
+01:02:42,890 --> 01:02:45,890
+older idea than this paper there's been
+
+1274
+01:02:45,890 --> 01:02:48,710
+a bunch of call so consistency schemes
+
+1275
+01:02:48,710 --> 01:02:50,510
+before this paper indeed a bunch of
+
+1276
+01:02:50,510 --> 01:02:53,300
+follow-on work so it's a treating idea
+
+1277
+01:02:53,300 --> 01:02:55,300
+that people like a lot
+
+1278
+01:02:55,300 --> 01:02:58,670
+what causal consistency is what it sort
+
+1279
+01:02:58,670 --> 01:03:02,000
+of means and here I am putting up I
+
+1280
+01:03:02,000 --> 01:03:03,620
+think a copy of figure two from the
+
+1281
+01:03:03,620 --> 01:03:05,119
+paper
+
+1282
+01:03:05,119 --> 01:03:07,760
+the sort of what the definition says is
+
+1283
+01:03:07,760 --> 01:03:10,869
+that the clients actions induce
+
+1284
+01:03:10,869 --> 01:03:15,380
+dependencies so there's two ways that
+
+1285
+01:03:15,380 --> 01:03:17,660
+dependencies are induced one is if a
+
+1286
+01:03:17,660 --> 01:03:21,349
+given client there's a put and then I
+
+1287
+01:03:21,349 --> 01:03:24,200
+get does it get and then a PUD or a put
+
+1288
+01:03:24,200 --> 01:03:28,730
+and then a put then we say that the the
+
+1289
+01:03:28,730 --> 01:03:31,430
+put depends on the previous put or get
+
+1290
+01:03:31,430 --> 01:03:34,640
+so that in this case put of why if two
+
+1291
+01:03:34,640 --> 01:03:37,220
+depends on the put of X of one so that's
+
+1292
+01:03:37,220 --> 01:03:41,150
+one form of dependency another form of
+
+1293
+01:03:41,150 --> 01:03:43,579
+dependency if is if one client frees a
+
+1294
+01:03:43,579 --> 01:03:46,430
+value out of the storage system then we
+
+1295
+01:03:46,430 --> 01:03:49,130
+say that that the get that that second
+
+1296
+01:03:49,130 --> 01:03:51,920
+client issued depends on the
+
+1297
+01:03:51,920 --> 01:03:53,570
+corresponding put that actually inserted
+
+1298
+01:03:53,570 --> 01:03:55,849
+the value from a previous client and
+
+1299
+01:03:55,849 --> 01:03:59,630
+furthermore we say that the dependency
+
+1300
+01:03:59,630 --> 01:04:03,920
+relationship is transitive so that you
+
+1301
+01:04:03,920 --> 01:04:06,770
+know this put depends on that get this
+
+1302
+01:04:06,770 --> 01:04:09,619
+get by client two depends on the put by
+
+1303
+01:04:09,619 --> 01:04:11,630
+client one and by transitivity in
+
+1304
+01:04:11,630 --> 01:04:15,920
+addition we can conclude that the client
+
+1305
+01:04:15,920 --> 01:04:18,220
+two's get depends on client ones gift
+
+1306
+01:04:18,220 --> 01:04:21,020
+and so that means that this last put of
+
+1307
+01:04:21,020 --> 01:04:23,980
+by client three for example depends on
+
+1308
+01:04:23,980 --> 01:04:31,550
+all of these previous operations so
+
+1309
+01:04:31,550 --> 01:04:35,380
+that's a definition of causal dependency
+
+1310
+01:04:35,380 --> 01:04:38,900
+and then a causally consistent system
+
+1311
+01:04:38,900 --> 01:04:45,440
+says that says that if through the
+
+1312
+01:04:45,440 --> 01:04:46,910
+definition of dependency I just outlined
+
+1313
+01:04:46,910 --> 01:04:51,890
+a depends on B sorry B depends on a and
+
+1314
+01:04:51,890 --> 01:04:56,089
+a client reads B then the client must
+
+1315
+01:04:56,089 --> 01:04:59,089
+subsequently also see a the dependency
+
+1316
+01:04:59,089 --> 01:05:03,920
+so if client ever sees through a second
+
+1317
+01:05:03,920 --> 01:05:05,270
+of two ordered operations operations
+
+1318
+01:05:05,270 --> 01:05:07,430
+ordered by dependency and the client is
+
+1319
+01:05:07,430 --> 01:05:09,770
+also then after that guaranteed to be
+
+1320
+01:05:09,770 --> 01:05:13,760
+able to see the everything that that
+
+1321
+01:05:13,760 --> 01:05:16,780
+operation depended
+
+1322
+01:05:17,099 --> 01:05:19,270
+you know so that's the definition and
+
+1323
+01:05:19,270 --> 01:05:21,430
+it's you know in a sense kind of
+
+1324
+01:05:21,430 --> 01:05:25,060
+directly derived from what the system
+
+1325
+01:05:25,060 --> 01:05:29,050
+actually does so this is very nice when
+
+1326
+01:05:29,050 --> 01:05:32,260
+updates are causally related that is if
+
+1327
+01:05:32,260 --> 01:05:35,440
+yeah you know these clients and in some
+
+1328
+01:05:35,440 --> 01:05:36,580
+sense they're talking to each other you
+
+1329
+01:05:36,580 --> 01:05:37,930
+know indirectly through the storage
+
+1330
+01:05:37,930 --> 01:05:39,970
+system and so the clients are I kind of
+
+1331
+01:05:39,970 --> 01:05:42,160
+wear that of you know if we somebody
+
+1332
+01:05:42,160 --> 01:05:45,490
+reads this value and c5 sees five and
+
+1333
+01:05:45,490 --> 01:05:46,630
+inspects the code you know they can
+
+1334
+01:05:46,630 --> 01:05:48,880
+conclude that really really you know
+
+1335
+01:05:48,880 --> 01:05:51,599
+this there's a sense in which this put
+
+1336
+01:05:51,599 --> 01:05:55,150
+definitely must have come before this
+
+1337
+01:05:55,150 --> 01:05:56,950
+last put and so if you see slash but you
+
+1338
+01:05:56,950 --> 01:05:58,869
+really gosh you really just deserve to
+
+1339
+01:05:58,869 --> 01:06:00,580
+see this first put so in that sense
+
+1340
+01:06:00,580 --> 01:06:02,619
+causal consistency gives you this
+
+1341
+01:06:02,619 --> 01:06:08,140
+programmers kind of a sort of well
+
+1342
+01:06:08,140 --> 01:06:13,150
+behaved visas allows them to see well
+
+1343
+01:06:13,150 --> 01:06:14,740
+behave values coming out of the storage
+
+1344
+01:06:14,740 --> 01:06:18,310
+system another thing that's good about
+
+1345
+01:06:18,310 --> 01:06:20,349
+causal consistency is that when it
+
+1346
+01:06:20,349 --> 01:06:23,140
+updates when two values in the system
+
+1347
+01:06:23,140 --> 01:06:25,089
+are not two updates are not causally
+
+1348
+01:06:25,089 --> 01:06:28,900
+related the causal consistency system
+
+1349
+01:06:28,900 --> 01:06:31,450
+you know the cops storage system has no
+
+1350
+01:06:31,450 --> 01:06:33,310
+obligation is about maintaining order
+
+1351
+01:06:33,310 --> 01:06:35,859
+between updates that are not causally
+
+1352
+01:06:35,859 --> 01:06:41,200
+related so for example if I mean that's
+
+1353
+01:06:41,200 --> 01:06:43,359
+good for performance so example if we
+
+1354
+01:06:43,359 --> 01:06:46,300
+have you know client one does a put of X
+
+1355
+01:06:46,300 --> 01:06:49,480
+and then I put Z and then around the
+
+1356
+01:06:49,480 --> 01:06:53,220
+same time client two does a put of why
+
+1357
+01:06:53,220 --> 01:06:55,480
+there's a you know there's no causal
+
+1358
+01:06:55,480 --> 01:06:58,290
+relationship between these and therefore
+
+1359
+01:06:58,290 --> 01:07:00,339
+you know sorry there's no causal
+
+1360
+01:07:00,339 --> 01:07:02,200
+relationship between the put of Y and
+
+1361
+01:07:02,200 --> 01:07:04,900
+any of the actions of client one and so
+
+1362
+01:07:04,900 --> 01:07:09,820
+the cops is allowed to do all the work
+
+1363
+01:07:09,820 --> 01:07:11,980
+associated with the put of Y completely
+
+1364
+01:07:11,980 --> 01:07:14,440
+independently for client ones puts and
+
+1365
+01:07:14,440 --> 01:07:16,060
+the way that plays out is that it's done
+
+1366
+01:07:16,060 --> 01:07:19,440
+and the put of Y is sort of entirely
+
+1367
+01:07:19,440 --> 01:07:22,240
+happens in the servers that for the
+
+1368
+01:07:22,240 --> 01:07:24,770
+shard of why these two puts
+
+1369
+01:07:24,770 --> 01:07:29,360
+are only involve servers for the shards
+
+1370
+01:07:29,360 --> 01:07:31,070
+that X and Z are in it may require some
+
+1371
+01:07:31,070 --> 01:07:35,180
+interaction here because the remote
+
+1372
+01:07:35,180 --> 01:07:37,220
+servers for Z may have to wait for this
+
+1373
+01:07:37,220 --> 01:07:39,410
+put to arrive not but they don't have to
+
+1374
+01:07:39,410 --> 01:07:41,870
+talk to the servers that are in charge
+
+1375
+01:07:41,870 --> 01:07:44,990
+of of Y so if that's a sense in which
+
+1376
+01:07:44,990 --> 01:07:47,540
+causal consistency allows good allows
+
+1377
+01:07:47,540 --> 01:07:51,320
+parallelism and good performance and you
+
+1378
+01:07:51,320 --> 01:07:54,530
+know this is different from potentially
+
+1379
+01:07:54,530 --> 01:07:55,940
+from linearizable systems like Anna
+
+1380
+01:07:55,940 --> 01:07:57,320
+linearizable system the fact that this
+
+1381
+01:07:57,320 --> 01:07:59,750
+put Y came after the put of X in real
+
+1382
+01:07:59,750 --> 01:08:01,760
+time actually imposes some requirements
+
+1383
+01:08:01,760 --> 01:08:04,670
+on the linearizable storage system but
+
+1384
+01:08:04,670 --> 01:08:06,970
+there's no such requirements here for
+
+1385
+01:08:06,970 --> 01:08:09,530
+causal consistency and so you might be
+
+1386
+01:08:09,530 --> 01:08:11,030
+able to build a causal consistency
+
+1387
+01:08:11,030 --> 01:08:13,460
+causally consistent system that's faster
+
+1388
+01:08:13,460 --> 01:08:18,380
+than a linearizable system okay there's
+
+1389
+01:08:18,380 --> 01:08:20,390
+a question would cops gain any more
+
+1390
+01:08:20,390 --> 01:08:22,640
+information by including puts in the
+
+1391
+01:08:22,640 --> 01:08:26,120
+client context okay so it's this may be
+
+1392
+01:08:26,120 --> 01:08:28,490
+a reference to the today's lecture
+
+1393
+01:08:28,490 --> 01:08:33,529
+question it is the case so why don't I
+
+1394
+01:08:33,529 --> 01:08:36,500
+explain the answer for the electric
+
+1395
+01:08:36,500 --> 01:08:45,800
+question the if a client does get of X I
+
+1396
+01:08:45,800 --> 01:08:49,640
+mean look at its context does the get of
+
+1397
+01:08:49,640 --> 01:08:53,330
+X maybe and then put to Y and then a
+
+1398
+01:08:53,330 --> 01:08:58,760
+quit to Z in the context initially is X
+
+1399
+01:08:58,760 --> 01:09:02,060
+version something you know that when we
+
+1400
+01:09:02,060 --> 01:09:03,859
+client since the puts of the server it's
+
+1401
+01:09:03,859 --> 01:09:06,470
+gonna include this context along with it
+
+1402
+01:09:06,470 --> 01:09:08,839
+but in the actual system there's this
+
+1403
+01:09:08,839 --> 01:09:13,630
+optimization that after a put the
+
+1404
+01:09:13,630 --> 01:09:20,410
+context is replaced by simply the
+
+1405
+01:09:20,410 --> 01:09:22,640
+version number for the put and any
+
+1406
+01:09:22,640 --> 01:09:24,620
+previous stuff in the context like
+
+1407
+01:09:24,620 --> 01:09:26,870
+namely this information about X is a
+
+1408
+01:09:26,870 --> 01:09:28,670
+race from the from the clients context
+
+1409
+01:09:28,670 --> 01:09:30,859
+so it only includes after put the
+
+1410
+01:09:30,859 --> 01:09:33,529
+context is just replaced with
+
+1411
+01:09:33,529 --> 01:09:37,040
+number returned from the put that so
+
+1412
+01:09:37,040 --> 01:09:38,799
+isn't this returns you know version
+
+1413
+01:09:38,799 --> 01:09:44,270
+version seven of why and the reason why
+
+1414
+01:09:44,270 --> 01:09:47,390
+this is correct and doesn't lose any
+
+1415
+01:09:47,390 --> 01:09:49,520
+information for the non-transactional
+
+1416
+01:09:49,520 --> 01:09:57,650
+cops is that for this when this put is
+
+1417
+01:09:57,650 --> 01:10:01,490
+sent out to all the remote sites the put
+
+1418
+01:10:01,490 --> 01:10:04,070
+is accompanied by X version whatever in
+
+1419
+01:10:04,070 --> 01:10:06,080
+the dependency list so this put won't be
+
+1420
+01:10:06,080 --> 01:10:10,640
+applied until at all and each data
+
+1421
+01:10:10,640 --> 01:10:13,880
+center until this X is also applied so
+
+1422
+01:10:13,880 --> 01:10:16,400
+then when if the client then does this
+
+1423
+01:10:16,400 --> 01:10:18,710
+put right what this turns into is sent
+
+1424
+01:10:18,710 --> 01:10:20,990
+to other data centers is really a put
+
+1425
+01:10:20,990 --> 01:10:24,530
+with Z and some value and the dependency
+
+1426
+01:10:24,530 --> 01:10:27,050
+is just Y version seven all the other
+
+1427
+01:10:27,050 --> 01:10:29,350
+data centers are going to wait for
+
+1428
+01:10:29,350 --> 01:10:32,330
+they're gonna check before applying Z
+
+1429
+01:10:32,330 --> 01:10:34,520
+they're gonna check that Y version seven
+
+1430
+01:10:34,520 --> 01:10:36,740
+has been applied at their data center
+
+1431
+01:10:36,740 --> 01:10:39,110
+well we know the Y version seven won't
+
+1432
+01:10:39,110 --> 01:10:41,780
+be applied at their data center until X
+
+1433
+01:10:41,780 --> 01:10:43,310
+version whatever is supplied at that
+
+1434
+01:10:43,310 --> 01:10:44,360
+data center so there's sort of a
+
+1435
+01:10:44,360 --> 01:10:48,310
+cascading delays here where that is
+
+1436
+01:10:48,310 --> 01:10:50,630
+telling other data centers to wait for Y
+
+1437
+01:10:50,630 --> 01:10:53,300
+version seven to be installed implies
+
+1438
+01:10:53,300 --> 01:10:55,760
+that they must also already be waiting
+
+1439
+01:10:55,760 --> 01:10:59,240
+for whatever Y version seven depended on
+
+1440
+01:10:59,240 --> 01:11:01,910
+and because of that we don't need to
+
+1441
+01:11:01,910 --> 01:11:06,170
+also include X version the X version and
+
+1442
+01:11:06,170 --> 01:11:08,810
+this dependency list because those data
+
+1443
+01:11:08,810 --> 01:11:10,400
+centers will already be waiting for it
+
+1444
+01:11:10,400 --> 01:11:12,560
+that version of X so the answer the
+
+1445
+01:11:12,560 --> 01:11:15,890
+question is no cops call the
+
+1446
+01:11:15,890 --> 01:11:18,560
+non-transactional cops doesn't need to
+
+1447
+01:11:18,560 --> 01:11:20,390
+have anything doesn't need to remember
+
+1448
+01:11:20,390 --> 01:11:23,030
+the gets in the context after it's done
+
+1449
+01:11:23,030 --> 01:11:25,270
+put
+
+1450
+01:11:27,269 --> 01:11:32,079
+all right a final thing to note about
+
+1451
+01:11:32,079 --> 01:11:36,999
+this scheme is that cops only see
+
+1452
+01:11:36,999 --> 01:11:39,820
+certain relationships it's only aware of
+
+1453
+01:11:39,820 --> 01:11:45,820
+certain causal relationships that is it
+
+1454
+01:11:45,820 --> 01:11:48,519
+only you know cops is aware that if a
+
+1455
+01:11:48,519 --> 01:11:50,320
+single client thread does a put and then
+
+1456
+01:11:50,320 --> 01:11:53,320
+another put client you know cops record
+
+1457
+01:11:53,320 --> 01:11:55,989
+so this the second put depends on the
+
+1458
+01:11:55,989 --> 01:11:58,590
+first book furthermore cops is aware
+
+1459
+01:11:58,590 --> 01:12:01,210
+that oh what a client does a read of a
+
+1460
+01:12:01,210 --> 01:12:05,590
+certain value that it's depending on I'm
+
+1461
+01:12:05,590 --> 01:12:07,630
+the one to put the created that value
+
+1462
+01:12:07,630 --> 01:12:09,130
+and therefore depending on anything that
+
+1463
+01:12:09,130 --> 01:12:11,050
+that depended on so you know cops is
+
+1464
+01:12:11,050 --> 01:12:13,269
+directly aware of these dependencies
+
+1465
+01:12:13,269 --> 01:12:18,969
+here however it could it is often the
+
+1466
+01:12:18,969 --> 01:12:21,969
+case that causality in the larger sense
+
+1467
+01:12:21,969 --> 01:12:24,730
+is conveyed through channels that cops
+
+1468
+01:12:24,730 --> 01:12:29,559
+is not aware of so for example you know
+
+1469
+01:12:29,559 --> 01:12:34,840
+if client one does a put of X and then
+
+1470
+01:12:34,840 --> 01:12:38,050
+the human you know who's controlling
+
+1471
+01:12:38,050 --> 01:12:41,650
+client one calls up client to on the
+
+1472
+01:12:41,650 --> 01:12:44,139
+telephone or it's you know email or
+
+1473
+01:12:44,139 --> 01:12:45,579
+something that says look you know I just
+
+1474
+01:12:45,579 --> 01:12:47,019
+updated the database with some new
+
+1475
+01:12:47,019 --> 01:12:48,550
+information why don't you go look at it
+
+1476
+01:12:48,550 --> 01:12:52,090
+right and then client to you know does
+
+1477
+01:12:52,090 --> 01:12:57,519
+it get of X sort of in a larger sense
+
+1478
+01:12:57,519 --> 01:13:00,500
+causality would you know
+
+1479
+01:13:00,500 --> 01:13:01,910
+suggest the client to really ought to
+
+1480
+01:13:01,910 --> 01:13:04,160
+see the updated X because client to new
+
+1481
+01:13:04,160 --> 01:13:07,070
+from the telephone call that X had been
+
+1482
+01:13:07,070 --> 01:13:11,360
+updated and so if cops had known about
+
+1483
+01:13:11,360 --> 01:13:12,740
+the telephone call it would have
+
+1484
+01:13:12,740 --> 01:13:19,550
+actually included the it would have
+
+1485
+01:13:19,550 --> 01:13:27,170
+actually caused the extra sorry if the
+
+1486
+01:13:27,170 --> 01:13:28,840
+telephone call had been itself a put
+
+1487
+01:13:28,840 --> 01:13:31,340
+right you know it would have been a put
+
+1488
+01:13:31,340 --> 01:13:33,380
+of telephone call here and I get of
+
+1489
+01:13:33,380 --> 01:13:36,740
+telephone call here and if this get had
+
+1490
+01:13:36,740 --> 01:13:39,590
+seen that put cops would know enough to
+
+1491
+01:13:39,590 --> 01:13:41,680
+arrange that this get would see that put
+
+1492
+01:13:41,680 --> 01:13:44,780
+but because cops was totally unaware of
+
+1493
+01:13:44,780 --> 01:13:47,150
+the telephone call there's no reason to
+
+1494
+01:13:47,150 --> 01:13:48,740
+expect that this get would actually
+
+1495
+01:13:48,740 --> 01:13:55,240
+yield the put value so cops is sort of
+
+1496
+01:13:55,240 --> 01:13:57,920
+enforcing causal consistency but only
+
+1497
+01:13:57,920 --> 01:14:00,680
+for the sources the kinds of causation
+
+1498
+01:14:00,680 --> 01:14:04,730
+the cops is directly aware of and that
+
+1499
+01:14:04,730 --> 01:14:08,360
+means that the sense in which cops is
+
+1500
+01:14:08,360 --> 01:14:10,630
+causal consistency sort of eliminates
+
+1501
+01:14:10,630 --> 01:14:13,160
+anomalous behavior well it only
+
+1502
+01:14:13,160 --> 01:14:17,210
+eliminates anomalous behavior if you
+
+1503
+01:14:17,210 --> 01:14:19,010
+restrict your notion of causality to
+
+1504
+01:14:19,010 --> 01:14:21,620
+what cops can see it in the larger sense
+
+1505
+01:14:21,620 --> 01:14:23,300
+you're going to still see odd behavior
+
+1506
+01:14:23,300 --> 01:14:24,860
+you definitely going to see situations
+
+1507
+01:14:24,860 --> 01:14:27,500
+where you know someone believes that a
+
+1508
+01:14:27,500 --> 01:14:29,750
+values been updated and yet they do not
+
+1509
+01:14:29,750 --> 01:14:31,370
+see the updated value that's because
+
+1510
+01:14:31,370 --> 01:14:32,990
+their belief was caused by something
+
+1511
+01:14:32,990 --> 01:14:41,290
+that cops wasn't aware of all right
+
+1512
+01:14:41,290 --> 01:14:46,040
+another potential problem which I'm not
+
+1513
+01:14:46,040 --> 01:14:51,140
+gonna talk about is that the remember
+
+1514
+01:14:51,140 --> 01:14:52,640
+for the photo example with the photo
+
+1515
+01:14:52,640 --> 01:14:55,520
+list there was a particular order of the
+
+1516
+01:14:55,520 --> 01:14:57,580
+adding a photo and that particular
+
+1517
+01:14:57,580 --> 01:14:59,780
+different order of looking at photos
+
+1518
+01:14:59,780 --> 01:15:02,930
+that made the system work with causal
+
+1519
+01:15:02,930 --> 01:15:04,550
+consistency as we're definitely relying
+
+1520
+01:15:04,550 --> 01:15:08,750
+on the there being sort of if the reader
+
+1521
+01:15:08,750 --> 01:15:10,910
+reads the photo list and then reads the
+
+1522
+01:15:10,910 --> 01:15:13,310
+photo in that order that the fact that a
+
+1523
+01:15:13,310 --> 01:15:14,030
+photos refer
+
+1524
+01:15:14,030 --> 01:15:16,250
+joana photo list means that the read of
+
+1525
+01:15:16,250 --> 01:15:19,190
+the photo will succeed it is however the
+
+1526
+01:15:19,190 --> 01:15:22,670
+case that there are situations where no
+
+1527
+01:15:22,670 --> 01:15:25,970
+one order of reading or combination of
+
+1528
+01:15:25,970 --> 01:15:30,440
+orders of reading or writing will cause
+
+1529
+01:15:30,440 --> 01:15:32,990
+sort of the behavior we want and that
+
+1530
+01:15:32,990 --> 01:15:34,850
+but this is leading into transactions
+
+1531
+01:15:34,850 --> 01:15:36,800
+which I'm not gonna have time enough to
+
+1532
+01:15:36,800 --> 01:15:38,660
+explain but at least I want to mention
+
+1533
+01:15:38,660 --> 01:15:42,560
+the problems the paper set up so
+
+1534
+01:15:42,560 --> 01:15:47,050
+supposing we have our photo list and
+
+1535
+01:15:47,050 --> 01:15:50,210
+it's protected by an access control list
+
+1536
+01:15:50,210 --> 01:15:52,100
+and an access control this is basically
+
+1537
+01:15:52,100 --> 01:15:55,240
+a list of usernames that are allowed to
+
+1538
+01:15:55,240 --> 01:15:57,500
+look at the photos on my list
+
+1539
+01:15:57,500 --> 01:16:01,480
+does that means that the software that
+
+1540
+01:16:01,630 --> 01:16:04,250
+implements these photo lists with access
+
+1541
+01:16:04,250 --> 01:16:07,490
+control this needs to be able to you
+
+1542
+01:16:07,490 --> 01:16:09,170
+know read the list and then read the
+
+1543
+01:16:09,170 --> 01:16:11,540
+access control list and see if the user
+
+1544
+01:16:11,540 --> 01:16:13,280
+trying to do the read is in the access
+
+1545
+01:16:13,280 --> 01:16:17,060
+control list and however neither order
+
+1546
+01:16:17,060 --> 01:16:19,580
+of getting the access control list and
+
+1547
+01:16:19,580 --> 01:16:22,580
+the list of photos works out so if the
+
+1548
+01:16:22,580 --> 01:16:24,320
+client code first gets the access
+
+1549
+01:16:24,320 --> 01:16:29,150
+control list and then gets the list of
+
+1550
+01:16:29,150 --> 01:16:32,420
+photos that order actually doesn't
+
+1551
+01:16:32,420 --> 01:16:36,860
+always work so well because supposing my
+
+1552
+01:16:36,860 --> 01:16:38,630
+client Reesie access control list and
+
+1553
+01:16:38,630 --> 01:16:40,880
+sees that I'm on the list but then right
+
+1554
+01:16:40,880 --> 01:16:44,060
+here the owner of this photo this
+
+1555
+01:16:44,060 --> 01:16:47,510
+deletes me from the access control list
+
+1556
+01:16:47,510 --> 01:16:50,030
+and inserts a new photograph that I'm
+
+1557
+01:16:50,030 --> 01:16:51,760
+not supposed to see in the list list
+
+1558
+01:16:51,760 --> 01:16:56,740
+right so c2 does a you know a port of
+
+1559
+01:16:56,740 --> 01:16:59,660
+access control is to delete me and then
+
+1560
+01:16:59,660 --> 01:17:01,880
+a put of the photo list to add a photo
+
+1561
+01:17:01,880 --> 01:17:05,840
+I'm not allowed to see then my client
+
+1562
+01:17:05,840 --> 01:17:07,790
+gets around to the second get it sees
+
+1563
+01:17:07,790 --> 01:17:09,770
+this list you may see this list which is
+
+1564
+01:17:09,770 --> 01:17:11,510
+the now the updated list that has the
+
+1565
+01:17:11,510 --> 01:17:12,800
+photo I'm not allowed to see but my
+
+1566
+01:17:12,800 --> 01:17:14,180
+client thinks aha I'm in the access
+
+1567
+01:17:14,180 --> 01:17:15,710
+control list because it's reading an old
+
+1568
+01:17:15,710 --> 01:17:17,980
+one
+
+1569
+01:17:18,510 --> 01:17:20,490
+and here's this photo so I'm allowed to
+
+1570
+01:17:20,490 --> 01:17:23,490
+see you so in that case you know we're
+
+1571
+01:17:23,490 --> 01:17:26,040
+getting an inconsistent what we know to
+
+1572
+01:17:26,040 --> 01:17:29,250
+be an inconsistent sort of combination
+
+1573
+01:17:29,250 --> 01:17:32,040
+of a new list and an old access control
+
+1574
+01:17:32,040 --> 01:17:34,590
+list but there was really nothing but
+
+1575
+01:17:34,590 --> 01:17:38,190
+but causal consistency allows this it'll
+
+1576
+01:17:38,190 --> 01:17:40,650
+it calls a consistency only says well
+
+1577
+01:17:40,650 --> 01:17:42,300
+you're gonna see data that's at least as
+
+1578
+01:17:42,300 --> 01:17:46,380
+new as the dependencies every time you
+
+1579
+01:17:46,380 --> 01:17:51,390
+do a get so and indeed if you know as
+
+1580
+01:17:51,390 --> 01:17:52,680
+the paper points out if you think it
+
+1581
+01:17:52,680 --> 01:17:54,590
+through it's also not correct for the
+
+1582
+01:17:54,590 --> 01:17:58,050
+reading client to first read the list of
+
+1583
+01:17:58,050 --> 01:18:01,050
+photos and then read the access control
+
+1584
+01:18:01,050 --> 01:18:05,510
+this because sneaking in between this
+
+1585
+01:18:05,510 --> 01:18:08,220
+though this might have a this that I
+
+1586
+01:18:08,220 --> 01:18:09,480
+read may have a photo I'm not allowed to
+
+1587
+01:18:09,480 --> 01:18:11,460
+see and at that time maybe the access
+
+1588
+01:18:11,460 --> 01:18:14,160
+control this didn't include me but at
+
+1589
+01:18:14,160 --> 01:18:15,930
+this point the owner of the list may
+
+1590
+01:18:15,930 --> 01:18:18,240
+delete the private photo add me to the
+
+1591
+01:18:18,240 --> 01:18:20,220
+access control list and then I may see
+
+1592
+01:18:20,220 --> 01:18:22,230
+myself in the list so again if we do it
+
+1593
+01:18:22,230 --> 01:18:23,520
+in this order it's also not right
+
+1594
+01:18:23,520 --> 01:18:28,110
+because we might see we might get an old
+
+1595
+01:18:28,110 --> 01:18:31,640
+list and a new access control list so
+
+1596
+01:18:31,640 --> 01:18:34,890
+causal consistency as I've described it
+
+1597
+01:18:34,890 --> 01:18:36,270
+so far isn't powerful enough to deal
+
+1598
+01:18:36,270 --> 01:18:37,890
+with this situation you know we need
+
+1599
+01:18:37,890 --> 01:18:39,900
+some notion of being able to get a
+
+1600
+01:18:39,900 --> 01:18:42,720
+mutually consistent list and access
+
+1601
+01:18:42,720 --> 01:18:45,390
+control lists through either sort of
+
+1602
+01:18:45,390 --> 01:18:48,500
+both before some update or both after
+
+1603
+01:18:48,500 --> 01:18:52,320
+and cops GT actually provides a way of
+
+1604
+01:18:52,320 --> 01:18:55,830
+doing this it by essentially doing both
+
+1605
+01:18:55,830 --> 01:18:57,410
+Gatz
+
+1606
+01:18:57,410 --> 01:19:02,700
+but but cops GT sends the full set of
+
+1607
+01:19:02,700 --> 01:19:04,410
+dependencies back to the client when it
+
+1608
+01:19:04,410 --> 01:19:07,320
+doesn't get and that means that the
+
+1609
+01:19:07,320 --> 01:19:08,910
+client is submit is in a position to
+
+1610
+01:19:08,910 --> 01:19:10,680
+actually check the dependencies of both
+
+1611
+01:19:10,680 --> 01:19:14,880
+of these return values and see that aha
+
+1612
+01:19:14,880 --> 01:19:16,800
+you know there's a dependency for list
+
+1613
+01:19:16,800 --> 01:19:20,520
+that is a version of these sorry for
+
+1614
+01:19:20,520 --> 01:19:23,970
+that there might be a the dependency
+
+1615
+01:19:23,970 --> 01:19:25,650
+list for the access control list me
+
+1616
+01:19:25,650 --> 01:19:28,230
+mention that it depends on a version of
+
+1617
+01:19:28,230 --> 01:19:30,510
+this that's in the farther ahead than
+
+1618
+01:19:30,510 --> 01:19:31,920
+the version of Lists the
+
+1619
+01:19:31,920 --> 01:19:34,140
+begone and in that case cops GT would be
+
+1620
+01:19:34,140 --> 01:19:41,940
+fetch the data alright with one question
+
+1621
+01:19:41,940 --> 01:19:45,800
+is it related to the threat of execution
+
+1622
+01:19:45,800 --> 01:19:50,880
+yeah so it's true their causal
+
+1623
+01:19:50,880 --> 01:19:52,590
+consistency doesn't really it's not
+
+1624
+01:19:52,590 --> 01:19:55,800
+about wall clock time so it has no
+
+1625
+01:19:55,800 --> 01:19:58,130
+notion of wall clock time there's only
+
+1626
+01:19:58,130 --> 01:20:00,810
+the only sort of forms of order that
+
+1627
+01:20:00,810 --> 01:20:03,510
+it's obeying that are even a little bit
+
+1628
+01:20:03,510 --> 01:20:05,699
+related to walk walk time or that if a
+
+1629
+01:20:05,699 --> 01:20:07,500
+single thread does one thing and then
+
+1630
+01:20:07,500 --> 01:20:08,699
+another and another
+
+1631
+01:20:08,699 --> 01:20:12,120
+then causal consistency does consider
+
+1632
+01:20:12,120 --> 01:20:13,590
+these three operations to be in that
+
+1633
+01:20:13,590 --> 01:20:15,690
+order but it's because one client thread
+
+1634
+01:20:15,690 --> 01:20:18,210
+did these sequence of things and not
+
+1635
+01:20:18,210 --> 01:20:19,880
+because there was a real time
+
+1636
+01:20:19,880 --> 01:20:24,780
+relationship so just a wrap up here to
+
+1637
+01:20:24,780 --> 01:20:26,880
+sort of put this into a kind of larger
+
+1638
+01:20:26,880 --> 01:20:32,580
+world context causal consistency has has
+
+1639
+01:20:32,580 --> 01:20:37,440
+been an is like a very kind of promising
+
+1640
+01:20:37,440 --> 01:20:39,090
+research area and has been for a long
+
+1641
+01:20:39,090 --> 01:20:41,699
+time because it does seem like it might
+
+1642
+01:20:41,699 --> 01:20:43,920
+provide you with good enough consistency
+
+1643
+01:20:43,920 --> 01:20:47,100
+but also opportunities more
+
+1644
+01:20:47,100 --> 01:20:49,590
+opportunities and linearise ability to
+
+1645
+01:20:49,590 --> 01:20:52,949
+get high performance however it hasn't
+
+1646
+01:20:52,949 --> 01:20:54,570
+actually gotten much traction in the
+
+1647
+01:20:54,570 --> 01:20:55,290
+real world
+
+1648
+01:20:55,290 --> 01:20:58,410
+people use eventual consistency systems
+
+1649
+01:20:58,410 --> 01:21:00,360
+and they use strongly consistent systems
+
+1650
+01:21:00,360 --> 01:21:02,790
+but it's very rare to see a deployed
+
+1651
+01:21:02,790 --> 01:21:04,830
+system and as causal consistency and
+
+1652
+01:21:04,830 --> 01:21:06,810
+there's a bunch of reasons potential
+
+1653
+01:21:06,810 --> 01:21:09,510
+reasons for that you know it's always
+
+1654
+01:21:09,510 --> 01:21:11,520
+hard to tell exactly why people do or
+
+1655
+01:21:11,520 --> 01:21:15,330
+don't use some technology for real-world
+
+1656
+01:21:15,330 --> 01:21:19,920
+systems one reason is that it can be
+
+1657
+01:21:19,920 --> 01:21:24,030
+awkward to track per client causality in
+
+1658
+01:21:24,030 --> 01:21:25,890
+the real world a user and browser are
+
+1659
+01:21:25,890 --> 01:21:27,660
+likely to contact different web servers
+
+1660
+01:21:27,660 --> 01:21:31,020
+at different times and that means it's
+
+1661
+01:21:31,020 --> 01:21:32,790
+not enough for a single web server to
+
+1662
+01:21:32,790 --> 01:21:36,300
+keep users context we need some way to
+
+1663
+01:21:36,300 --> 01:21:38,280
+stitch together context for a single
+
+1664
+01:21:38,280 --> 01:21:40,650
+user as they visit different web servers
+
+1665
+01:21:40,650 --> 01:21:43,240
+at the same website so that's painful
+
+1666
+01:21:43,240 --> 01:21:45,100
+I know there is this problem that cops
+
+1667
+01:21:45,100 --> 01:21:48,880
+doesn't doesn't track only tracks causal
+
+1668
+01:21:48,880 --> 01:21:50,680
+dependencies it knows about and that
+
+1669
+01:21:50,680 --> 01:21:52,660
+means it doesn't doesn't have a sort of
+
+1670
+01:21:52,660 --> 01:21:55,960
+ironclad solution or doesn't sort of
+
+1671
+01:21:55,960 --> 01:21:57,970
+provide ironclad causality and only sort
+
+1672
+01:21:57,970 --> 01:22:00,810
+of certain kinds of causality which is
+
+1673
+01:22:00,810 --> 01:22:05,910
+well sort of limits how appealing it is
+
+1674
+01:22:05,910 --> 01:22:09,190
+another is that the you know eventual
+
+1675
+01:22:09,190 --> 01:22:11,560
+and causal consistent systems can
+
+1676
+01:22:11,560 --> 01:22:13,270
+provide only the most limited notion of
+
+1677
+01:22:13,270 --> 01:22:16,570
+transactions and people more and more I
+
+1678
+01:22:16,570 --> 01:22:19,540
+think as time goes on are sort of
+
+1679
+01:22:19,540 --> 01:22:21,760
+wishing that their storage systems had
+
+1680
+01:22:21,760 --> 01:22:25,420
+transactions I'm finally the amount of
+
+1681
+01:22:25,420 --> 01:22:27,640
+overhead required to push around a track
+
+1682
+01:22:27,640 --> 01:22:30,190
+and store all that dependency
+
+1683
+01:22:30,190 --> 01:22:33,120
+information can be quite significant and
+
+1684
+01:22:33,120 --> 01:22:35,980
+you know I was unable to kind of detect
+
+1685
+01:22:35,980 --> 01:22:38,560
+this in the performance section of the
+
+1686
+01:22:38,560 --> 01:22:40,030
+paper but the fact is it's quite a lot
+
+1687
+01:22:40,030 --> 01:22:41,530
+of information that has to be stored and
+
+1688
+01:22:41,530 --> 01:22:44,110
+pushed around and it you know if you
+
+1689
+01:22:44,110 --> 01:22:46,450
+were hoping for the sort of millions of
+
+1690
+01:22:46,450 --> 01:22:47,800
+operations per second level of
+
+1691
+01:22:47,800 --> 01:22:50,080
+performance that at least Facebook was
+
+1692
+01:22:50,080 --> 01:22:52,930
+getting out of memcache D the kind of
+
+1693
+01:22:52,930 --> 01:22:54,370
+overhead that you would have to pay to
+
+1694
+01:22:54,370 --> 01:22:57,250
+use causal consistency might be
+
+1695
+01:22:57,250 --> 01:22:59,380
+extremely significant for the
+
+1696
+01:22:59,380 --> 01:23:02,080
+performance so those are reasons why I'm
+
+1697
+01:23:02,080 --> 01:23:03,970
+causal consistency maybe hasn't
+
+1698
+01:23:03,970 --> 01:23:08,350
+currently caught on although maybe
+
+1699
+01:23:08,350 --> 01:23:12,520
+someday it will be okay that's all I
+
+1700
+01:23:12,520 --> 01:23:14,860
+have to say and actually starting next
+
+1701
+01:23:14,860 --> 01:23:16,420
+lecture we'll be switching gears away
+
+1702
+01:23:16,420 --> 01:23:20,350
+from storage and sequence of three
+
+1703
+01:23:20,350 --> 01:23:24,220
+lectures that involve block chains so
+
+1704
+01:23:24,220 --> 01:23:26,790
+I'll see you on Thursday
+
+1705
+01:23:27,490 --> 01:23:29,550
+you
+
