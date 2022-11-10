@@ -1,0 +1,6740 @@
+1
+00:00:00,900 --> 00:00:04,120
+today the paper I'm going to discuss
+
+2
+00:00:04,120 --> 00:00:16,359
+this frangipani this is a fairly old
+
+3
+00:00:16,359 --> 00:00:18,400
+distributed file system paper the reason
+
+4
+00:00:18,400 --> 00:00:21,099
+why were reading it though is because it
+
+5
+00:00:21,099 --> 00:00:23,439
+has a lot of interesting and good design
+
+6
+00:00:23,439 --> 00:00:25,829
+having to do with cache coherence and
+
+7
+00:00:25,829 --> 00:00:28,839
+distributed transactions and distributed
+
+8
+00:00:28,839 --> 00:00:31,029
+crash recovery as well as the
+
+9
+00:00:31,029 --> 00:00:33,420
+interactions between them so those are
+
+10
+00:00:33,420 --> 00:00:35,500
+those are the really the ideas behind
+
+11
+00:00:35,500 --> 00:00:38,140
+this that we're gonna try to tease out
+
+12
+00:00:38,140 --> 00:00:42,699
+so these are it's really a lot of our
+
+13
+00:00:42,699 --> 00:00:47,530
+caching coherence is really the idea of
+
+14
+00:00:47,530 --> 00:00:50,679
+if I have something cached that
+
+15
+00:00:50,679 --> 00:00:52,899
+nevertheless if you modify it despite me
+
+16
+00:00:52,899 --> 00:00:54,370
+having a cache you know something will
+
+17
+00:00:54,370 --> 00:00:56,410
+happen so I can see your your
+
+18
+00:00:56,410 --> 00:00:58,809
+modifications and we also have
+
+19
+00:00:58,809 --> 00:01:04,420
+distributed its actions which are needed
+
+20
+00:01:04,420 --> 00:01:06,910
+internally to file systems to be able to
+
+21
+00:01:06,910 --> 00:01:09,130
+make complex updates to the file system
+
+22
+00:01:09,130 --> 00:01:14,560
+data structures and because the file
+
+23
+00:01:14,560 --> 00:01:16,600
+system is essentially split up among a
+
+24
+00:01:16,600 --> 00:01:19,270
+bunch of servers it's critical to be
+
+25
+00:01:19,270 --> 00:01:20,920
+able to recover from crashes and those
+
+26
+00:01:20,920 --> 00:01:30,130
+servers the overall design a friend
+
+27
+00:01:30,130 --> 00:01:34,300
+pammi it's a network file system it's
+
+28
+00:01:34,300 --> 00:01:37,840
+intended to look to existing
+
+29
+00:01:37,840 --> 00:01:39,400
+applications this is intended to work
+
+30
+00:01:39,400 --> 00:01:41,050
+with existing applications like UNIX
+
+31
+00:01:41,050 --> 00:01:43,270
+programs ordinary UNIX programs we're
+
+32
+00:01:43,270 --> 00:01:47,620
+running on people's workstations much
+
+33
+00:01:47,620 --> 00:01:51,310
+like Athena's AFS lets you get at your
+
+34
+00:01:51,310 --> 00:01:53,500
+Athena home directory and various
+
+35
+00:01:53,500 --> 00:01:56,470
+project directories from any Athena
+
+36
+00:01:56,470 --> 00:01:58,690
+workstation so the kind of overall
+
+37
+00:01:58,690 --> 00:02:00,550
+picture is that you have a bunch of
+
+38
+00:02:00,550 --> 00:02:06,010
+users each user in the papers world is
+
+39
+00:02:06,010 --> 00:02:07,300
+sitting in front of a workstation which
+
+40
+00:02:07,300 --> 00:02:09,369
+is you know real not a laptop in those
+
+41
+00:02:09,369 --> 00:02:10,810
+days but sort of computer with a
+
+42
+00:02:10,810 --> 00:02:12,430
+keyboard and display in a mouse and
+
+43
+00:02:12,430 --> 00:02:14,020
+Windows system at all so each one is
+
+44
+00:02:14,020 --> 00:02:14,490
+sitting
+
+45
+00:02:14,490 --> 00:02:17,370
+front of a computer workstation I'm
+
+46
+00:02:17,370 --> 00:02:19,260
+gonna call the workstations you know
+
+47
+00:02:19,260 --> 00:02:24,720
+workstation one more station to each
+
+48
+00:02:24,720 --> 00:02:27,600
+workstation runs an instance of the
+
+49
+00:02:27,600 --> 00:02:30,510
+frangipani server I meant so a huge
+
+50
+00:02:30,510 --> 00:02:32,930
+amount of the you know almost all of the
+
+51
+00:02:32,930 --> 00:02:36,810
+stuff that happens in this paper goes on
+
+52
+00:02:36,810 --> 00:02:40,440
+in the frangipani software in each
+
+53
+00:02:40,440 --> 00:02:42,840
+workstation so maybe they're sitting in
+
+54
+00:02:42,840 --> 00:02:44,490
+front of a workstation and they might be
+
+55
+00:02:44,490 --> 00:02:47,040
+running ordinary programs like a text
+
+56
+00:02:47,040 --> 00:02:48,540
+editor that's reading and writing files
+
+57
+00:02:48,540 --> 00:02:50,520
+and maybe when they finished editing a
+
+58
+00:02:50,520 --> 00:02:51,540
+source file they run it through the
+
+59
+00:02:51,540 --> 00:02:53,490
+compiler that the Reiser source file
+
+60
+00:02:53,490 --> 00:02:57,570
+when these ordinary programs make file
+
+61
+00:02:57,570 --> 00:02:59,940
+system calls inside the kernel there's a
+
+62
+00:02:59,940 --> 00:03:08,040
+frangipani module that implements the
+
+63
+00:03:08,040 --> 00:03:10,470
+file system inside of all of these
+
+64
+00:03:10,470 --> 00:03:15,690
+workstations each other on copy and then
+
+65
+00:03:15,690 --> 00:03:18,000
+the real storage of the file system data
+
+66
+00:03:18,000 --> 00:03:19,980
+structures things like certainly file
+
+67
+00:03:19,980 --> 00:03:22,110
+contents but also I nodes and
+
+68
+00:03:22,110 --> 00:03:24,120
+directories and alissa file and each
+
+69
+00:03:24,120 --> 00:03:26,760
+directory and the information about what
+
+70
+00:03:26,760 --> 00:03:28,710
+I knows and what blocks are free all
+
+71
+00:03:28,710 --> 00:03:32,970
+that's stored in a shared virtual disk
+
+72
+00:03:32,970 --> 00:03:37,560
+surface called petal it's on a separate
+
+73
+00:03:37,560 --> 00:03:38,970
+set of machines that are you know
+
+74
+00:03:38,970 --> 00:03:40,650
+probably server machines and a machine
+
+75
+00:03:40,650 --> 00:03:42,240
+room rather than workstations on
+
+76
+00:03:42,240 --> 00:03:45,090
+people's desks pedal among many other
+
+77
+00:03:45,090 --> 00:03:46,710
+things replicates data so you can sort
+
+78
+00:03:46,710 --> 00:03:48,510
+of think of pedal servers is coming in
+
+79
+00:03:48,510 --> 00:03:55,470
+pairs and one crashes we can still get
+
+80
+00:03:55,470 --> 00:03:58,020
+at our data and so when frangipani
+
+81
+00:03:58,020 --> 00:04:00,390
+needs to read or write a you know read a
+
+82
+00:04:00,390 --> 00:04:02,370
+directory or something it sends a remote
+
+83
+00:04:02,370 --> 00:04:04,260
+procedure call off to the correct pedal
+
+84
+00:04:04,260 --> 00:04:06,360
+server to say well here's the block that
+
+85
+00:04:06,360 --> 00:04:08,280
+I need you know please read it for me
+
+86
+00:04:08,280 --> 00:04:10,650
+please return that block and for the
+
+87
+00:04:10,650 --> 00:04:13,980
+most part petal is acting like a disk
+
+88
+00:04:13,980 --> 00:04:16,108
+drive you can think of it as a kind of
+
+89
+00:04:16,108 --> 00:04:22,260
+shared as a shared disk drive that all
+
+90
+00:04:22,260 --> 00:04:25,800
+these frangipane knees talk to and it's
+
+91
+00:04:25,800 --> 00:04:28,700
+called a virtual disk
+
+92
+00:04:31,830 --> 00:04:34,000
+from our point of view for most of this
+
+93
+00:04:34,000 --> 00:04:35,440
+discussion we're just going to imagine
+
+94
+00:04:35,440 --> 00:04:37,690
+pedal is just being a disk ride that's
+
+95
+00:04:37,690 --> 00:04:39,580
+used over the network by all these
+
+96
+00:04:39,580 --> 00:04:41,919
+friends of Handy's and so it has you
+
+97
+00:04:41,919 --> 00:04:44,950
+read and write it by giving it a block
+
+98
+00:04:44,950 --> 00:04:46,690
+number or an address on the disk and
+
+99
+00:04:46,690 --> 00:04:47,919
+seem like I'd like to read that block
+
+100
+00:04:47,919 --> 00:04:56,880
+just like an ordinary hard drive okay so
+
+101
+00:04:56,880 --> 00:05:00,730
+the intended use for this file so the
+
+102
+00:05:00,730 --> 00:05:02,820
+use that the authors intended is
+
+103
+00:05:02,820 --> 00:05:05,590
+actually reasonably important driver in
+
+104
+00:05:05,590 --> 00:05:08,200
+the design what they wanted was to
+
+105
+00:05:08,200 --> 00:05:10,690
+support their own activities and what
+
+106
+00:05:10,690 --> 00:05:12,730
+they were were were members of a
+
+107
+00:05:12,730 --> 00:05:16,600
+research lab of maybe say 50 people in
+
+108
+00:05:16,600 --> 00:05:18,940
+this research lab and they were used to
+
+109
+00:05:18,940 --> 00:05:20,890
+shared infrastructure things like time
+
+110
+00:05:20,890 --> 00:05:24,550
+sharing machines or workstations using
+
+111
+00:05:24,550 --> 00:05:27,070
+previous network file systems to share
+
+112
+00:05:27,070 --> 00:05:29,020
+files among cooperating groups of
+
+113
+00:05:29,020 --> 00:05:31,000
+researchers so they both wanted they
+
+114
+00:05:31,000 --> 00:05:32,800
+they wanted a file system that they
+
+115
+00:05:32,800 --> 00:05:33,970
+could use to store their own home
+
+116
+00:05:33,970 --> 00:05:37,270
+directories in as well as storing shared
+
+117
+00:05:37,270 --> 00:05:39,550
+project files and so that meant that if
+
+118
+00:05:39,550 --> 00:05:41,260
+I edit a file I'd really like the other
+
+119
+00:05:41,260 --> 00:05:43,270
+people my work and the other people I
+
+120
+00:05:43,270 --> 00:05:45,190
+work with to be able to read the file I
+
+121
+00:05:45,190 --> 00:05:47,320
+just edited so we want that kind of
+
+122
+00:05:47,320 --> 00:05:51,190
+sharing and in addition it's great if I
+
+123
+00:05:51,190 --> 00:05:52,780
+can sit down at any workstation my
+
+124
+00:05:52,780 --> 00:05:54,910
+workstation your workstation a public
+
+125
+00:05:54,910 --> 00:05:57,550
+workstation in the library and still get
+
+126
+00:05:57,550 --> 00:05:59,440
+at all of the files of all my home
+
+127
+00:05:59,440 --> 00:06:01,240
+directory everything I need in my
+
+128
+00:06:01,240 --> 00:06:03,340
+environment so they're really interested
+
+129
+00:06:03,340 --> 00:06:07,000
+in a shared file system for human users
+
+130
+00:06:07,000 --> 00:06:11,380
+in a relatively small organization small
+
+131
+00:06:11,380 --> 00:06:12,820
+enough that everybody was trusted all
+
+132
+00:06:12,820 --> 00:06:14,740
+the people all the computers so really
+
+133
+00:06:14,740 --> 00:06:16,810
+the design has essentially nothing to
+
+134
+00:06:16,810 --> 00:06:19,660
+say about security and indeed arguably
+
+135
+00:06:19,660 --> 00:06:21,820
+would not work in an environment like
+
+136
+00:06:21,820 --> 00:06:23,830
+Athena where you can't really trust the
+
+137
+00:06:23,830 --> 00:06:26,410
+users or the workstations so it's really
+
+138
+00:06:26,410 --> 00:06:29,950
+very much designed for their their
+
+139
+00:06:29,950 --> 00:06:34,450
+environment now as far as performance
+
+140
+00:06:34,450 --> 00:06:36,130
+their environment was also important you
+
+141
+00:06:36,130 --> 00:06:37,630
+know it turns out that the way most
+
+142
+00:06:37,630 --> 00:06:39,039
+people use computers are leased
+
+143
+00:06:39,039 --> 00:06:40,569
+workstations they sit in front of is
+
+144
+00:06:40,569 --> 00:06:41,919
+that they mostly read and write their
+
+145
+00:06:41,919 --> 00:06:44,679
+own files and they may read some shared
+
+146
+00:06:44,679 --> 00:06:48,009
+files you know programs or some project
+
+147
+00:06:48,009 --> 00:06:50,289
+files or something but most of the time
+
+148
+00:06:50,289 --> 00:06:51,909
+I'm reading and writing my files and
+
+149
+00:06:51,909 --> 00:06:53,770
+you're reading and writing your files on
+
+150
+00:06:53,770 --> 00:06:55,569
+your workstation and you know it's
+
+151
+00:06:55,569 --> 00:06:57,189
+really the exception that we're actively
+
+152
+00:06:57,189 --> 00:06:59,319
+sharing files so it makes a huge amount
+
+153
+00:06:59,319 --> 00:07:01,629
+of sense to be able to one way or
+
+154
+00:07:01,629 --> 00:07:04,659
+another even though officially the real
+
+155
+00:07:04,659 --> 00:07:06,099
+copies of files are stored in this
+
+156
+00:07:06,099 --> 00:07:08,289
+shared disk it's fantastic if we can
+
+157
+00:07:08,289 --> 00:07:11,499
+have some kind of caching so that after
+
+158
+00:07:11,499 --> 00:07:12,999
+I log in and I use my files for a while
+
+159
+00:07:12,999 --> 00:07:15,610
+they're locally cached here so they can
+
+160
+00:07:15,610 --> 00:07:17,379
+be gotten gotten that and you know
+
+161
+00:07:17,379 --> 00:07:20,169
+microseconds instead of milliseconds if
+
+162
+00:07:20,169 --> 00:07:22,059
+we have to fetch them from the file
+
+163
+00:07:22,059 --> 00:07:27,639
+servers ok so French Pyrenees supported
+
+164
+00:07:27,639 --> 00:07:29,619
+this this kind of caching furthermore it
+
+165
+00:07:29,619 --> 00:07:33,849
+supported right-back caching not only
+
+166
+00:07:33,849 --> 00:07:38,349
+caching in each in each workstation and
+
+167
+00:07:38,349 --> 00:07:40,479
+each frangipani server we also have
+
+168
+00:07:40,479 --> 00:07:46,269
+right back caching which means that if I
+
+169
+00:07:46,269 --> 00:07:49,149
+want to modify something if I modify a
+
+170
+00:07:49,149 --> 00:07:51,159
+file or even create a file in a
+
+171
+00:07:51,159 --> 00:07:53,409
+directory or delete a file or basically
+
+172
+00:07:53,409 --> 00:07:55,869
+do any other operation as long as nobody
+
+173
+00:07:55,869 --> 00:07:57,939
+else no other workstation needs to see
+
+174
+00:07:57,939 --> 00:07:59,039
+it
+
+175
+00:07:59,039 --> 00:08:01,659
+frangipani acts with a write back cache
+
+176
+00:08:01,659 --> 00:08:05,110
+and that means that my writes stay only
+
+177
+00:08:05,110 --> 00:08:07,240
+local in the cache if I create a file at
+
+178
+00:08:07,240 --> 00:08:09,430
+least initially the information about
+
+179
+00:08:09,430 --> 00:08:11,740
+the newly created file said a newly
+
+180
+00:08:11,740 --> 00:08:13,990
+allocated inode with initialized
+
+181
+00:08:13,990 --> 00:08:16,809
+contents and you know a new entry added
+
+182
+00:08:16,809 --> 00:08:19,449
+to a new name attitudes to my home
+
+183
+00:08:19,449 --> 00:08:21,219
+directory all those modifications
+
+184
+00:08:21,219 --> 00:08:23,439
+initially are just done in the cache and
+
+185
+00:08:23,439 --> 00:08:25,389
+therefore things like creating a file
+
+186
+00:08:25,389 --> 00:08:27,789
+can be done extremely rapidly they just
+
+187
+00:08:27,789 --> 00:08:30,300
+require modifying local memory in this
+
+188
+00:08:30,300 --> 00:08:32,620
+machine's disk cache and they're not
+
+189
+00:08:32,620 --> 00:08:34,630
+written back in general to peddle until
+
+190
+00:08:34,630 --> 00:08:37,299
+later so at least initially we can do
+
+191
+00:08:37,299 --> 00:08:39,519
+all kinds of modifications to the file
+
+192
+00:08:39,519 --> 00:08:41,708
+system at least to my own directories my
+
+193
+00:08:41,708 --> 00:08:44,889
+own files completely locally and that's
+
+194
+00:08:44,889 --> 00:08:47,139
+enormous ly helpful for performance it's
+
+195
+00:08:47,139 --> 00:08:48,639
+like a you know factor of a thousand
+
+196
+00:08:48,639 --> 00:08:50,319
+difference being able to modify
+
+197
+00:08:50,319 --> 00:08:52,149
+something in local memory versus having
+
+198
+00:08:52,149 --> 00:08:54,430
+to send a remote procedure calls to send
+
+199
+00:08:54,430 --> 00:08:59,470
+server now one serious consequence of
+
+200
+00:08:59,470 --> 00:09:03,870
+that it's extremely determinative of the
+
+201
+00:09:03,870 --> 00:09:06,130
+architecture here is that that meant
+
+202
+00:09:06,130 --> 00:09:09,399
+that the logic of the file system has to
+
+203
+00:09:09,399 --> 00:09:11,860
+be in each workstation in order for my
+
+204
+00:09:11,860 --> 00:09:13,240
+workstation to be able to implement
+
+205
+00:09:13,240 --> 00:09:15,700
+things like create a file just operating
+
+206
+00:09:15,700 --> 00:09:17,560
+out of its local cache it means all the
+
+207
+00:09:17,560 --> 00:09:20,740
+logic all the intelligence for the file
+
+208
+00:09:20,740 --> 00:09:22,180
+system has to be sitting here in my
+
+209
+00:09:22,180 --> 00:09:24,070
+workstation and in their design
+
+210
+00:09:24,070 --> 00:09:26,110
+basically to a first approximation the
+
+211
+00:09:26,110 --> 00:09:28,720
+pedal shared storage system knows
+
+212
+00:09:28,720 --> 00:09:31,330
+absolutely nothing about file systems or
+
+213
+00:09:31,330 --> 00:09:34,450
+files or directories all that logic this
+
+214
+00:09:34,450 --> 00:09:35,800
+is a very in a sense very
+
+215
+00:09:35,800 --> 00:09:38,920
+straightforward simple system and all
+
+216
+00:09:38,920 --> 00:09:41,350
+the complexity is here in the frangipani
+
+217
+00:09:41,350 --> 00:09:46,089
+in each client so it's a very kind of
+
+218
+00:09:46,089 --> 00:09:49,029
+decentralized scheme and one of the
+
+219
+00:09:49,029 --> 00:09:50,770
+reasons is - because that's what you
+
+220
+00:09:50,770 --> 00:09:53,800
+really need or these that was a design
+
+221
+00:09:53,800 --> 00:09:56,339
+they could think of to allow them to do
+
+222
+00:09:56,339 --> 00:09:58,360
+modifications purely locally in each
+
+223
+00:09:58,360 --> 00:10:00,610
+workstation it does have the nice side
+
+224
+00:10:00,610 --> 00:10:03,459
+effect though that I'm since most of the
+
+225
+00:10:03,459 --> 00:10:05,470
+complexity and most of the CPU time
+
+226
+00:10:05,470 --> 00:10:07,839
+spent is spent here it means that as you
+
+227
+00:10:07,839 --> 00:10:09,970
+add workstations as you add users to the
+
+228
+00:10:09,970 --> 00:10:13,630
+system you automatically get more CPU
+
+229
+00:10:13,630 --> 00:10:16,870
+capacity to run those new users file
+
+230
+00:10:16,870 --> 00:10:18,850
+system operations because most file
+
+231
+00:10:18,850 --> 00:10:21,550
+system operations happen just locally in
+
+232
+00:10:21,550 --> 00:10:23,050
+the workstation that's most of the CPU
+
+233
+00:10:23,050 --> 00:10:25,690
+time is spent here so the system does
+
+234
+00:10:25,690 --> 00:10:27,490
+have a certain degree of natural scaling
+
+235
+00:10:27,490 --> 00:10:30,550
+scalability as you add workstations each
+
+236
+00:10:30,550 --> 00:10:32,020
+new workstation is a bit more load from
+
+237
+00:10:32,020 --> 00:10:33,459
+a new user but it's also a bit more
+
+238
+00:10:33,459 --> 00:10:35,920
+available CPU time to run that users
+
+239
+00:10:35,920 --> 00:10:38,260
+file system operations of course at some
+
+240
+00:10:38,260 --> 00:10:40,779
+point you're gonna run out of gas here
+
+241
+00:10:40,779 --> 00:10:44,800
+in the central storage system and you
+
+242
+00:10:44,800 --> 00:10:46,120
+know then you may need to add more
+
+243
+00:10:46,120 --> 00:10:52,980
+storage servers to all right
+
+244
+00:10:54,830 --> 00:10:59,339
+so okay so we have the system that does
+
+245
+00:10:59,339 --> 00:11:01,320
+serious caching here and furthermore
+
+246
+00:11:01,320 --> 00:11:05,339
+does the modifications in the cache that
+
+247
+00:11:05,339 --> 00:11:06,750
+actually these immediately to some
+
+248
+00:11:06,750 --> 00:11:09,660
+serious challenges in the design and the
+
+249
+00:11:09,660 --> 00:11:11,670
+design is mostly about solving the
+
+250
+00:11:11,670 --> 00:11:15,510
+challenges I'm about to lay out these
+
+251
+00:11:15,510 --> 00:11:20,339
+are largely count challenges of that's
+
+252
+00:11:20,339 --> 00:11:26,130
+come from caching and this sort of
+
+253
+00:11:26,130 --> 00:11:28,380
+decentralized architecture where most of
+
+254
+00:11:28,380 --> 00:11:30,660
+the intelligence is sitting in the
+
+255
+00:11:30,660 --> 00:11:43,220
+clients so the first challenge is that
+
+256
+00:11:45,500 --> 00:11:49,170
+suppose workstation one creates a file
+
+257
+00:11:49,170 --> 00:11:55,890
+in you know maybe a file say /a a new
+
+258
+00:11:55,890 --> 00:11:59,490
+file /a and initially it just creates
+
+259
+00:11:59,490 --> 00:12:01,380
+this in its local cache so that you know
+
+260
+00:12:01,380 --> 00:12:03,029
+first it may need to fetch the current
+
+261
+00:12:03,029 --> 00:12:05,010
+contents of the slash directory from
+
+262
+00:12:05,010 --> 00:12:06,930
+petal nom but then when it creates a
+
+263
+00:12:06,930 --> 00:12:10,110
+file just modifies its cached copy and
+
+264
+00:12:10,110 --> 00:12:11,250
+doesn't immediately send it back to
+
+265
+00:12:11,250 --> 00:12:14,459
+peddle then there's an immediate problem
+
+266
+00:12:14,459 --> 00:12:17,250
+here suppose the user on workstation 2
+
+267
+00:12:17,250 --> 00:12:19,709
+tries to get a directory listing of the
+
+268
+00:12:19,709 --> 00:12:21,930
+directory slash right we'd really like
+
+269
+00:12:21,930 --> 00:12:24,720
+to be able to this user see the newly
+
+270
+00:12:24,720 --> 00:12:27,720
+created file right and that's what users
+
+271
+00:12:27,720 --> 00:12:29,339
+are gonna expect and users will be very
+
+272
+00:12:29,339 --> 00:12:31,980
+confused if you know person down the
+
+273
+00:12:31,980 --> 00:12:33,420
+hall from me created a file and said oh
+
+274
+00:12:33,420 --> 00:12:34,410
+you know I put all this interesting
+
+275
+00:12:34,410 --> 00:12:36,360
+information in this new file /a why
+
+276
+00:12:36,360 --> 00:12:37,860
+don't you go read it and then I try to
+
+277
+00:12:37,860 --> 00:12:41,040
+read it and it's totally not there so we
+
+278
+00:12:41,040 --> 00:12:43,470
+absolutely want very strong consistency
+
+279
+00:12:43,470 --> 00:12:45,000
+if the person down the hall says they've
+
+280
+00:12:45,000 --> 00:12:46,470
+done something in the file system I
+
+281
+00:12:46,470 --> 00:12:49,200
+should be able to see it and if I edit a
+
+282
+00:12:49,200 --> 00:12:51,720
+file on one work station and then maybe
+
+283
+00:12:51,720 --> 00:12:54,330
+compile it on a computer on another
+
+284
+00:12:54,330 --> 00:12:56,850
+computer I want the compiler to see the
+
+285
+00:12:56,850 --> 00:12:58,500
+modifications I just made to my file
+
+286
+00:12:58,500 --> 00:13:01,079
+which means that the file system has to
+
+287
+00:13:01,079 --> 00:13:05,540
+do something to ensure that readers see
+
+288
+00:13:05,540 --> 00:13:09,810
+even the most recent rights so we've
+
+289
+00:13:09,810 --> 00:13:11,279
+been talking about this as we've been
+
+290
+00:13:11,279 --> 00:13:13,319
+calling this you know strong strong
+
+291
+00:13:13,319 --> 00:13:15,740
+consistency and linearize ability before
+
+292
+00:13:15,740 --> 00:13:18,779
+and that's basically what we want in the
+
+293
+00:13:18,779 --> 00:13:20,850
+context of caches though like the issue
+
+294
+00:13:20,850 --> 00:13:22,980
+here is not really about the storage
+
+295
+00:13:22,980 --> 00:13:24,480
+server necessarily it's about the fact
+
+296
+00:13:24,480 --> 00:13:26,370
+that there was a modification here that
+
+297
+00:13:26,370 --> 00:13:28,860
+needs to be seen somewhere else and now
+
+298
+00:13:28,860 --> 00:13:30,870
+for historical reasons that's usually
+
+299
+00:13:30,870 --> 00:13:38,790
+called cache coherence that is the
+
+300
+00:13:38,790 --> 00:13:41,879
+property of a caching system that even
+
+301
+00:13:41,879 --> 00:13:43,649
+if I have an old version of something
+
+302
+00:13:43,649 --> 00:13:46,470
+cached if someone else modifies it in
+
+303
+00:13:46,470 --> 00:13:48,269
+their cache then my cache will
+
+304
+00:13:48,269 --> 00:13:50,790
+automatically reflect their
+
+305
+00:13:50,790 --> 00:13:53,550
+modifications so we want this cache
+
+306
+00:13:53,550 --> 00:13:58,350
+coherence property another issue you
+
+307
+00:13:58,350 --> 00:14:01,889
+have is that the you know everything all
+
+308
+00:14:01,889 --> 00:14:03,870
+the files and directories are shared we
+
+309
+00:14:03,870 --> 00:14:05,879
+could easily have a situation where two
+
+310
+00:14:05,879 --> 00:14:09,059
+different workstations are modifying the
+
+311
+00:14:09,059 --> 00:14:11,220
+same directory at the same time so
+
+312
+00:14:11,220 --> 00:14:14,250
+suppose again maybe the user one on
+
+313
+00:14:14,250 --> 00:14:16,019
+their workstation wants to create a file
+
+314
+00:14:16,019 --> 00:14:18,209
+/a which is a new file in the directory
+
+315
+00:14:18,209 --> 00:14:20,189
+slash in the new in the root directory
+
+316
+00:14:20,189 --> 00:14:24,029
+and at the same time user two wants to
+
+317
+00:14:24,029 --> 00:14:27,209
+create a new file called slash B so at
+
+318
+00:14:27,209 --> 00:14:29,250
+some level you know they're creating
+
+319
+00:14:29,250 --> 00:14:32,100
+different files alright a and B but they
+
+320
+00:14:32,100 --> 00:14:33,540
+both need to modify the root directory
+
+321
+00:14:33,540 --> 00:14:35,399
+to add a new name to the root directory
+
+322
+00:14:35,399 --> 00:14:38,040
+and so the question is even if they do
+
+323
+00:14:38,040 --> 00:14:40,920
+this simultaneously you know to file
+
+324
+00:14:40,920 --> 00:14:42,870
+creations of differently named files but
+
+325
+00:14:42,870 --> 00:14:44,339
+in the same directory from different
+
+326
+00:14:44,339 --> 00:14:46,290
+workstations will the system be able to
+
+327
+00:14:46,290 --> 00:14:51,029
+sort out these concurrent modifications
+
+328
+00:14:51,029 --> 00:14:52,889
+to the same directory and arrive at some
+
+329
+00:14:52,889 --> 00:14:54,240
+sensible result and of course the
+
+330
+00:14:54,240 --> 00:14:56,519
+sensible result we want is that both a
+
+331
+00:14:56,519 --> 00:14:58,949
+and B end up existing we don't want to
+
+332
+00:14:58,949 --> 00:15:01,889
+end up with some you know situation in
+
+333
+00:15:01,889 --> 00:15:04,230
+which only one of them ends up existing
+
+334
+00:15:04,230 --> 00:15:06,329
+because the second modification
+
+335
+00:15:06,329 --> 00:15:10,259
+overwrote and sort of superseded the
+
+336
+00:15:10,259 --> 00:15:13,160
+first modification
+
+337
+00:15:15,440 --> 00:15:19,860
+and so this is again it goes by a lot of
+
+338
+00:15:19,860 --> 00:15:21,150
+different names but we'll call it a de
+
+339
+00:15:21,150 --> 00:15:26,010
+Missa T we want operations such as
+
+340
+00:15:26,010 --> 00:15:28,770
+create a file to lead a file to act as
+
+341
+00:15:28,770 --> 00:15:31,520
+if they just are instantaneous
+
+342
+00:15:31,520 --> 00:15:34,620
+instantaneous and time and don't ever
+
+343
+00:15:34,620 --> 00:15:37,040
+therefore don't ever interfere with
+
+344
+00:15:37,040 --> 00:15:39,930
+operations that occur at similar times
+
+345
+00:15:39,930 --> 00:15:41,460
+by other workstations
+
+346
+00:15:41,460 --> 00:15:43,470
+well things to happen just at a point in
+
+347
+00:15:43,470 --> 00:15:46,080
+time and not be spread over even if
+
+348
+00:15:46,080 --> 00:15:47,670
+they're complex operations and involve
+
+349
+00:15:47,670 --> 00:15:50,760
+touching a lot of state we want them to
+
+350
+00:15:50,760 --> 00:15:54,770
+appear as if they occur instantaneously
+
+351
+00:15:54,770 --> 00:16:00,630
+at a final problem we have is suppose
+
+352
+00:16:00,630 --> 00:16:04,230
+you know my workstation is modified a
+
+353
+00:16:04,230 --> 00:16:05,550
+lot of stuff and maybe it's
+
+354
+00:16:05,550 --> 00:16:07,589
+modifications are or many of its
+
+355
+00:16:07,589 --> 00:16:10,260
+modifications are done only in the local
+
+356
+00:16:10,260 --> 00:16:12,420
+cache because of this right back caching
+
+357
+00:16:12,420 --> 00:16:16,170
+if my were station crashes after having
+
+358
+00:16:16,170 --> 00:16:18,450
+modified some stuff in its local cache
+
+359
+00:16:18,450 --> 00:16:20,400
+and maybe reflected some but not all
+
+360
+00:16:20,400 --> 00:16:22,170
+those modifications back to storage
+
+361
+00:16:22,170 --> 00:16:27,300
+pedal other workstations are still
+
+362
+00:16:27,300 --> 00:16:29,520
+executing and they still need to be able
+
+363
+00:16:29,520 --> 00:16:32,010
+to make sense of the file system so the
+
+364
+00:16:32,010 --> 00:16:34,290
+fact that my workstation crashed while I
+
+365
+00:16:34,290 --> 00:16:35,700
+was in the middle of something had
+
+366
+00:16:35,700 --> 00:16:38,310
+better not wreck the entire file system
+
+367
+00:16:38,310 --> 00:16:39,990
+for everybody else or even any part of
+
+368
+00:16:39,990 --> 00:16:45,330
+it so that means what we need is crash
+
+369
+00:16:45,330 --> 00:16:49,290
+recovery of individual servers we won't
+
+370
+00:16:49,290 --> 00:16:51,080
+be able to have my workstation crash
+
+371
+00:16:51,080 --> 00:16:53,850
+without disturbing the activity of
+
+372
+00:16:53,850 --> 00:16:55,500
+anybody else using the same shared
+
+373
+00:16:55,500 --> 00:16:57,270
+system even if they look at my directory
+
+374
+00:16:57,270 --> 00:16:58,650
+in my files they should see something
+
+375
+00:16:58,650 --> 00:17:00,510
+sensible maybe it won't include the very
+
+376
+00:17:00,510 --> 00:17:02,839
+last things I did but they should see a
+
+377
+00:17:02,839 --> 00:17:06,150
+consistent file system and not a rekt
+
+378
+00:17:06,150 --> 00:17:08,250
+file system data structure so we want
+
+379
+00:17:08,250 --> 00:17:10,910
+crash recovery
+
+380
+00:17:13,859 --> 00:17:16,390
+as always with distributed systems
+
+381
+00:17:16,390 --> 00:17:18,760
+that's made more complex because we can
+
+382
+00:17:18,760 --> 00:17:20,560
+easily have a situation where only one
+
+383
+00:17:20,560 --> 00:17:22,900
+of the servers crashes but the others
+
+384
+00:17:22,900 --> 00:17:27,220
+are running and again for all of these
+
+385
+00:17:27,220 --> 00:17:30,160
+things for all three of these challenges
+
+386
+00:17:30,160 --> 00:17:32,170
+they're really challenged we're in this
+
+387
+00:17:32,170 --> 00:17:34,300
+discussion their challenges about how
+
+388
+00:17:34,300 --> 00:17:36,300
+frangipani works and how these
+
+389
+00:17:36,300 --> 00:17:38,190
+frangipani
+
+390
+00:17:38,190 --> 00:17:40,810
+software inside the workstations work
+
+391
+00:17:40,810 --> 00:17:42,130
+and so when I talk about a crash I'm
+
+392
+00:17:42,130 --> 00:17:43,480
+talking about a crash of a workstation
+
+393
+00:17:43,480 --> 00:17:46,630
+and it's frangipani you know the pedal
+
+394
+00:17:46,630 --> 00:17:50,080
+virtual disk has many similar questions
+
+395
+00:17:50,080 --> 00:17:51,850
+associated with it but there are not
+
+396
+00:17:51,850 --> 00:17:55,470
+really the focus today it has a
+
+397
+00:17:55,470 --> 00:17:59,230
+completely separate set of R'lyeh fault
+
+398
+00:17:59,230 --> 00:18:02,590
+tolerance machinery built into pedal and
+
+399
+00:18:02,590 --> 00:18:04,720
+it's actually a lot like the chain
+
+400
+00:18:04,720 --> 00:18:06,670
+replication kind of systems we talked
+
+401
+00:18:06,670 --> 00:18:12,460
+about earlier ok so I'm going to talk
+
+402
+00:18:12,460 --> 00:18:15,270
+about each of these challenges in turn
+
+403
+00:18:15,270 --> 00:18:20,010
+the first challenge is cache coherence
+
+404
+00:18:22,050 --> 00:18:29,620
+and the game here is to get both the
+
+405
+00:18:29,620 --> 00:18:32,680
+benefits of both linearize ability that
+
+406
+00:18:32,680 --> 00:18:35,170
+is when I read when I look at anything
+
+407
+00:18:35,170 --> 00:18:36,850
+in the filesystem I always see fresh
+
+408
+00:18:36,850 --> 00:18:38,710
+data I always see the very latest data
+
+409
+00:18:38,710 --> 00:18:42,210
+so we got both linearize ability and
+
+410
+00:18:42,210 --> 00:18:45,370
+caching not caching that's good caching
+
+411
+00:18:45,370 --> 00:18:48,100
+as we can get for performance so somehow
+
+412
+00:18:48,100 --> 00:18:50,230
+we you know we need to get the benefits
+
+413
+00:18:50,230 --> 00:18:56,470
+of both of these and the kind of that
+
+414
+00:18:56,470 --> 00:18:59,010
+people implement cache coherence that is
+
+415
+00:18:59,010 --> 00:19:01,120
+using what are called cache coherence
+
+416
+00:19:01,120 --> 00:19:02,860
+protocols and it turns out these
+
+417
+00:19:02,860 --> 00:19:04,510
+protocols are used a lot in many
+
+418
+00:19:04,510 --> 00:19:06,220
+different situations not just
+
+419
+00:19:06,220 --> 00:19:08,770
+distributed file systems but also things
+
+420
+00:19:08,770 --> 00:19:12,550
+like the caches in multi-core the per
+
+421
+00:19:12,550 --> 00:19:14,880
+core caches in multi core processors
+
+422
+00:19:14,880 --> 00:19:17,560
+also use cache coherence protocols which
+
+423
+00:19:17,560 --> 00:19:20,620
+are going to be not unlike the protocols
+
+424
+00:19:20,620 --> 00:19:23,350
+I'm going to describe for frangipani all
+
+425
+00:19:23,350 --> 00:19:23,700
+right
+
+426
+00:19:23,700 --> 00:19:29,100
+so it turns out that frangipani x' cache
+
+427
+00:19:29,100 --> 00:19:32,130
+coherence is driven by its use of locks
+
+428
+00:19:32,130 --> 00:19:34,679
+and we'll see locks come up later in
+
+429
+00:19:34,679 --> 00:19:37,169
+both actually for both atomicity and
+
+430
+00:19:37,169 --> 00:19:39,480
+crash recovery but the particular use of
+
+431
+00:19:39,480 --> 00:19:41,130
+locks I'm going to talk about for now is
+
+432
+00:19:41,130 --> 00:19:43,200
+a use of blocks to drive cache coherence
+
+433
+00:19:43,200 --> 00:19:45,149
+to help workstations ensure that even
+
+434
+00:19:45,149 --> 00:19:46,919
+though they're caching data they're
+
+435
+00:19:46,919 --> 00:19:51,029
+caching the latest data so as well as
+
+436
+00:19:51,029 --> 00:19:52,950
+the frangipani servers and workstations
+
+437
+00:19:52,950 --> 00:19:55,889
+and pedal servers there's a third kind
+
+438
+00:19:55,889 --> 00:19:59,789
+of server in the frangipani system
+
+439
+00:19:59,789 --> 00:20:02,730
+there's lock servers and so we're I'm
+
+440
+00:20:02,730 --> 00:20:04,559
+just gonna pretend there's one lock
+
+441
+00:20:04,559 --> 00:20:06,870
+server although you could shard the
+
+442
+00:20:06,870 --> 00:20:10,049
+locks over multiple servers so here's a
+
+443
+00:20:10,049 --> 00:20:16,470
+lock server it's a separate you know
+
+444
+00:20:16,470 --> 00:20:17,909
+it's logically at least a separate
+
+445
+00:20:17,909 --> 00:20:19,500
+computer although I think they ran them
+
+446
+00:20:19,500 --> 00:20:21,269
+on the same hardware as the pedal
+
+447
+00:20:21,269 --> 00:20:24,659
+servers but it basically just has a
+
+448
+00:20:24,659 --> 00:20:29,669
+table of named locks and locks are named
+
+449
+00:20:29,669 --> 00:20:32,070
+we'll consider them to be named after a
+
+450
+00:20:32,070 --> 00:20:34,679
+named as after file names although in
+
+451
+00:20:34,679 --> 00:20:37,139
+fact they're named after I numbers so we
+
+452
+00:20:37,139 --> 00:20:43,620
+have for every file we have a lock
+
+453
+00:20:43,620 --> 00:20:48,630
+potentially and each lock is possibly
+
+454
+00:20:48,630 --> 00:20:51,539
+owned by some owner for this discussion
+
+455
+00:20:51,539 --> 00:20:54,240
+I'm just gonna assume I'm gonna describe
+
+456
+00:20:54,240 --> 00:20:56,130
+it as if the locks were exclusive locks
+
+457
+00:20:56,130 --> 00:20:58,769
+although in fact frangipani has a more
+
+458
+00:20:58,769 --> 00:21:01,049
+complicated scheme for locks that allow
+
+459
+00:21:01,049 --> 00:21:03,899
+either one writer or multiple readers so
+
+460
+00:21:03,899 --> 00:21:08,279
+for example maybe file X has recently
+
+461
+00:21:08,279 --> 00:21:10,529
+been used by workstation 1 and
+
+462
+00:21:10,529 --> 00:21:15,029
+workstation 1 has a lock on it and maybe
+
+463
+00:21:15,029 --> 00:21:17,519
+file Y is recently used by workstation 2
+
+464
+00:21:17,519 --> 00:21:20,039
+and workstation 2 has a lock on it and
+
+465
+00:21:20,039 --> 00:21:21,510
+the lock server will remember off or
+
+466
+00:21:21,510 --> 00:21:22,200
+each file
+
+467
+00:21:22,200 --> 00:21:24,299
+who has the lock if anyone maybe nobody
+
+468
+00:21:24,299 --> 00:21:28,260
+does on that file and then in each
+
+469
+00:21:28,260 --> 00:21:29,870
+workstation
+
+470
+00:21:29,870 --> 00:21:33,779
+each workstation keeps track of which
+
+471
+00:21:33,779 --> 00:21:36,090
+locks it holds and this is tightly tied
+
+472
+00:21:36,090 --> 00:21:37,110
+to it
+
+473
+00:21:37,110 --> 00:21:38,999
+I'm keeping track of cache data as well
+
+474
+00:21:38,999 --> 00:21:42,440
+so in each workstations frangipani
+
+475
+00:21:42,440 --> 00:21:49,549
+module there's also a lock table and
+
+476
+00:21:52,999 --> 00:21:55,889
+record what file the more session to
+
+477
+00:21:55,889 --> 00:21:59,989
+lock for what kind of lock it has and
+
+478
+00:21:59,989 --> 00:22:03,210
+the contents the cached contents of that
+
+479
+00:22:03,210 --> 00:22:04,710
+file so that might be a whole bunch of
+
+480
+00:22:04,710 --> 00:22:07,289
+data blocks or maybe directory contents
+
+481
+00:22:07,289 --> 00:22:10,320
+for example so there's a lot of content
+
+482
+00:22:10,320 --> 00:22:14,460
+here so Linda frangipani server decides
+
+483
+00:22:14,460 --> 00:22:17,100
+oh it needs to read it needs to use the
+
+484
+00:22:17,100 --> 00:22:19,320
+directory slash or look at the file a or
+
+485
+00:22:19,320 --> 00:22:22,679
+look at an inode it first gets asked the
+
+486
+00:22:22,679 --> 00:22:24,389
+lock server for a lock on whatever it's
+
+487
+00:22:24,389 --> 00:22:26,999
+about to use and then it asks petal to
+
+488
+00:22:26,999 --> 00:22:30,149
+get the data for whatever that file or
+
+489
+00:22:30,149 --> 00:22:32,369
+directory or whatever it is and it needs
+
+490
+00:22:32,369 --> 00:22:34,409
+to read and then the workstation
+
+491
+00:22:34,409 --> 00:22:36,539
+remembers oh ho you know I have a copy
+
+492
+00:22:36,539 --> 00:22:41,609
+of file X its content is whatever the
+
+493
+00:22:41,609 --> 00:22:46,590
+content of file X is cached and it turns
+
+494
+00:22:46,590 --> 00:22:48,600
+out that workstations can have a lock in
+
+495
+00:22:48,600 --> 00:22:51,960
+at least two different modes what the
+
+496
+00:22:51,960 --> 00:22:54,659
+workstation can be actively reading or
+
+497
+00:22:54,659 --> 00:22:56,970
+writing whatever that file or directory
+
+498
+00:22:56,970 --> 00:22:59,129
+is right now that it's in the middle of
+
+499
+00:22:59,129 --> 00:23:01,799
+a file creation operation or deletion or
+
+500
+00:23:01,799 --> 00:23:05,399
+rename or something so in that case I'll
+
+501
+00:23:05,399 --> 00:23:09,379
+say that the lock is held by the
+
+502
+00:23:09,379 --> 00:23:12,769
+workstation and is busy it could also be
+
+503
+00:23:12,769 --> 00:23:16,049
+after a workstation has done some
+
+504
+00:23:16,049 --> 00:23:17,999
+operation like create a file or maybe
+
+505
+00:23:17,999 --> 00:23:18,779
+read a file
+
+506
+00:23:18,779 --> 00:23:20,639
+you know then release the lock as soon
+
+507
+00:23:20,639 --> 00:23:22,139
+as it's done with that system call
+
+508
+00:23:22,139 --> 00:23:24,149
+whatever system call like rename or read
+
+509
+00:23:24,149 --> 00:23:25,859
+or write or create as soon as the system
+
+510
+00:23:25,859 --> 00:23:27,659
+calls over the workstation will give up
+
+511
+00:23:27,659 --> 00:23:31,980
+the lock at least internally it's not
+
+512
+00:23:31,980 --> 00:23:34,289
+actively using that file anymore but
+
+513
+00:23:34,289 --> 00:23:36,119
+it'll as far as the lock server is
+
+514
+00:23:36,119 --> 00:23:37,739
+concerned the workstation will hold the
+
+515
+00:23:37,739 --> 00:23:39,809
+lock but the workstation notes for it
+
+516
+00:23:39,809 --> 00:23:42,899
+its own use that it's not actively using
+
+517
+00:23:42,899 --> 00:23:45,269
+that lock anymore as well call that the
+
+518
+00:23:45,269 --> 00:23:49,170
+lock is still held by the workstation
+
+519
+00:23:49,170 --> 00:23:54,430
+I'm just but the work station isn't
+
+520
+00:23:54,430 --> 00:23:57,130
+really using it and that'll be important
+
+521
+00:23:57,130 --> 00:24:01,360
+in a moment okay so I think these two
+
+522
+00:24:01,360 --> 00:24:02,920
+are set up consistently if we assume
+
+523
+00:24:02,920 --> 00:24:05,050
+this is workstation one the lock server
+
+524
+00:24:05,050 --> 00:24:07,420
+knows Oh locks for x and y exists and
+
+525
+00:24:07,420 --> 00:24:08,620
+they're both held by workstation one
+
+526
+00:24:08,620 --> 00:24:11,470
+workstation one has equivalent
+
+527
+00:24:11,470 --> 00:24:13,090
+information in its table it knows it's
+
+528
+00:24:13,090 --> 00:24:15,790
+holding these two blocks and furthermore
+
+529
+00:24:15,790 --> 00:24:18,010
+it has the it's remembering the content
+
+530
+00:24:18,010 --> 00:24:20,440
+is cached for the filers of directories
+
+531
+00:24:20,440 --> 00:24:26,560
+that the two locks cover there's a
+
+532
+00:24:26,560 --> 00:24:28,990
+number of rules here that in that
+
+533
+00:24:28,990 --> 00:24:32,680
+frangipani follows that caused it to use
+
+534
+00:24:32,680 --> 00:24:35,110
+locks in a way that provide cache
+
+535
+00:24:35,110 --> 00:24:36,850
+coherence then sure nobody's ever
+
+536
+00:24:36,850 --> 00:24:38,860
+meaning using stale data from their
+
+537
+00:24:38,860 --> 00:24:45,840
+cache so so these are basically rules
+
+538
+00:24:46,110 --> 00:24:48,310
+that are using conjunction with the
+
+539
+00:24:48,310 --> 00:24:53,470
+locks and cache data so one the really
+
+540
+00:24:53,470 --> 00:24:58,240
+overriding invariant here is that no
+
+541
+00:24:58,240 --> 00:25:00,610
+workstation is allowed to cache data to
+
+542
+00:25:00,610 --> 00:25:02,470
+hold any cached data unless it also
+
+543
+00:25:02,470 --> 00:25:05,440
+holds the lock associated with that data
+
+544
+00:25:05,440 --> 00:25:13,480
+so basically it's no cache data without
+
+545
+00:25:13,480 --> 00:25:17,740
+a lock without the lock that protects
+
+546
+00:25:17,740 --> 00:25:21,520
+that data and operationally what this
+
+547
+00:25:21,520 --> 00:25:25,150
+means is a workstation before it uses
+
+548
+00:25:25,150 --> 00:25:27,370
+data it first acquires the lock on the
+
+549
+00:25:27,370 --> 00:25:29,590
+data from the lock server and after the
+
+550
+00:25:29,590 --> 00:25:32,350
+workstation has the lock only then does
+
+551
+00:25:32,350 --> 00:25:34,600
+the workstation read the data from petal
+
+552
+00:25:34,600 --> 00:25:40,060
+and put it and put it in its cache so so
+
+553
+00:25:40,060 --> 00:25:41,830
+the sequence is you can acquire a lock
+
+554
+00:25:41,830 --> 00:25:47,160
+and then read from petal
+
+555
+00:25:50,470 --> 00:25:53,630
+I'll tell you at the lock of course you
+
+556
+00:25:53,630 --> 00:25:55,220
+know you weren't passing the data you
+
+557
+00:25:55,220 --> 00:25:56,480
+want to catch the data you first got to
+
+558
+00:25:56,480 --> 00:25:58,040
+get the lock and only strictly
+
+559
+00:25:58,040 --> 00:26:02,300
+afterwards read from petal and if you
+
+560
+00:26:02,300 --> 00:26:05,960
+ever release a lock then the rule is
+
+561
+00:26:05,960 --> 00:26:08,000
+that before releasing a lock you first
+
+562
+00:26:08,000 --> 00:26:10,100
+have to write if you modified the lock
+
+563
+00:26:10,100 --> 00:26:13,340
+data in your cache before you release
+
+564
+00:26:13,340 --> 00:26:15,440
+the lock you have to write the data back
+
+565
+00:26:15,440 --> 00:26:18,200
+to modify data back to petal and then
+
+566
+00:26:18,200 --> 00:26:20,240
+only when petals as yes I got the data
+
+567
+00:26:20,240 --> 00:26:22,070
+only then you'll have to release the
+
+568
+00:26:22,070 --> 00:26:23,840
+lock that is gives a lock back to the
+
+569
+00:26:23,840 --> 00:26:27,130
+lock server so the sequence is always
+
+570
+00:26:27,130 --> 00:26:31,930
+first you write the cache dated a petal
+
+571
+00:26:31,930 --> 00:26:37,840
+storage system and then release the lock
+
+572
+00:26:40,690 --> 00:26:43,760
+and erase the entry whoops
+
+573
+00:26:43,760 --> 00:26:45,410
+erase the entry and the cat and the
+
+574
+00:26:45,410 --> 00:26:47,600
+cache data from your from that
+
+575
+00:26:47,600 --> 00:26:52,160
+workstations lock table what this
+
+576
+00:26:52,160 --> 00:26:55,250
+results in the the protocol between the
+
+577
+00:26:55,250 --> 00:26:57,950
+lock server and between the workstations
+
+578
+00:26:57,950 --> 00:27:01,940
+and the lock server consists of four
+
+579
+00:27:01,940 --> 00:27:04,070
+different kinds of messages this is the
+
+580
+00:27:04,070 --> 00:27:11,720
+coherence protocol these are just
+
+581
+00:27:11,720 --> 00:27:13,190
+network you can think of them as
+
+582
+00:27:13,190 --> 00:27:14,540
+essentially sort of one-way Network
+
+583
+00:27:14,540 --> 00:27:20,860
+messages there's a request message from
+
+584
+00:27:20,860 --> 00:27:25,000
+from workstations to the lock server
+
+585
+00:27:25,000 --> 00:27:27,590
+request message says oh hey lock server
+
+586
+00:27:27,590 --> 00:27:30,950
+I'd like to get this lock when the lock
+
+587
+00:27:30,950 --> 00:27:34,460
+server is willing to give you the lock
+
+588
+00:27:34,460 --> 00:27:35,960
+and of course if somebody else holds if
+
+589
+00:27:35,960 --> 00:27:37,610
+the lock server can't immediately give
+
+590
+00:27:37,610 --> 00:27:39,200
+you the lock but if when the lock
+
+591
+00:27:39,200 --> 00:27:41,360
+becomes free the lock server will
+
+592
+00:27:41,360 --> 00:27:46,970
+respond we have a grant message then the
+
+593
+00:27:46,970 --> 00:27:49,400
+lock server back to the workstation in
+
+594
+00:27:49,400 --> 00:27:51,980
+response to an earlier request well if
+
+595
+00:27:51,980 --> 00:27:53,900
+you request a lock for the lock server
+
+596
+00:27:53,900 --> 00:27:55,610
+and someone else holds the lock right
+
+597
+00:27:55,610 --> 00:27:58,010
+now that other workstation has to first
+
+598
+00:27:58,010 --> 00:27:59,450
+give up the lock we can't have two
+
+599
+00:27:59,450 --> 00:28:02,180
+people owning the same lock so how are
+
+600
+00:28:02,180 --> 00:28:03,440
+we going to get that works
+
+601
+00:28:03,440 --> 00:28:07,250
+the lock well what I said here is that
+
+602
+00:28:07,250 --> 00:28:08,690
+when a lock station is you know when
+
+603
+00:28:08,690 --> 00:28:09,889
+it's actually using the lock and
+
+604
+00:28:09,889 --> 00:28:11,779
+actively reading or writing something it
+
+605
+00:28:11,779 --> 00:28:13,519
+has the lock and it's marked it busy but
+
+606
+00:28:13,519 --> 00:28:15,710
+the workstations don't give up their
+
+607
+00:28:15,710 --> 00:28:18,289
+locks ordinarily when they're done using
+
+608
+00:28:18,289 --> 00:28:21,649
+them so if I if I create a file and then
+
+609
+00:28:21,649 --> 00:28:24,679
+create system call finishes I'll still
+
+610
+00:28:24,679 --> 00:28:26,509
+have that file that new file locked and
+
+611
+00:28:26,509 --> 00:28:28,370
+also own the lock for that my
+
+612
+00:28:28,370 --> 00:28:29,570
+workstation will still all in the lock
+
+613
+00:28:29,570 --> 00:28:31,549
+for that file it'll just be in state
+
+614
+00:28:31,549 --> 00:28:33,620
+idle instead of busy but as far as the
+
+615
+00:28:33,620 --> 00:28:34,730
+lock server is concerned
+
+616
+00:28:34,730 --> 00:28:36,409
+well my workstation still has the lock
+
+617
+00:28:36,409 --> 00:28:38,269
+and the reason for this the reason to be
+
+618
+00:28:38,269 --> 00:28:40,159
+lazy about handing locks back to the
+
+619
+00:28:40,159 --> 00:28:42,320
+lock server is that if I create a file
+
+620
+00:28:42,320 --> 00:28:43,850
+called Y on my workstation
+
+621
+00:28:43,850 --> 00:28:46,159
+I'm almost certainly going to be about
+
+622
+00:28:46,159 --> 00:28:48,950
+to use Y for other purposes like maybe
+
+623
+00:28:48,950 --> 00:28:51,110
+write some data to it or read from it or
+
+624
+00:28:51,110 --> 00:28:53,139
+something so it's extremely advantageous
+
+625
+00:28:53,139 --> 00:28:55,490
+for the workstation to sort of
+
+626
+00:28:55,490 --> 00:28:58,940
+accumulate locks for all of the recently
+
+627
+00:28:58,940 --> 00:29:00,590
+used files in the workstation and not
+
+628
+00:29:00,590 --> 00:29:02,899
+give them back unless it really has to
+
+629
+00:29:02,899 --> 00:29:05,179
+and so in the ordinary in the common
+
+630
+00:29:05,179 --> 00:29:07,070
+case in which I use a bunch of files in
+
+631
+00:29:07,070 --> 00:29:09,950
+my home directory and nobody else on any
+
+632
+00:29:09,950 --> 00:29:11,960
+other workstation ever looks at them my
+
+633
+00:29:11,960 --> 00:29:14,000
+workstation ends up accumulating dozens
+
+634
+00:29:14,000 --> 00:29:16,279
+or hundreds of locks in idle state for
+
+635
+00:29:16,279 --> 00:29:18,230
+my files but if somebody else does look
+
+636
+00:29:18,230 --> 00:29:20,840
+at one of my files they need to first
+
+637
+00:29:20,840 --> 00:29:22,340
+get the lock and I have to give up the
+
+638
+00:29:22,340 --> 00:29:25,009
+lock so the way that works is that if
+
+639
+00:29:25,009 --> 00:29:27,350
+the lock server receives a lock request
+
+640
+00:29:27,350 --> 00:29:30,080
+and it sees in the lock server table AHA
+
+641
+00:29:30,080 --> 00:29:31,879
+you know that lock is currently owned by
+
+642
+00:29:31,879 --> 00:29:34,460
+workstation 1 the lock server will send
+
+643
+00:29:34,460 --> 00:29:38,539
+a revoke message to whoever the
+
+644
+00:29:38,539 --> 00:29:40,669
+workstation that currently owns that
+
+645
+00:29:40,669 --> 00:29:42,889
+lock saying look you know somebody else
+
+646
+00:29:42,889 --> 00:29:47,360
+wants it please give up the lock when a
+
+647
+00:29:47,360 --> 00:29:49,580
+workstation receives a revoke request if
+
+648
+00:29:49,580 --> 00:29:54,409
+the lock is idle then if the cache data
+
+649
+00:29:54,409 --> 00:29:56,419
+is dirty the workstation will first
+
+650
+00:29:56,419 --> 00:30:00,230
+write the cat dirty data that modified
+
+651
+00:30:00,230 --> 00:30:01,759
+data from his cache back to peddle
+
+652
+00:30:01,759 --> 00:30:04,610
+because the rule says the rule that in
+
+653
+00:30:04,610 --> 00:30:06,259
+order to never cache data without a lock
+
+654
+00:30:06,259 --> 00:30:08,750
+says we got our right the modify dated
+
+655
+00:30:08,750 --> 00:30:11,419
+back to peddle before releasing so if
+
+656
+00:30:11,419 --> 00:30:13,159
+the locks idle would first write back
+
+657
+00:30:13,159 --> 00:30:16,519
+the data if it's modified back to peddle
+
+658
+00:30:16,519 --> 00:30:17,360
+and
+
+659
+00:30:17,360 --> 00:30:22,250
+then send a message back to the lock
+
+660
+00:30:22,250 --> 00:30:24,890
+server saying it's okay we give up this
+
+661
+00:30:24,890 --> 00:30:35,809
+lock so the response to revoke send to a
+
+662
+00:30:35,809 --> 00:30:37,940
+workstation is the worst station sends
+
+663
+00:30:37,940 --> 00:30:39,200
+it released of course if the worst
+
+664
+00:30:39,200 --> 00:30:40,850
+station gets a revoke while it's
+
+665
+00:30:40,850 --> 00:30:42,620
+actively using a lock while it's in the
+
+666
+00:30:42,620 --> 00:30:44,630
+middle of a delete or rename or
+
+667
+00:30:44,630 --> 00:30:49,190
+something that affects the locked file
+
+668
+00:30:49,190 --> 00:30:51,950
+the worst station will not give us a
+
+669
+00:30:51,950 --> 00:30:53,720
+lock until it's it's done using and
+
+670
+00:30:53,720 --> 00:30:55,010
+until it's finished that file system
+
+671
+00:30:55,010 --> 00:30:56,809
+operation whatever system call it was
+
+672
+00:30:56,809 --> 00:30:58,970
+that was using this file and then the
+
+673
+00:30:58,970 --> 00:31:00,830
+lock in the worst stations lock state
+
+674
+00:31:00,830 --> 00:31:03,500
+will transition to idle and then you'll
+
+675
+00:31:03,500 --> 00:31:07,190
+be able to pay attention to the revoke
+
+676
+00:31:07,190 --> 00:31:10,010
+request and after writing to peddle if
+
+677
+00:31:10,010 --> 00:31:12,950
+need be released the lock alright so
+
+678
+00:31:12,950 --> 00:31:17,650
+this is the is the coherence protocol
+
+679
+00:31:17,650 --> 00:31:21,410
+that fringe that well this is a
+
+680
+00:31:21,410 --> 00:31:23,059
+simplification of the coherence protocol
+
+681
+00:31:23,059 --> 00:31:24,799
+that frangipani uses as I mentioned
+
+682
+00:31:24,799 --> 00:31:26,299
+before what's missing from all this is
+
+683
+00:31:26,299 --> 00:31:28,429
+the fact that locks can be either
+
+684
+00:31:28,429 --> 00:31:31,100
+exclusive for writers or shared for
+
+685
+00:31:31,100 --> 00:31:38,990
+read-only access and just like petal is
+
+686
+00:31:38,990 --> 00:31:41,059
+a block server and doesn't understand
+
+687
+00:31:41,059 --> 00:31:44,150
+anything about file systems the lock
+
+688
+00:31:44,150 --> 00:31:47,210
+server also these IDs these are really
+
+689
+00:31:47,210 --> 00:31:49,429
+lock identifiers and the locks are
+
+690
+00:31:49,429 --> 00:31:51,980
+doesn't know anything about files or
+
+691
+00:31:51,980 --> 00:31:53,809
+directories or file system it just has
+
+692
+00:31:53,809 --> 00:31:55,760
+these it's just has this table with
+
+693
+00:31:55,760 --> 00:31:58,790
+opaque IDs and who owns you know that
+
+694
+00:31:58,790 --> 00:32:01,190
+name locks and who owns those locks and
+
+695
+00:32:01,190 --> 00:32:03,230
+it's frangipani that knows ah you know
+
+696
+00:32:03,230 --> 00:32:05,240
+the lock that I associate was he given a
+
+697
+00:32:05,240 --> 00:32:08,330
+file has such and such an identifier and
+
+698
+00:32:08,330 --> 00:32:11,450
+as it happens prin Japan uses unix-style
+
+699
+00:32:11,450 --> 00:32:14,270
+I numbers or the numbers associated with
+
+700
+00:32:14,270 --> 00:32:20,390
+files instead of names for locks so just
+
+701
+00:32:20,390 --> 00:32:25,760
+to make this coherence protocol concrete
+
+702
+00:32:25,760 --> 00:32:28,580
+and to illustrate again the relationship
+
+703
+00:32:28,580 --> 00:32:31,100
+between petal operations
+
+704
+00:32:31,100 --> 00:32:33,620
+and lock server operations let me just
+
+705
+00:32:33,620 --> 00:32:35,390
+run through what happens if one
+
+706
+00:32:35,390 --> 00:32:37,850
+workstation modifies some file system
+
+707
+00:32:37,850 --> 00:32:40,360
+data and then in another workstation
+
+708
+00:32:40,360 --> 00:32:43,130
+means to look at it so we have two
+
+709
+00:32:43,130 --> 00:32:50,840
+workstations the lock server so the way
+
+710
+00:32:50,840 --> 00:32:52,910
+the protocol plays out if workstation
+
+711
+00:32:52,910 --> 00:32:56,299
+one wants to read since a workstation
+
+712
+00:32:56,299 --> 00:32:58,970
+one wants to read and then modify files
+
+713
+00:32:58,970 --> 00:33:02,120
+e so before it can even read anything
+
+714
+00:33:02,120 --> 00:33:06,940
+about Z from peddle it must first
+
+715
+00:33:06,940 --> 00:33:11,510
+acquire the lock for Z so it sends an
+
+716
+00:33:11,510 --> 00:33:13,520
+acquire request to the lock server maybe
+
+717
+00:33:13,520 --> 00:33:15,350
+nobody holds the lock or lock servers
+
+718
+00:33:15,350 --> 00:33:16,690
+never heard anything about it
+
+719
+00:33:16,690 --> 00:33:19,250
+so the locks are makes a new entry for Z
+
+720
+00:33:19,250 --> 00:33:21,919
+and it stable returns our reply saying
+
+721
+00:33:21,919 --> 00:33:24,429
+yes
+
+722
+00:33:24,429 --> 00:33:33,200
+you own the grant for lock C and at this
+
+723
+00:33:33,200 --> 00:33:34,789
+point the workstation says it has the
+
+724
+00:33:34,789 --> 00:33:37,309
+lock on file Z isn't entitled to read
+
+725
+00:33:37,309 --> 00:33:40,220
+information about it from petal so at
+
+726
+00:33:40,220 --> 00:33:47,799
+this point we're gonna read Z from petal
+
+727
+00:33:52,030 --> 00:33:55,159
+and indeed workstation one can modify it
+
+728
+00:33:55,159 --> 00:33:57,620
+locally in their cache at some later
+
+729
+00:33:57,620 --> 00:33:59,750
+point maybe the human being and sitting
+
+730
+00:33:59,750 --> 00:34:01,880
+in front of workstation two wants to
+
+731
+00:34:01,880 --> 00:34:04,010
+also to read file Z while the
+
+732
+00:34:04,010 --> 00:34:06,110
+workstation two doesn't have the lock
+
+733
+00:34:06,110 --> 00:34:07,580
+for files the ISA the very first thing
+
+734
+00:34:07,580 --> 00:34:09,590
+it needs to do is send a message the
+
+735
+00:34:09,590 --> 00:34:12,560
+lock server saying oh yeah I'd like to
+
+736
+00:34:12,560 --> 00:34:16,609
+get the lock for file Z the lock server
+
+737
+00:34:16,609 --> 00:34:18,710
+knows it can't reply yes yet because
+
+738
+00:34:18,710 --> 00:34:20,629
+somebody else has the lock namely
+
+739
+00:34:20,629 --> 00:34:23,239
+workstation one my the lock server sends
+
+740
+00:34:23,239 --> 00:34:28,418
+in response a revoke
+
+741
+00:34:30,600 --> 00:34:34,000
+the workstation one workstation one not
+
+742
+00:34:34,000 --> 00:34:35,710
+allowed to give up the lock until it
+
+743
+00:34:35,710 --> 00:34:37,810
+writes any modified data back to the
+
+744
+00:34:37,810 --> 00:34:42,280
+pedal so it's now gonna write the model
+
+745
+00:34:42,280 --> 00:34:45,460
+anything modified content the actual
+
+746
+00:34:45,460 --> 00:34:46,449
+contents of the file with always
+
+747
+00:34:46,449 --> 00:34:51,370
+modified back to pedal only then is
+
+748
+00:34:51,370 --> 00:34:54,840
+workstation two allowed to send a
+
+749
+00:34:54,840 --> 00:35:02,260
+release back to the lock server the lock
+
+750
+00:35:02,260 --> 00:35:04,150
+server with must have kept a record in
+
+751
+00:35:04,150 --> 00:35:05,590
+some table saying well you know there's
+
+752
+00:35:05,590 --> 00:35:07,900
+somebody waiting for lock Z as soon as
+
+753
+00:35:07,900 --> 00:35:10,390
+its current holder releases that we need
+
+754
+00:35:10,390 --> 00:35:14,590
+to reply and so this receipt of this
+
+755
+00:35:14,590 --> 00:35:17,140
+release will cause the lock server to
+
+756
+00:35:17,140 --> 00:35:19,800
+update its tables and finally send the
+
+757
+00:35:19,800 --> 00:35:26,500
+grant back to or station two and at this
+
+758
+00:35:26,500 --> 00:35:28,720
+point now our station two can finally
+
+759
+00:35:28,720 --> 00:35:36,580
+read files even pedal this is how the
+
+760
+00:35:36,580 --> 00:35:39,370
+cache coherence protocol plays out to
+
+761
+00:35:39,370 --> 00:35:43,620
+ensure that everybody who does a read
+
+762
+00:35:43,620 --> 00:35:46,960
+doesn't read the data until whoever the
+
+763
+00:35:46,960 --> 00:35:49,390
+previous until anybody who might have
+
+764
+00:35:49,390 --> 00:35:52,570
+had the data modified privately in their
+
+765
+00:35:52,570 --> 00:35:54,700
+cache first writes the data back to
+
+766
+00:35:54,700 --> 00:36:01,060
+pedal all right so the locking machinery
+
+767
+00:36:01,060 --> 00:36:04,300
+forces reads to see the latest right so
+
+768
+00:36:04,300 --> 00:36:12,540
+what's going on there's a number of the
+
+769
+00:36:12,540 --> 00:36:14,770
+optimizations that are possible in these
+
+770
+00:36:14,770 --> 00:36:16,570
+kind of cache coherence protocols
+
+771
+00:36:16,570 --> 00:36:18,250
+I mean I've actually already described
+
+772
+00:36:18,250 --> 00:36:20,260
+one this idle state the fact that
+
+773
+00:36:20,260 --> 00:36:22,270
+workstations hold onto locks that
+
+774
+00:36:22,270 --> 00:36:23,830
+they're not using right now instead of
+
+775
+00:36:23,830 --> 00:36:25,420
+immediately releasing them that's
+
+776
+00:36:25,420 --> 00:36:28,120
+already an optimization to the simplest
+
+777
+00:36:28,120 --> 00:36:30,730
+protocol you can think of and the other
+
+778
+00:36:30,730 --> 00:36:33,790
+main optimization is that the frangipani
+
+779
+00:36:33,790 --> 00:36:36,700
+has is that it has a notion of shared
+
+780
+00:36:36,700 --> 00:36:39,220
+versus shared read locks versus
+
+781
+00:36:39,220 --> 00:36:41,470
+exclusive write locks so have lots and
+
+782
+00:36:41,470 --> 00:36:42,880
+lots of workstations need to be
+
+783
+00:36:42,880 --> 00:36:44,740
+the same file but nobody's writing it
+
+784
+00:36:44,740 --> 00:36:47,710
+they can all have a lock a read lock on
+
+785
+00:36:47,710 --> 00:36:49,539
+that file and if somebody does come
+
+786
+00:36:49,539 --> 00:36:51,400
+along and try to write this file that's
+
+787
+00:36:51,400 --> 00:36:54,759
+widely cached they first need to first
+
+788
+00:36:54,759 --> 00:36:57,910
+revoke everybody's read lock so that
+
+789
+00:36:57,910 --> 00:36:59,710
+everybody gives up their cached copy and
+
+790
+00:36:59,710 --> 00:37:01,930
+only then is a right or allowed to write
+
+791
+00:37:01,930 --> 00:37:03,460
+the file but it's okay now because
+
+792
+00:37:03,460 --> 00:37:05,500
+nobody has a cache copy anymore so
+
+793
+00:37:05,500 --> 00:37:08,109
+nobody could be reading stale data while
+
+794
+00:37:08,109 --> 00:37:13,240
+it's being written all right so that's a
+
+795
+00:37:13,240 --> 00:37:21,609
+cache coherence story driven by driven
+
+796
+00:37:21,609 --> 00:37:26,380
+by the locking protocol next up in our
+
+797
+00:37:26,380 --> 00:37:35,829
+list of yes yes that's a good question
+
+798
+00:37:35,829 --> 00:37:42,700
+in fact there's a risk here in the
+
+799
+00:37:42,700 --> 00:37:44,529
+scheme I described that if I modify a
+
+800
+00:37:44,529 --> 00:37:47,170
+file on my workstation and nobody else
+
+801
+00:37:47,170 --> 00:37:50,440
+reads it for nobody else reads it that
+
+802
+00:37:50,440 --> 00:37:53,019
+the only copy of the modified file maybe
+
+803
+00:37:53,019 --> 00:37:55,569
+have some precious information in it is
+
+804
+00:37:55,569 --> 00:37:58,450
+on in in the cache in RAM on my
+
+805
+00:37:58,450 --> 00:38:00,849
+workstation and my works they were to
+
+806
+00:38:00,849 --> 00:38:03,579
+crash then and you know we hadn't done
+
+807
+00:38:03,579 --> 00:38:05,079
+anything special then it would have
+
+808
+00:38:05,079 --> 00:38:07,059
+crashed with the only copy of the data
+
+809
+00:38:07,059 --> 00:38:09,490
+and the data would be lost so in order
+
+810
+00:38:09,490 --> 00:38:12,190
+to forestall this no matter what all
+
+811
+00:38:12,190 --> 00:38:15,220
+these workstations write back anything
+
+812
+00:38:15,220 --> 00:38:18,549
+that's in their cache any modified stuff
+
+813
+00:38:18,549 --> 00:38:21,700
+in their cache every 30 seconds so that
+
+814
+00:38:21,700 --> 00:38:23,799
+if my workstation crash is unexpectedly
+
+815
+00:38:23,799 --> 00:38:25,539
+I may lose the last 30 seconds at work
+
+816
+00:38:25,539 --> 00:38:27,339
+but no more there's actually just mimics
+
+817
+00:38:27,339 --> 00:38:32,279
+the way ordinary Linux or UNIX works
+
+818
+00:38:33,150 --> 00:38:36,240
+indeed all of this a lot of the story is
+
+819
+00:38:36,240 --> 00:38:40,480
+about in the context of a distributed
+
+820
+00:38:40,480 --> 00:38:43,660
+file system trying to mimic the
+
+821
+00:38:43,660 --> 00:38:46,119
+properties that ordinary unix-style
+
+822
+00:38:46,119 --> 00:38:49,180
+workstations have so that users won't be
+
+823
+00:38:49,180 --> 00:38:51,309
+surprised by frangipani it just sort of
+
+824
+00:38:51,309 --> 00:38:53,410
+works much the same way that they're
+
+825
+00:38:53,410 --> 00:38:55,859
+already used
+
+826
+00:38:57,000 --> 00:39:00,910
+all right so our next challenge is how
+
+827
+00:39:00,910 --> 00:39:04,390
+do you atomicity that is how to make it
+
+828
+00:39:04,390 --> 00:39:05,890
+so even though when I do a complex
+
+829
+00:39:05,890 --> 00:39:07,750
+operation like creating a file which
+
+830
+00:39:07,750 --> 00:39:10,780
+after all involves marking a new I
+
+831
+00:39:10,780 --> 00:39:14,080
+knowed as allocated initializing the
+
+832
+00:39:14,080 --> 00:39:15,580
+inode the I knows a little piece of data
+
+833
+00:39:15,580 --> 00:39:16,960
+that describes each file maybe
+
+834
+00:39:16,960 --> 00:39:19,720
+allocating space for the file adding a
+
+835
+00:39:19,720 --> 00:39:21,400
+new name in the directory for my new
+
+836
+00:39:21,400 --> 00:39:23,440
+file there's many steps so many things
+
+837
+00:39:23,440 --> 00:39:25,510
+that have to be updated we don't want
+
+838
+00:39:25,510 --> 00:39:27,820
+anybody to see any of the intermediate
+
+839
+00:39:27,820 --> 00:39:30,340
+steps we want people you know other
+
+840
+00:39:30,340 --> 00:39:32,260
+workstations to either see the file not
+
+841
+00:39:32,260 --> 00:39:34,360
+exist or completely exist but not
+
+842
+00:39:34,360 --> 00:39:40,260
+something in between one atomic
+
+843
+00:39:41,340 --> 00:39:56,860
+multi-step operations alright so in
+
+844
+00:39:56,860 --> 00:39:58,840
+order to implement this in order to make
+
+845
+00:39:58,840 --> 00:40:01,240
+multi-step operations like file create
+
+846
+00:40:01,240 --> 00:40:04,030
+or rename or delete atomic as far as
+
+847
+00:40:04,030 --> 00:40:05,860
+other workstations are concerned
+
+848
+00:40:05,860 --> 00:40:08,380
+frangipani has a implement the notion of
+
+849
+00:40:08,380 --> 00:40:13,930
+transactions that is as a complete sort
+
+850
+00:40:13,930 --> 00:40:15,850
+of database style transaction system
+
+851
+00:40:15,850 --> 00:40:20,040
+inside it again driven by the locks
+
+852
+00:40:20,250 --> 00:40:22,830
+furthermore it it's it's this is
+
+853
+00:40:22,830 --> 00:40:26,220
+actually distributed transaction system
+
+854
+00:40:26,220 --> 00:40:28,720
+and we'll see more we'll hear more about
+
+855
+00:40:28,720 --> 00:40:31,060
+distributed transaction systems later in
+
+856
+00:40:31,060 --> 00:40:31,570
+the course
+
+857
+00:40:31,570 --> 00:40:34,690
+there are like a very common requirement
+
+858
+00:40:34,690 --> 00:40:39,550
+and distributed systems the basic story
+
+859
+00:40:39,550 --> 00:40:43,390
+here is that frangipani makes it so that
+
+860
+00:40:43,390 --> 00:40:45,790
+other workstations can't see my
+
+861
+00:40:45,790 --> 00:40:47,800
+modifications until completely done by
+
+862
+00:40:47,800 --> 00:40:50,350
+an operation by first acquiring all the
+
+863
+00:40:50,350 --> 00:40:52,330
+locks on all the data that I'm going to
+
+864
+00:40:52,330 --> 00:40:54,640
+need to read or write during my
+
+865
+00:40:54,640 --> 00:40:57,280
+operation and not releasing any of those
+
+866
+00:40:57,280 --> 00:41:00,970
+locks until it's finished with the
+
+867
+00:41:00,970 --> 00:41:02,620
+complete operation and of course
+
+868
+00:41:02,620 --> 00:41:05,470
+following the coherence rule written all
+
+869
+00:41:05,470 --> 00:41:08,800
+of the modified data back to petal
+
+870
+00:41:08,800 --> 00:41:10,330
+so before I do an operation like
+
+871
+00:41:10,330 --> 00:41:12,340
+renaming like moving a file from one
+
+872
+00:41:12,340 --> 00:41:13,900
+directory to another which after all
+
+873
+00:41:13,900 --> 00:41:16,000
+modifies both directories and I don't
+
+874
+00:41:16,000 --> 00:41:18,970
+want anybody to see the file being in
+
+875
+00:41:18,970 --> 00:41:20,980
+either directory or something in the
+
+876
+00:41:20,980 --> 00:41:22,330
+middle of the operation in order to do
+
+877
+00:41:22,330 --> 00:41:25,420
+in order to do this French penny first
+
+878
+00:41:25,420 --> 00:41:31,960
+acquires require all the locks for the
+
+879
+00:41:31,960 --> 00:41:39,190
+operation then do everything like all
+
+880
+00:41:39,190 --> 00:41:47,830
+the updates right the frangipani so I
+
+881
+00:41:47,830 --> 00:41:55,900
+write to pedal and then release and of
+
+882
+00:41:55,900 --> 00:41:57,430
+course this is easy button and you know
+
+883
+00:41:57,430 --> 00:41:59,170
+since we already had the locking server
+
+884
+00:41:59,170 --> 00:42:00,370
+anyway in order to drive the cache
+
+885
+00:42:00,370 --> 00:42:04,210
+coherence protocol we buy just by you
+
+886
+00:42:04,210 --> 00:42:05,740
+know making sure we hold all the locks
+
+887
+00:42:05,740 --> 00:42:07,870
+for the entire duration of an operation
+
+888
+00:42:07,870 --> 00:42:10,510
+we get these indivisible atomic
+
+889
+00:42:10,510 --> 00:42:18,190
+transactions almost for free so an
+
+890
+00:42:18,190 --> 00:42:19,330
+interesting thing to know and that's
+
+891
+00:42:19,330 --> 00:42:20,860
+basically all there is to say about
+
+892
+00:42:20,860 --> 00:42:23,620
+making operations atomic and transit
+
+893
+00:42:23,620 --> 00:42:26,800
+Pandu's hold all the locks an
+
+894
+00:42:26,800 --> 00:42:28,270
+interesting thing about this use of
+
+895
+00:42:28,270 --> 00:42:29,950
+locks is that trends of pennies using
+
+896
+00:42:29,950 --> 00:42:33,600
+locks for - almost opposite purposes for
+
+897
+00:42:33,600 --> 00:42:36,430
+cache coherence frangipani uses the
+
+898
+00:42:36,430 --> 00:42:38,850
+locks to make sure that writes are
+
+899
+00:42:38,850 --> 00:42:41,620
+visible immediately to anybody who wants
+
+900
+00:42:41,620 --> 00:42:43,780
+to read them so this is all about using
+
+901
+00:42:43,780 --> 00:42:46,270
+locks essentially to kind of make sure
+
+902
+00:42:46,270 --> 00:42:49,420
+people can see writes this use the
+
+903
+00:42:49,420 --> 00:42:51,430
+blocks is all about making sure people
+
+904
+00:42:51,430 --> 00:42:53,920
+don't see the writes until I'm finished
+
+905
+00:42:53,920 --> 00:42:57,820
+with an operation because I hold all the
+
+906
+00:42:57,820 --> 00:42:59,530
+locks until all the rights have been
+
+907
+00:42:59,530 --> 00:43:01,690
+done so they're sort of playing an
+
+908
+00:43:01,690 --> 00:43:04,630
+interesting trick here by reusing the
+
+909
+00:43:04,630 --> 00:43:06,100
+locks they would have had to have anyway
+
+910
+00:43:06,100 --> 00:43:09,160
+for transactions in order to drive cache
+
+911
+00:43:09,160 --> 00:43:11,700
+coherence
+
+912
+00:43:12,590 --> 00:43:14,750
+all right so the next interesting thing
+
+913
+00:43:14,750 --> 00:43:24,950
+is crash recovery we need to cope with
+
+914
+00:43:24,950 --> 00:43:27,050
+the possibility the most interesting
+
+915
+00:43:27,050 --> 00:43:29,270
+possibility is that a workstation
+
+916
+00:43:29,270 --> 00:43:33,410
+crashes while holding locks and while in
+
+917
+00:43:33,410 --> 00:43:35,900
+the middle of some sort of complex set
+
+918
+00:43:35,900 --> 00:43:37,250
+of updates that is a reforestation
+
+919
+00:43:37,250 --> 00:43:39,350
+acquired a bunch of locks it's writing a
+
+920
+00:43:39,350 --> 00:43:40,820
+whole lot of data to maybe create or
+
+921
+00:43:40,820 --> 00:43:42,740
+delete files or something has possibly
+
+922
+00:43:42,740 --> 00:43:45,380
+written some of those modifications back
+
+923
+00:43:45,380 --> 00:43:48,620
+to pedal because maybe it was gonna soon
+
+924
+00:43:48,620 --> 00:43:50,480
+release locks or had been asked by the
+
+925
+00:43:50,480 --> 00:43:52,100
+lock server to release locks so it's
+
+926
+00:43:52,100 --> 00:43:54,320
+maybe done some of the rights back to
+
+927
+00:43:54,320 --> 00:43:57,590
+pedal for its complex operations but not
+
+928
+00:43:57,590 --> 00:44:00,230
+all of them and then crashes before
+
+929
+00:44:00,230 --> 00:44:02,380
+giving up the locks so that's the
+
+930
+00:44:02,380 --> 00:44:07,300
+interesting situation for crash recovery
+
+931
+00:44:07,300 --> 00:44:09,830
+so there's a number of things that that
+
+932
+00:44:09,830 --> 00:44:11,420
+don't work very well for workstation
+
+933
+00:44:11,420 --> 00:44:30,440
+crashes crashing we hope one thing that
+
+934
+00:44:30,440 --> 00:44:32,990
+doesn't work very well is to just
+
+935
+00:44:32,990 --> 00:44:35,090
+observe the workstations crashed and
+
+936
+00:44:35,090 --> 00:44:37,870
+just release all its locks because then
+
+937
+00:44:37,870 --> 00:44:41,060
+if it's done something like created a
+
+938
+00:44:41,060 --> 00:44:43,570
+new file and it's written the files
+
+939
+00:44:43,570 --> 00:44:47,150
+directory entry its name back to pedal
+
+940
+00:44:47,150 --> 00:44:48,860
+but it hasn't yet written the
+
+941
+00:44:48,860 --> 00:44:51,500
+initialized inode that describes the
+
+942
+00:44:51,500 --> 00:44:53,840
+file the inode may still be filled with
+
+943
+00:44:53,840 --> 00:44:56,450
+garbage or the previous file some
+
+944
+00:44:56,450 --> 00:44:58,700
+previous files information in petal and
+
+945
+00:44:58,700 --> 00:45:00,230
+yet we've already written the directory
+
+946
+00:45:00,230 --> 00:45:02,270
+entry so it's not okay to just release a
+
+947
+00:45:02,270 --> 00:45:05,060
+crashed file servers release of crash
+
+948
+00:45:05,060 --> 00:45:11,180
+were stations locks another thing that's
+
+949
+00:45:11,180 --> 00:45:13,400
+not okay is to not release the crashed
+
+950
+00:45:13,400 --> 00:45:15,350
+workstations locks you know that would
+
+951
+00:45:15,350 --> 00:45:17,690
+be correct because you know if it
+
+952
+00:45:17,690 --> 00:45:20,150
+crashed while in the middle of writing
+
+953
+00:45:20,150 --> 00:45:23,210
+out some of this modifications the fact
+
+954
+00:45:23,210 --> 00:45:24,350
+that it hadn't written out all of them
+
+955
+00:45:24,350 --> 00:45:26,090
+means a can't of release its locks
+
+956
+00:45:26,090 --> 00:45:28,640
+so simply not releasing its locks is
+
+957
+00:45:28,640 --> 00:45:31,100
+correct because it would hide the this
+
+958
+00:45:31,100 --> 00:45:33,830
+partial update from any readers and so
+
+959
+00:45:33,830 --> 00:45:35,740
+nobody would ever be confused by seeing
+
+960
+00:45:35,740 --> 00:45:38,240
+partially updated data structures in
+
+961
+00:45:38,240 --> 00:45:41,210
+petal on the other hand you know then
+
+962
+00:45:41,210 --> 00:45:42,950
+anybody you needed to use those files
+
+963
+00:45:42,950 --> 00:45:44,480
+would have to wait forever for the locks
+
+964
+00:45:44,480 --> 00:45:47,480
+if we simply didn't give them up so we
+
+965
+00:45:47,480 --> 00:45:48,950
+absolutely have to give up the locks in
+
+966
+00:45:48,950 --> 00:45:51,500
+order that other workstations can use
+
+967
+00:45:51,500 --> 00:45:53,210
+the system can use those same files and
+
+968
+00:45:53,210 --> 00:45:55,700
+directories but we have to do something
+
+969
+00:45:55,700 --> 00:45:57,590
+about the fact that the workstation
+
+970
+00:45:57,590 --> 00:45:59,900
+might have done some of the rights but
+
+971
+00:45:59,900 --> 00:46:05,360
+not all for its operations so frangipani
+
+972
+00:46:05,360 --> 00:46:10,130
+has like almost every other system that
+
+973
+00:46:10,130 --> 00:46:12,050
+needs to implement crashed recoverable
+
+974
+00:46:12,050 --> 00:46:16,540
+transactions users right ahead logging
+
+975
+00:46:22,600 --> 00:46:25,820
+this is something we've seen at least
+
+976
+00:46:25,820 --> 00:46:29,990
+one instance of the last lecture with
+
+977
+00:46:29,990 --> 00:46:33,350
+with aurora i was also using right ahead
+
+978
+00:46:33,350 --> 00:46:39,950
+logging so the idea is that if a
+
+979
+00:46:39,950 --> 00:46:41,420
+workstation needs to do a complex
+
+980
+00:46:41,420 --> 00:46:43,030
+operation that involves touching
+
+981
+00:46:43,030 --> 00:46:46,430
+updating many pieces of data in petal in
+
+982
+00:46:46,430 --> 00:46:48,500
+the file system the workstation well
+
+983
+00:46:48,500 --> 00:46:51,020
+first before it makes any rights to
+
+984
+00:46:51,020 --> 00:46:57,140
+petal append a la log entry to his log
+
+985
+00:46:57,140 --> 00:47:00,650
+in petal describing the full set of
+
+986
+00:47:00,650 --> 00:47:03,920
+operations it's about to do and only
+
+987
+00:47:03,920 --> 00:47:07,130
+when that log entry describing the full
+
+988
+00:47:07,130 --> 00:47:09,980
+set of operations is safely in petal
+
+989
+00:47:09,980 --> 00:47:11,990
+where now anybody else can see it only
+
+990
+00:47:11,990 --> 00:47:15,140
+then will the workstation start to send
+
+991
+00:47:15,140 --> 00:47:17,090
+the rights for the operation out to
+
+992
+00:47:17,090 --> 00:47:20,390
+petal I'm so we if it were station could
+
+993
+00:47:20,390 --> 00:47:23,240
+ever reveal even the one of its rights
+
+994
+00:47:23,240 --> 00:47:26,060
+for an operation the petal it must have
+
+995
+00:47:26,060 --> 00:47:29,390
+already put the log entry describing the
+
+996
+00:47:29,390 --> 00:47:32,300
+whole operation all of the updates must
+
+997
+00:47:32,300 --> 00:47:35,390
+already exist in petal so this is very
+
+998
+00:47:35,390 --> 00:47:37,640
+standard this is just a description of
+
+999
+00:47:37,640 --> 00:47:39,630
+right ahead logging
+
+1000
+00:47:39,630 --> 00:47:43,989
+but there's a couple of odd aspects of
+
+1001
+00:47:43,989 --> 00:47:47,829
+how frangipani implements right ahead
+
+1002
+00:47:47,829 --> 00:47:48,309
+logging
+
+1003
+00:47:48,309 --> 00:47:51,489
+the first one is that in most
+
+1004
+00:47:51,489 --> 00:47:54,630
+transaction systems there's just one log
+
+1005
+00:47:54,630 --> 00:47:57,549
+and all the transactions in the system
+
+1006
+00:47:57,549 --> 00:47:59,170
+you know they're all sitting there in
+
+1007
+00:47:59,170 --> 00:48:02,200
+one log in one place so there's a crash
+
+1008
+00:48:02,200 --> 00:48:05,499
+and there's opera there's more than one
+
+1009
+00:48:05,499 --> 00:48:07,390
+operation that affects the same piece of
+
+1010
+00:48:07,390 --> 00:48:10,359
+data we have all of those operations for
+
+1011
+00:48:10,359 --> 00:48:11,650
+that piece of data and everything else
+
+1012
+00:48:11,650 --> 00:48:14,650
+right there in the single log sequence
+
+1013
+00:48:14,650 --> 00:48:16,779
+and so we know for example which is the
+
+1014
+00:48:16,779 --> 00:48:20,890
+most recent update to a given piece of
+
+1015
+00:48:20,890 --> 00:48:22,450
+David but frangipani doesn't do that
+
+1016
+00:48:22,450 --> 00:48:28,150
+this it has her work station logs as one
+
+1017
+00:48:28,150 --> 00:48:30,400
+log per work station and there's
+
+1018
+00:48:30,400 --> 00:48:34,930
+separate logs the other very interesting
+
+1019
+00:48:34,930 --> 00:48:36,940
+thing about frangipane ease logging
+
+1020
+00:48:36,940 --> 00:48:39,519
+system is that the LA workstation logs
+
+1021
+00:48:39,519 --> 00:48:42,069
+are stored in petal and not on local
+
+1022
+00:48:42,069 --> 00:48:44,499
+disk in almost every system that uses
+
+1023
+00:48:44,499 --> 00:48:46,839
+logging the log is tightly associated
+
+1024
+00:48:46,839 --> 00:48:48,880
+with whatever computer is running the
+
+1025
+00:48:48,880 --> 00:48:50,650
+transactions that it's almost always
+
+1026
+00:48:50,650 --> 00:48:54,339
+kept on a local disk but for extremely
+
+1027
+00:48:54,339 --> 00:48:56,729
+good reasons
+
+1028
+00:48:56,729 --> 00:48:59,229
+frangipani workstations
+
+1029
+00:48:59,229 --> 00:49:01,479
+store their logs in petal in the shared
+
+1030
+00:49:01,479 --> 00:49:03,460
+storage each workstation had its own
+
+1031
+00:49:03,460 --> 00:49:06,009
+sort of semi-private log but it's stored
+
+1032
+00:49:06,009 --> 00:49:09,549
+in petal storage where if the
+
+1033
+00:49:09,549 --> 00:49:11,619
+workstation crashes its log can be
+
+1034
+00:49:11,619 --> 00:49:14,769
+gotten that by other workstations so the
+
+1035
+00:49:14,769 --> 00:49:25,450
+logs are in petal and this is this is
+
+1036
+00:49:25,450 --> 00:49:26,940
+like separate logs for workstation
+
+1037
+00:49:26,940 --> 00:49:30,039
+stored somewhere else in public sort of
+
+1038
+00:49:30,039 --> 00:49:31,539
+shared storage so like a very
+
+1039
+00:49:31,539 --> 00:49:34,839
+interesting and unusual arrangement all
+
+1040
+00:49:34,839 --> 00:49:37,719
+right so we kind of need to know roughly
+
+1041
+00:49:37,719 --> 00:49:41,579
+what's in the law what's in a log entry
+
+1042
+00:49:50,579 --> 00:49:53,469
+and unfortunately the papers not super
+
+1043
+00:49:53,469 --> 00:49:56,430
+explicit about the format of a log entry
+
+1044
+00:49:56,430 --> 00:49:58,869
+but we can imagine that the well the
+
+1045
+00:49:58,869 --> 00:50:00,640
+paper does say that each workstations
+
+1046
+00:50:00,640 --> 00:50:04,239
+log sits in a known place a known range
+
+1047
+00:50:04,239 --> 00:50:06,729
+of block numbers in petal and
+
+1048
+00:50:06,729 --> 00:50:09,099
+furthermore that each workstation uses
+
+1049
+00:50:09,099 --> 00:50:11,170
+its log space and petal on a kind of in
+
+1050
+00:50:11,170 --> 00:50:13,390
+a circular way that it is all right log
+
+1051
+00:50:13,390 --> 00:50:15,009
+entries along from the beginning and
+
+1052
+00:50:15,009 --> 00:50:18,670
+when it hits the end the workstation
+
+1053
+00:50:18,670 --> 00:50:21,700
+will go back and reuse its log space
+
+1054
+00:50:21,700 --> 00:50:23,349
+back at the beginning of its log area
+
+1055
+00:50:23,349 --> 00:50:25,329
+and of course that means that were
+
+1056
+00:50:25,329 --> 00:50:26,769
+stations need to be able to you know
+
+1057
+00:50:26,769 --> 00:50:30,940
+clean their logs so that sort of ensure
+
+1058
+00:50:30,940 --> 00:50:32,979
+that a log entry isn't needed before
+
+1059
+00:50:32,979 --> 00:50:35,589
+that space is reused and I'll talk about
+
+1060
+00:50:35,589 --> 00:50:39,400
+that in a bit but each a log consists of
+
+1061
+00:50:39,400 --> 00:50:42,719
+a sequence of log entries each log entry
+
+1062
+00:50:42,719 --> 00:50:47,559
+has a log sequence number it's just an
+
+1063
+00:50:47,559 --> 00:50:48,999
+increasing number each workstation
+
+1064
+00:50:48,999 --> 00:50:53,229
+numbers it's log entries 1 2 3 4 5 and
+
+1065
+00:50:53,229 --> 00:50:56,319
+the immediate reason for this may be the
+
+1066
+00:50:56,319 --> 00:50:58,059
+only reason for this that the paper
+
+1067
+00:50:58,059 --> 00:51:02,170
+mentions is that the the way that French
+
+1068
+00:51:02,170 --> 00:51:04,839
+penny just detects the end of a work
+
+1069
+00:51:04,839 --> 00:51:06,940
+stations log if the work station crashes
+
+1070
+00:51:06,940 --> 00:51:10,239
+is by scanning for words in its log in
+
+1071
+00:51:10,239 --> 00:51:14,049
+petal until it sees the increasing
+
+1072
+00:51:14,049 --> 00:51:16,630
+sequence stop increasing and it knows
+
+1073
+00:51:16,630 --> 00:51:18,130
+then that the log entry with the highest
+
+1074
+00:51:18,130 --> 00:51:20,769
+log sequence number must be the very
+
+1075
+00:51:20,769 --> 00:51:23,140
+last entry as it needs to be able to
+
+1076
+00:51:23,140 --> 00:51:27,519
+detect the end of the log ok so we have
+
+1077
+00:51:27,519 --> 00:51:29,170
+this log sequence number and then I
+
+1078
+00:51:29,170 --> 00:51:31,539
+believe each log actually has an an
+
+1079
+00:51:31,539 --> 00:51:32,059
+array
+
+1080
+00:51:32,059 --> 00:51:35,390
+of descriptions of model aughh entry has
+
+1081
+00:51:35,390 --> 00:51:38,059
+an array of the descriptions of the
+
+1082
+00:51:38,059 --> 00:51:39,859
+modifications all the different
+
+1083
+00:51:39,859 --> 00:51:41,930
+modifications that were involved in a
+
+1084
+00:51:41,930 --> 00:51:44,059
+particular operation or an operation of
+
+1085
+00:51:44,059 --> 00:51:48,410
+some a file system system call so each
+
+1086
+00:51:48,410 --> 00:51:51,170
+entry in the array is going to have a
+
+1087
+00:51:51,170 --> 00:51:53,989
+block number it's a block number in
+
+1088
+00:51:53,989 --> 00:52:00,920
+petal there's a version number which
+
+1089
+00:52:00,920 --> 00:52:07,900
+we'll get to in a bit and then there's
+
+1090
+00:52:07,900 --> 00:52:12,380
+the data to be written and so there's a
+
+1091
+00:52:12,380 --> 00:52:18,019
+bunch of these required to describe
+
+1092
+00:52:18,019 --> 00:52:19,640
+operations that might touch more than
+
+1093
+00:52:19,640 --> 00:52:23,029
+one piece of data in the file system one
+
+1094
+00:52:23,029 --> 00:52:25,609
+thing to notice is that the log only
+
+1095
+00:52:25,609 --> 00:52:29,269
+contains information about changes to
+
+1096
+00:52:29,269 --> 00:52:32,569
+metadata that is to directories and
+
+1097
+00:52:32,569 --> 00:52:37,069
+inodes and allocation bitmaps in the
+
+1098
+00:52:37,069 --> 00:52:38,719
+file system the log doesn't actually
+
+1099
+00:52:38,719 --> 00:52:41,479
+contain the data that is written to the
+
+1100
+00:52:41,479 --> 00:52:43,400
+contents of files it doesn't contain the
+
+1101
+00:52:43,400 --> 00:52:45,349
+user's data it just contains information
+
+1102
+00:52:45,349 --> 00:52:47,809
+enough information to make the file
+
+1103
+00:52:47,809 --> 00:52:51,019
+systems structures recoverable after a
+
+1104
+00:52:51,019 --> 00:52:55,309
+crash so for example if I create a file
+
+1105
+00:52:55,309 --> 00:52:58,239
+called F in a directory that's gonna
+
+1106
+00:52:58,239 --> 00:53:01,819
+result in a new log entry that has two
+
+1107
+00:53:01,819 --> 00:53:04,339
+little descriptions of modifications in
+
+1108
+00:53:04,339 --> 00:53:06,289
+it one a description of how to
+
+1109
+00:53:06,289 --> 00:53:08,809
+initialize the new files inode and in
+
+1110
+00:53:08,809 --> 00:53:11,929
+another description of a new name to be
+
+1111
+00:53:11,929 --> 00:53:16,299
+placed in the new files directory
+
+1112
+00:53:17,140 --> 00:53:21,259
+alright so one thing I didn't mention so
+
+1113
+00:53:21,259 --> 00:53:22,699
+of course the log is really a sequence
+
+1114
+00:53:22,699 --> 00:53:25,689
+of these log entries
+
+1115
+00:53:28,630 --> 00:53:32,440
+initially in order to be able to do
+
+1116
+00:53:32,440 --> 00:53:34,840
+modifications as fast as possible
+
+1117
+00:53:34,840 --> 00:53:37,520
+initially a friend Japanese workstations
+
+1118
+00:53:37,520 --> 00:53:40,880
+log is only stored inside the
+
+1119
+00:53:40,880 --> 00:53:43,460
+workstations own memory and won't be
+
+1120
+00:53:43,460 --> 00:53:46,430
+written back to peddle until it has to
+
+1121
+00:53:46,430 --> 00:53:49,610
+be and that's so that you know writing
+
+1122
+00:53:49,610 --> 00:53:51,590
+anything including log entries to peddle
+
+1123
+00:53:51,590 --> 00:53:53,330
+you know it takes a long time so we want
+
+1124
+00:53:53,330 --> 00:53:55,460
+to avoid even writing log entries back
+
+1125
+00:53:55,460 --> 00:53:58,190
+to peddle as well as writing dirty data
+
+1126
+00:53:58,190 --> 00:54:00,590
+or modified blocks back to peddle we'd
+
+1127
+00:54:00,590 --> 00:54:02,330
+like to avoid doing that as long as
+
+1128
+00:54:02,330 --> 00:54:07,310
+possible so the real full story for what
+
+1129
+00:54:07,310 --> 00:54:13,010
+happens when a workstation gets a revoke
+
+1130
+00:54:13,010 --> 00:54:15,740
+message from the lock server seeing that
+
+1131
+00:54:15,740 --> 00:54:26,110
+it has to give up a certain lock so on
+
+1132
+00:54:28,720 --> 00:54:31,010
+right now this is the same you know this
+
+1133
+00:54:31,010 --> 00:54:33,020
+is though compared sporto's
+
+1134
+00:54:33,020 --> 00:54:36,650
+protocols revoke message if the
+
+1135
+00:54:36,650 --> 00:54:39,710
+workstation gets a revoke message the
+
+1136
+00:54:39,710 --> 00:54:41,960
+series of steps it must take is first
+
+1137
+00:54:41,960 --> 00:54:47,300
+it's great that's the right any parts of
+
+1138
+00:54:47,300 --> 00:54:48,920
+its log that are only in memory and
+
+1139
+00:54:48,920 --> 00:54:50,750
+haven't yet been written to peddle it's
+
+1140
+00:54:50,750 --> 00:54:52,430
+got to make sure as log is complete and
+
+1141
+00:54:52,430 --> 00:54:54,620
+pedal as the first step so it writes
+
+1142
+00:54:54,620 --> 00:55:09,020
+it's long and only then does it write
+
+1143
+00:55:09,020 --> 00:55:16,040
+any updated blocks that are covered by
+
+1144
+00:55:16,040 --> 00:55:21,340
+the lock that's being revoked so write
+
+1145
+00:55:21,340 --> 00:55:24,700
+modified blocks
+
+1146
+00:55:28,069 --> 00:55:36,579
+just for that provoked to lock and then
+
+1147
+00:55:40,420 --> 00:55:48,499
+send a release message and the reason
+
+1148
+00:55:48,499 --> 00:55:50,059
+for this sequencing and for this strict
+
+1149
+00:55:50,059 --> 00:55:54,380
+ban is that these modifications if we
+
+1150
+00:55:54,380 --> 00:55:55,819
+write them to peddle you know their
+
+1151
+00:55:55,819 --> 00:55:58,699
+modifications to the data structure the
+
+1152
+00:55:58,699 --> 00:56:00,469
+file system data structure and if we
+
+1153
+00:56:00,469 --> 00:56:01,910
+were to crash midway through baby news
+
+1154
+00:56:01,910 --> 00:56:04,940
+box just as usual we want to make sure
+
+1155
+00:56:04,940 --> 00:56:07,609
+that some other workstation somebody
+
+1156
+00:56:07,609 --> 00:56:09,199
+else there's enough information to be
+
+1157
+00:56:09,199 --> 00:56:12,049
+able to complete the set of
+
+1158
+00:56:12,049 --> 00:56:14,900
+modifications that the were station is
+
+1159
+00:56:14,900 --> 00:56:16,130
+made even though the workstation has
+
+1160
+00:56:16,130 --> 00:56:17,809
+crashed and maybe didn't finish doing
+
+1161
+00:56:17,809 --> 00:56:20,089
+these rights and writing the log first
+
+1162
+00:56:20,089 --> 00:56:22,400
+it's gonna be what allows us to
+
+1163
+00:56:22,400 --> 00:56:24,680
+accomplish it these these log records
+
+1164
+00:56:24,680 --> 00:56:26,329
+are a complete description of what these
+
+1165
+00:56:26,329 --> 00:56:28,099
+modifications are going to be so first
+
+1166
+00:56:28,099 --> 00:56:30,769
+we you know first we write though the
+
+1167
+00:56:30,769 --> 00:56:33,549
+complete log to petal and then we
+
+1168
+00:56:33,549 --> 00:56:35,719
+workstation can start writing its
+
+1169
+00:56:35,719 --> 00:56:37,609
+modified blocks you know maybe it
+
+1170
+00:56:37,609 --> 00:56:39,319
+crashes maybe doesn't hopefully not and
+
+1171
+00:56:39,319 --> 00:56:41,630
+if it finishes writing as modified
+
+1172
+00:56:41,630 --> 00:56:43,069
+blocks then it could send the release
+
+1173
+00:56:43,069 --> 00:56:45,259
+back to the lock server so you know if
+
+1174
+00:56:45,259 --> 00:56:46,759
+my workstation has modified a bunch of
+
+1175
+00:56:46,759 --> 00:56:48,499
+files and then some other workstation
+
+1176
+00:56:48,499 --> 00:56:50,420
+wants to read one of those files this is
+
+1177
+00:56:50,420 --> 00:56:52,219
+the sequence that happens lock so ever
+
+1178
+00:56:52,219 --> 00:56:54,949
+asked me for my locks right back my
+
+1179
+00:56:54,949 --> 00:56:56,930
+workstation right back said log then
+
+1180
+00:56:56,930 --> 00:56:58,369
+right back
+
+1181
+00:56:58,369 --> 00:57:01,130
+writes the dirty modified blocks to
+
+1182
+00:57:01,130 --> 00:57:03,229
+peddle and only then releases and then
+
+1183
+00:57:03,229 --> 00:57:04,670
+the other workstation can acquire the
+
+1184
+00:57:04,670 --> 00:57:06,559
+lock and read these blocks so that's
+
+1185
+00:57:06,559 --> 00:57:09,289
+sort of the non crash you know if a
+
+1186
+00:57:09,289 --> 00:57:13,430
+crash doesn't happen that is the
+
+1187
+00:57:13,430 --> 00:57:17,930
+sequence of course it's only interesting
+
+1188
+00:57:17,930 --> 00:57:21,400
+if a crash happens yes
+
+1189
+00:57:21,980 --> 00:57:28,390
+[Music]
+
+1190
+00:57:35,519 --> 00:57:38,079
+okay so for the log you're absolutely
+
+1191
+00:57:38,079 --> 00:57:42,969
+right it writes the entire log and yeah
+
+1192
+00:57:42,969 --> 00:57:44,859
+so so if if we get a revoke for a
+
+1193
+00:57:44,859 --> 00:57:47,680
+particular file the workstation will
+
+1194
+00:57:47,680 --> 00:57:53,319
+write its entire log and then only it's
+
+1195
+00:57:53,319 --> 00:57:54,999
+only because it's only giving up the
+
+1196
+00:57:54,999 --> 00:57:59,650
+lock for Z it it only needs to write
+
+1197
+00:57:59,650 --> 00:58:01,359
+back data that's covered by Z so I have
+
+1198
+00:58:01,359 --> 00:58:03,880
+to write the whole log just the data
+
+1199
+00:58:03,880 --> 00:58:05,289
+that's covered by the lock that we
+
+1200
+00:58:05,289 --> 00:58:07,329
+needed to give up and then we can
+
+1201
+00:58:07,329 --> 00:58:10,059
+release that lock so yeah you know maybe
+
+1202
+00:58:10,059 --> 00:58:11,469
+this writing the whole log might be
+
+1203
+00:58:11,469 --> 00:58:13,930
+overkill like you if it turned out you
+
+1204
+00:58:13,930 --> 00:58:15,910
+know so here's an optimization that you
+
+1205
+00:58:15,910 --> 00:58:18,849
+might or might not care about if the
+
+1206
+00:58:18,849 --> 00:58:21,609
+last modification for profile Z for the
+
+1207
+00:58:21,609 --> 00:58:22,989
+lock were giving up is this one but
+
+1208
+00:58:22,989 --> 00:58:25,509
+subsequent entries in my log didn't
+
+1209
+00:58:25,509 --> 00:58:27,670
+modify that file then I could just write
+
+1210
+00:58:27,670 --> 00:58:30,219
+just this prefix of my in-memory log
+
+1211
+00:58:30,219 --> 00:58:33,459
+back to petal and you know be lazy about
+
+1212
+00:58:33,459 --> 00:58:36,489
+writing the rest and that might see me
+
+1213
+00:58:36,489 --> 00:58:37,029
+sometime
+
+1214
+00:58:37,029 --> 00:58:41,380
+I might have to write the log back it's
+
+1215
+00:58:41,380 --> 00:58:42,549
+actually not clear I would save us a lot
+
+1216
+00:58:42,549 --> 00:58:43,779
+of time we have to write the log back at
+
+1217
+00:58:43,779 --> 00:58:47,890
+some point anyway and yeah I think petal
+
+1218
+00:58:47,890 --> 00:58:53,739
+just writes the whole thing okay okay so
+
+1219
+00:58:53,739 --> 00:58:56,289
+now we can talk about what happens when
+
+1220
+00:58:56,289 --> 00:58:58,539
+a workstation crashes while holding
+
+1221
+00:58:58,539 --> 00:59:01,410
+locks right it's you know needs to
+
+1222
+00:59:01,410 --> 00:59:03,910
+modify something rename a file create a
+
+1223
+00:59:03,910 --> 00:59:05,380
+file whatever it's acquired all the
+
+1224
+00:59:05,380 --> 00:59:07,569
+locks it needs it's modified some stuff
+
+1225
+00:59:07,569 --> 00:59:13,809
+in its own cache to reflect these
+
+1226
+00:59:13,809 --> 00:59:17,380
+operations maybe written some stuff back
+
+1227
+00:59:17,380 --> 00:59:19,630
+to petal and then crashed men possibly
+
+1228
+00:59:19,630 --> 00:59:21,849
+midway through writing so there's a
+
+1229
+00:59:21,849 --> 00:59:24,150
+number of points at which it could crash
+
+1230
+00:59:24,150 --> 00:59:26,709
+right because this is always the
+
+1231
+00:59:26,709 --> 00:59:31,779
+sequence it always just always before
+
+1232
+00:59:31,779 --> 00:59:33,880
+writing modified blocks from the cache
+
+1233
+00:59:33,880 --> 00:59:34,330
+back
+
+1234
+00:59:34,330 --> 00:59:36,610
+the frangipani will always have written
+
+1235
+00:59:36,610 --> 00:59:39,370
+it's logged pedal first that means that
+
+1236
+00:59:39,370 --> 00:59:41,830
+if a crash happens it's either while the
+
+1237
+00:59:41,830 --> 00:59:43,690
+worst station is writing us log back to
+
+1238
+00:59:43,690 --> 00:59:45,610
+pedal but before it's written any
+
+1239
+00:59:45,610 --> 00:59:48,100
+modified file or directory' blocks back
+
+1240
+00:59:48,100 --> 00:59:51,220
+or it crashes while it's writing these
+
+1241
+00:59:51,220 --> 00:59:53,500
+modified block back but therefore
+
+1242
+00:59:53,500 --> 00:59:55,720
+definitely after it's written in its
+
+1243
+00:59:55,720 --> 00:59:57,730
+entire log and so that's a very
+
+1244
+00:59:57,730 --> 01:00:00,370
+important you know but or maybe the
+
+1245
+01:00:00,370 --> 01:00:01,660
+crash happened after it's completely
+
+1246
+01:00:01,660 --> 01:00:05,530
+finished all of this so you know there's
+
+1247
+01:00:05,530 --> 01:00:06,970
+only because of the sequencing there's
+
+1248
+01:00:06,970 --> 01:00:08,350
+only a limited number of kind of
+
+1249
+01:00:08,350 --> 01:00:10,960
+scenarios we made me worried about for
+
+1250
+01:00:10,960 --> 01:00:15,970
+the crash okay so the workstations
+
+1251
+01:00:15,970 --> 01:00:18,370
+crashed its crashed you know for like to
+
+1252
+01:00:18,370 --> 01:00:19,900
+be exciting let's crash while Holdings
+
+1253
+01:00:19,900 --> 01:00:21,670
+locks the first thing that happens the
+
+1254
+01:00:21,670 --> 01:00:23,950
+lock server sends it a revoke request
+
+1255
+01:00:23,950 --> 01:00:26,620
+and the lock server gets no response all
+
+1256
+01:00:26,620 --> 01:00:27,760
+right that's what starts to trigger
+
+1257
+01:00:27,760 --> 01:00:29,560
+anything where did nobody ever asked for
+
+1258
+01:00:29,560 --> 01:00:31,920
+the lock
+
+1259
+01:00:32,010 --> 01:00:34,000
+basically nobody's ever going to notice
+
+1260
+01:00:34,000 --> 01:00:35,890
+that the workstation crashed so let's
+
+1261
+01:00:35,890 --> 01:00:37,300
+assume somebody else wanted one of the
+
+1262
+01:00:37,300 --> 01:00:40,270
+locks that the workstation had while it
+
+1263
+01:00:40,270 --> 01:00:42,550
+was crashed and the lock service ended
+
+1264
+01:00:42,550 --> 01:00:44,710
+revoke and it will never get a release
+
+1265
+01:00:44,710 --> 01:00:47,260
+back from the workstation after a
+
+1266
+01:00:47,260 --> 01:00:49,000
+certain amount of time has passed and it
+
+1267
+01:00:49,000 --> 01:00:52,030
+turns out frangipani locks use leases
+
+1268
+01:00:52,030 --> 01:00:53,680
+for a number of reasons so you know
+
+1269
+01:00:53,680 --> 01:00:56,650
+after the least time has expired the
+
+1270
+01:00:56,650 --> 01:00:58,390
+lock server will decide that the
+
+1271
+01:00:58,390 --> 01:01:01,000
+workstation must have crashed and it
+
+1272
+01:01:01,000 --> 01:01:02,560
+will initiate recovery and what that
+
+1273
+01:01:02,560 --> 01:01:04,000
+really means is telling a different
+
+1274
+01:01:04,000 --> 01:01:06,700
+workstation the lock server will tell
+
+1275
+01:01:06,700 --> 01:01:08,880
+some other live workstation look
+
+1276
+01:01:08,880 --> 01:01:10,720
+workstation one seems to have crashed
+
+1277
+01:01:10,720 --> 01:01:16,330
+please go read it's log and replay all
+
+1278
+01:01:16,330 --> 01:01:18,010
+of its recent operations to make sure
+
+1279
+01:01:18,010 --> 01:01:20,620
+they're complete and tell me when you're
+
+1280
+01:01:20,620 --> 01:01:22,510
+done and only then the lock servers
+
+1281
+01:01:22,510 --> 01:01:29,550
+going to release the locks so okay so
+
+1282
+01:01:29,550 --> 01:01:32,320
+and and this is the point at which it
+
+1283
+01:01:32,320 --> 01:01:34,480
+was critical that the logs are in pedal
+
+1284
+01:01:34,480 --> 01:01:36,490
+because some other workstation is going
+
+1285
+01:01:36,490 --> 01:01:39,340
+to inspect the crash workstations log in
+
+1286
+01:01:39,340 --> 01:01:41,910
+pedal
+
+1287
+01:01:42,120 --> 01:01:45,680
+all right so what are the possibilities
+
+1288
+01:01:45,680 --> 01:01:47,700
+one is that the worst that you can crash
+
+1289
+01:01:47,700 --> 01:01:49,590
+before it ever wrote anything back and
+
+1290
+01:01:49,590 --> 01:01:51,240
+so that means this other work station
+
+1291
+01:01:51,240 --> 01:01:53,100
+doing recovery will look at the crash
+
+1292
+01:01:53,100 --> 01:01:55,800
+workstation this log see that maybe
+
+1293
+01:01:55,800 --> 01:01:57,690
+there's nothing in it at all and do
+
+1294
+01:01:57,690 --> 01:02:00,600
+nothing and then release the locks the
+
+1295
+01:02:00,600 --> 01:02:02,700
+workstation held now the worst that you
+
+1296
+01:02:02,700 --> 01:02:04,170
+may have modified all kinds of things in
+
+1297
+01:02:04,170 --> 01:02:06,390
+its cache but if it didn't write
+
+1298
+01:02:06,390 --> 01:02:09,750
+anything to his log area then it
+
+1299
+01:02:09,750 --> 01:02:11,190
+couldn't possibly have written any of
+
+1300
+01:02:11,190 --> 01:02:12,900
+the blocks that have modified during
+
+1301
+01:02:12,900 --> 01:02:16,260
+these operations right and so well we
+
+1302
+01:02:16,260 --> 01:02:19,230
+will have lost the last few operations
+
+1303
+01:02:19,230 --> 01:02:22,230
+that the workstation did the file system
+
+1304
+01:02:22,230 --> 01:02:24,900
+is going to be consistent with the point
+
+1305
+01:02:24,900 --> 01:02:27,600
+in time before that crashed workstation
+
+1306
+01:02:27,600 --> 01:02:30,030
+started to modify anything because
+
+1307
+01:02:30,030 --> 01:02:31,290
+apparently the workstation never even
+
+1308
+01:02:31,290 --> 01:02:33,030
+got to the point where it was writing
+
+1309
+01:02:33,030 --> 01:02:35,670
+log entries the next possibilities of
+
+1310
+01:02:35,670 --> 01:02:38,180
+the workstation wrote some log entries
+
+1311
+01:02:38,180 --> 01:02:40,770
+the log area and in that case the
+
+1312
+01:02:40,770 --> 01:02:43,170
+recovering workstation will scan forward
+
+1313
+01:02:43,170 --> 01:02:45,900
+from the beginning of log until it's
+
+1314
+01:02:45,900 --> 01:02:48,120
+stopped seeing the log sequence numbers
+
+1315
+01:02:48,120 --> 01:02:51,000
+increasing that's the point of where's
+
+1316
+01:02:51,000 --> 01:02:53,970
+the log must Anton and the recovering
+
+1317
+01:02:53,970 --> 01:02:56,400
+workstation we'll look at each of these
+
+1318
+01:02:56,400 --> 01:02:58,830
+descriptions of a change and basically
+
+1319
+01:02:58,830 --> 01:03:02,160
+play that change back into petal I'll
+
+1320
+01:03:02,160 --> 01:03:04,230
+say oh you know there's certain block
+
+1321
+01:03:04,230 --> 01:03:06,630
+number and petal needs to have some
+
+1322
+01:03:06,630 --> 01:03:08,400
+certain data written to it which is just
+
+1323
+01:03:08,400 --> 01:03:10,410
+the same modification that the crashed
+
+1324
+01:03:10,410 --> 01:03:15,360
+workstation did in its own local cache
+
+1325
+01:03:15,360 --> 01:03:17,100
+so the recovering workstation we'll just
+
+1326
+01:03:17,100 --> 01:03:19,800
+consider each of these and replay each
+
+1327
+01:03:19,800 --> 01:03:24,330
+of the crashed workstations log entries
+
+1328
+01:03:24,330 --> 01:03:26,910
+back into petal and when it's done that
+
+1329
+01:03:26,910 --> 01:03:28,320
+all the way to the end of a crashed
+
+1330
+01:03:28,320 --> 01:03:32,430
+workstations log as it exists in petal
+
+1331
+01:03:32,430 --> 01:03:36,420
+it'll tell the lock server and the lock
+
+1332
+01:03:36,420 --> 01:03:37,800
+server will release the crashed
+
+1333
+01:03:37,800 --> 01:03:42,180
+workstations locks and that will bring
+
+1334
+01:03:42,180 --> 01:03:46,560
+the pedal up to date with some prefix of
+
+1335
+01:03:46,560 --> 01:03:50,100
+the operations the crash workstation had
+
+1336
+01:03:50,100 --> 01:03:51,780
+done before crashing maybe not all of
+
+1337
+01:03:51,780 --> 01:03:53,070
+them because maybe it didn't write out
+
+1338
+01:03:53,070 --> 01:03:55,560
+all of its log but the recovery were
+
+1339
+01:03:55,560 --> 01:03:56,310
+season
+
+1340
+01:03:56,310 --> 01:03:58,440
+won't replay anything in a log entry
+
+1341
+01:03:58,440 --> 01:04:01,800
+unless it has the complete log entry in
+
+1342
+01:04:01,800 --> 01:04:05,220
+petal and so you know implicitly that
+
+1343
+01:04:05,220 --> 01:04:06,270
+means there's gonna be some sort of
+
+1344
+01:04:06,270 --> 01:04:08,310
+checksum arrangement or something so the
+
+1345
+01:04:08,310 --> 01:04:11,220
+recovery work station will know aha this
+
+1346
+01:04:11,220 --> 01:04:13,110
+log entry is complete and not like
+
+1347
+01:04:13,110 --> 01:04:14,970
+partially written that's quite important
+
+1348
+01:04:14,970 --> 01:04:17,700
+because the whole point of this is to
+
+1349
+01:04:17,700 --> 01:04:21,030
+make sure that only complete operations
+
+1350
+01:04:21,030 --> 01:04:24,210
+are visible and petal and never never
+
+1351
+01:04:24,210 --> 01:04:26,850
+never a partial operation so it's also
+
+1352
+01:04:26,850 --> 01:04:30,570
+important that all the rights for a
+
+1353
+01:04:30,570 --> 01:04:32,160
+given operation or a group together in
+
+1354
+01:04:32,160 --> 01:04:34,880
+the log so that on recovery the recovery
+
+1355
+01:04:34,880 --> 01:04:38,910
+workstation can do all of the rights for
+
+1356
+01:04:38,910 --> 01:04:42,720
+an operation or none of them never half
+
+1357
+01:04:42,720 --> 01:04:48,000
+of them ok so that's what happens if the
+
+1358
+01:04:48,000 --> 01:04:50,550
+crash happens while the log is being
+
+1359
+01:04:50,550 --> 01:04:55,500
+written back to petal a another
+
+1360
+01:04:55,500 --> 01:04:57,990
+interesting possibility is that the
+
+1361
+01:04:57,990 --> 01:04:59,820
+crash workstation crashed after writing
+
+1362
+01:04:59,820 --> 01:05:02,160
+its log and also after writing some of
+
+1363
+01:05:02,160 --> 01:05:04,770
+the blocks back itself and then crashed
+
+1364
+01:05:04,770 --> 01:05:08,220
+and then skimming over some extremely
+
+1365
+01:05:08,220 --> 01:05:09,840
+important details which I'll get to in a
+
+1366
+01:05:09,840 --> 01:05:11,280
+moment then what will happen is again
+
+1367
+01:05:11,280 --> 01:05:12,330
+the recovery workstation of course the
+
+1368
+01:05:12,330 --> 01:05:13,650
+recovery where station doesn't know
+
+1369
+01:05:13,650 --> 01:05:14,910
+really the point at which the
+
+1370
+01:05:14,910 --> 01:05:19,530
+workstation crashed all it sees is oh
+
+1371
+01:05:19,530 --> 01:05:21,690
+here's some log entries and again the
+
+1372
+01:05:21,690 --> 01:05:23,220
+recovery workstation will replay the log
+
+1373
+01:05:23,220 --> 01:05:29,430
+in the same way and more or less what's
+
+1374
+01:05:29,430 --> 01:05:30,690
+going on is that yeah even if the
+
+1375
+01:05:30,690 --> 01:05:32,870
+modifications were already done in petal
+
+1376
+01:05:32,870 --> 01:05:35,400
+we're replaying the same modifications
+
+1377
+01:05:35,400 --> 01:05:36,690
+here the recovery where students were
+
+1378
+01:05:36,690 --> 01:05:38,280
+playing the same modifications it just
+
+1379
+01:05:38,280 --> 01:05:40,650
+writes the same data the same place
+
+1380
+01:05:40,650 --> 01:05:43,860
+again and presumably not really changing
+
+1381
+01:05:43,860 --> 01:05:46,170
+the value for the writes that had
+
+1382
+01:05:46,170 --> 01:05:48,060
+already been completed but if the crash
+
+1383
+01:05:48,060 --> 01:05:49,410
+workstation hadn't done some of its
+
+1384
+01:05:49,410 --> 01:05:50,940
+rights then some of these rights were
+
+1385
+01:05:50,940 --> 01:05:53,400
+not sure which will actually change the
+
+1386
+01:05:53,400 --> 01:06:00,600
+data to complete the operations all
+
+1387
+01:06:00,600 --> 01:06:03,020
+right
+
+1388
+01:06:03,740 --> 01:06:06,560
+that's not actually as it turns out the
+
+1389
+01:06:06,560 --> 01:06:12,230
+full story and today's question sets up
+
+1390
+01:06:12,230 --> 01:06:14,480
+a particular scenario for which a little
+
+1391
+01:06:14,480 --> 01:06:22,160
+bit of added complexity is necessary in
+
+1392
+01:06:22,160 --> 01:06:24,349
+particular the possibility that the
+
+1393
+01:06:24,349 --> 01:06:27,920
+crashed workstation had actually gotten
+
+1394
+01:06:27,920 --> 01:06:29,569
+through this entire sequence before
+
+1395
+01:06:29,569 --> 01:06:31,700
+crashing and in fact released some of
+
+1396
+01:06:31,700 --> 01:06:37,640
+its locks or so that it wasn't the last
+
+1397
+01:06:37,640 --> 01:06:40,609
+person the last workstation to modify a
+
+1398
+01:06:40,609 --> 01:06:42,530
+particular piece of data so an example
+
+1399
+01:06:42,530 --> 01:06:44,720
+of this is what happens if we have some
+
+1400
+01:06:44,720 --> 01:06:50,480
+workstation and it executes say a delete
+
+1401
+01:06:50,480 --> 01:06:57,200
+file it deletes a file say a file F and
+
+1402
+01:06:57,200 --> 01:07:03,589
+directory D and then there's some other
+
+1403
+01:07:03,589 --> 01:07:07,400
+workstation which after this delete
+
+1404
+01:07:07,400 --> 01:07:09,920
+creates a new file with the same name
+
+1405
+01:07:09,920 --> 01:07:12,490
+but of course it's a different file now
+
+1406
+01:07:12,490 --> 01:07:15,800
+so workstation 1 I'm sorry
+
+1407
+01:07:15,800 --> 01:07:22,490
+workstation two later create create same
+
+1408
+01:07:22,490 --> 01:07:27,140
+file same file name and then after that
+
+1409
+01:07:27,140 --> 01:07:32,750
+workstation 1 crashes so we're going to
+
+1410
+01:07:32,750 --> 01:07:34,190
+need you to do recovery on workstation
+
+1411
+01:07:34,190 --> 01:07:38,990
+ones log and so at this point in time
+
+1412
+01:07:38,990 --> 01:07:39,710
+you know maybe there's a third
+
+1413
+01:07:39,710 --> 01:07:43,420
+workstation doing the recovery
+
+1414
+01:07:45,250 --> 01:07:50,050
+so now workstation 3 is doing a recover
+
+1415
+01:07:52,180 --> 01:07:56,660
+on workstation ones log so the sequence
+
+1416
+01:07:56,660 --> 01:07:58,250
+says workstation 1 deleted a file or
+
+1417
+01:07:58,250 --> 01:08:00,829
+station 2 created a file or station 3
+
+1418
+01:08:00,829 --> 01:08:04,190
+does recovery well you know could be
+
+1419
+01:08:04,190 --> 01:08:06,829
+that this delete is still in workstation
+
+1420
+01:08:06,829 --> 01:08:09,890
+ones log so workstation two may you know
+
+1421
+01:08:09,890 --> 01:08:11,869
+or station 1 crash just going to go or
+
+1422
+01:08:11,869 --> 01:08:13,069
+station 3 is going to look at its log
+
+1423
+01:08:13,069 --> 01:08:14,670
+that's going to replay all
+
+1424
+01:08:14,670 --> 01:08:19,158
+all the updates in workstation ones log
+
+1425
+01:08:19,158 --> 01:08:21,779
+this delete may the updates for this
+
+1426
+01:08:21,779 --> 01:08:23,488
+delete the entry for this delete may
+
+1427
+01:08:23,488 --> 01:08:25,679
+still be in workstation ones log so
+
+1428
+01:08:25,679 --> 01:08:27,380
+unless we do something clever
+
+1429
+01:08:27,380 --> 01:08:29,819
+workstation 3 is going to delete this
+
+1430
+01:08:29,819 --> 01:08:32,729
+file you know because this this
+
+1431
+01:08:32,729 --> 01:08:34,889
+operation erased the relevant entry from
+
+1432
+01:08:34,889 --> 01:08:35,790
+the directory
+
+1433
+01:08:35,790 --> 01:08:40,109
+thus actually erasing deleting this file
+
+1434
+01:08:40,109 --> 01:08:41,908
+that's it's a different file that
+
+1435
+01:08:41,908 --> 01:08:44,279
+workstation 2 created afterwards so
+
+1436
+01:08:44,279 --> 01:08:46,920
+that's completely wrong alright what we
+
+1437
+01:08:46,920 --> 01:08:48,750
+want you know the how come we want is
+
+1438
+01:08:48,750 --> 01:08:50,460
+you know horse station one deleted a
+
+1439
+01:08:50,460 --> 01:08:52,859
+file that file should be deleted but a
+
+1440
+01:08:52,859 --> 01:08:55,170
+new file that if her name should not be
+
+1441
+01:08:55,170 --> 01:08:56,790
+deleted just because it was a crash in a
+
+1442
+01:08:56,790 --> 01:08:58,859
+restart cuz this create happen after
+
+1443
+01:08:58,859 --> 01:09:01,969
+delete all right so we cannot just
+
+1444
+01:09:01,969 --> 01:09:05,460
+replay workstation ones log without
+
+1445
+01:09:05,460 --> 01:09:09,389
+further thought because it may it may
+
+1446
+01:09:09,389 --> 01:09:11,130
+essentially a log entry in workstations
+
+1447
+01:09:11,130 --> 01:09:13,500
+one log may be out of date by the time
+
+1448
+01:09:13,500 --> 01:09:16,109
+it's we played during recovery some
+
+1449
+01:09:16,109 --> 01:09:17,460
+other workstation may have modified the
+
+1450
+01:09:17,460 --> 01:09:19,109
+same data and some other way
+
+1451
+01:09:19,109 --> 01:09:22,198
+subsequently so we can't blindly replay
+
+1452
+01:09:22,198 --> 01:09:26,880
+the log entries and so this is this is
+
+1453
+01:09:26,880 --> 01:09:29,939
+this is today's question and the way
+
+1454
+01:09:29,939 --> 01:09:32,939
+frangipani solves this is by associating
+
+1455
+01:09:32,939 --> 01:09:36,259
+version numbers with every piece of data
+
+1456
+01:09:36,259 --> 01:09:39,359
+in the file system as stored in pedal
+
+1457
+01:09:39,359 --> 01:09:42,420
+and also associating the same version
+
+1458
+01:09:42,420 --> 01:09:45,868
+number with every update that's
+
+1459
+01:09:45,868 --> 01:09:49,100
+described in the log so every log entry
+
+1460
+01:09:49,100 --> 01:09:53,670
+when well first I don't have any that's
+
+1461
+01:09:53,670 --> 01:09:59,429
+you know say in pedal I'll just say in
+
+1462
+01:09:59,429 --> 01:10:02,429
+pedal every piece of metadata every
+
+1463
+01:10:02,429 --> 01:10:06,659
+inode every every piece of data that's
+
+1464
+01:10:06,659 --> 01:10:08,400
+like the contents of a directory for
+
+1465
+01:10:08,400 --> 01:10:12,320
+example every block of data metadata in
+
+1466
+01:10:12,320 --> 01:10:14,580
+stored and pedal has a version number
+
+1467
+01:10:14,580 --> 01:10:19,290
+when a workstation needs to modify a
+
+1468
+01:10:19,290 --> 01:10:21,840
+piece of metadata in pedal it first
+
+1469
+01:10:21,840 --> 01:10:23,670
+reads that metadata from pedal into its
+
+1470
+01:10:23,670 --> 01:10:27,449
+memory and then looks at the existing
+
+1471
+01:10:27,449 --> 01:10:28,219
+version of
+
+1472
+01:10:28,219 --> 01:10:30,320
+and then when it's creating the log file
+
+1473
+01:10:30,320 --> 01:10:32,420
+describing its modification it puts the
+
+1474
+01:10:32,420 --> 01:10:36,289
+existing version number plus one into
+
+1475
+01:10:36,289 --> 01:10:41,599
+the log entry and then when it in if it
+
+1476
+01:10:41,599 --> 01:10:43,099
+does get a chance to write the data back
+
+1477
+01:10:43,099 --> 01:10:45,170
+it'll write the data back with the new
+
+1478
+01:10:45,170 --> 01:10:48,619
+increased version number so if over
+
+1479
+01:10:48,619 --> 01:10:51,499
+station hasn't crashed and it did or if
+
+1480
+01:10:51,499 --> 01:10:52,969
+it did manage to write some data back
+
+1481
+01:10:52,969 --> 01:10:55,039
+before it crashed then the version
+
+1482
+01:10:55,039 --> 01:10:56,960
+number has stored in petal for the
+
+1483
+01:10:56,960 --> 01:10:59,929
+effected metadata it will be at least as
+
+1484
+01:10:59,929 --> 01:11:02,630
+high or higher than the version numbers
+
+1485
+01:11:02,630 --> 01:11:04,280
+stored in the log entry there will be
+
+1486
+01:11:04,280 --> 01:11:05,599
+higher some other workstations
+
+1487
+01:11:05,599 --> 01:11:09,829
+subsequently modified so what will
+
+1488
+01:11:09,829 --> 01:11:13,699
+actually happen here is that the what
+
+1489
+01:11:13,699 --> 01:11:17,300
+workstation 3 we'll see is that the log
+
+1490
+01:11:17,300 --> 01:11:20,690
+entry for workstations one delete
+
+1491
+01:11:20,690 --> 01:11:23,090
+operation will have a particular version
+
+1492
+01:11:23,090 --> 01:11:26,030
+number stored in the log entry that
+
+1493
+01:11:26,030 --> 01:11:28,849
+associated with the modification to the
+
+1494
+01:11:28,849 --> 01:11:31,940
+directory let's say and the log entry
+
+1495
+01:11:31,940 --> 01:11:33,199
+will say well the version number for the
+
+1496
+01:11:33,199 --> 01:11:35,150
+directory and the new version number
+
+1497
+01:11:35,150 --> 01:11:37,460
+created by this log entry is version
+
+1498
+01:11:37,460 --> 01:11:40,130
+number three in order for workstation
+
+1499
+01:11:40,130 --> 01:11:42,170
+two to subsequently change the directory
+
+1500
+01:11:42,170 --> 01:11:45,619
+that is to add a file app in fact before
+
+1501
+01:11:45,619 --> 01:11:47,539
+it crashed the workstation one must have
+
+1502
+01:11:47,539 --> 01:11:49,599
+given up the lock in the directory and
+
+1503
+01:11:49,599 --> 01:11:52,219
+that's probably why the log entry even
+
+1504
+01:11:52,219 --> 01:11:55,429
+exists in pedal so workstation 1 must
+
+1505
+01:11:55,429 --> 01:11:56,630
+have given up the lock apparently
+
+1506
+01:11:56,630 --> 01:11:58,940
+workstation two got the lock and read
+
+1507
+01:11:58,940 --> 01:12:02,179
+the current metadata for the directory
+
+1508
+01:12:02,179 --> 01:12:04,489
+saw that the version number was three
+
+1509
+01:12:04,489 --> 01:12:08,269
+now and when workstation two writes this
+
+1510
+01:12:08,269 --> 01:12:14,360
+data it will set the version number or
+
+1511
+01:12:14,360 --> 01:12:19,940
+the directory in peddle to be 4 ok so
+
+1512
+01:12:19,940 --> 01:12:22,749
+the that means the log entry for this
+
+1513
+01:12:22,749 --> 01:12:24,739
+delete operation is going to have
+
+1514
+01:12:24,739 --> 01:12:28,789
+version number 3 in it now when the
+
+1515
+01:12:28,789 --> 01:12:31,190
+recovery software on worst agent 3
+
+1516
+01:12:31,190 --> 01:12:34,849
+replays workstation ones log it looks at
+
+1517
+01:12:34,849 --> 01:12:36,469
+the version numbers first so it'll look
+
+1518
+01:12:36,469 --> 01:12:37,909
+at the version number the log entry
+
+1519
+01:12:37,909 --> 01:12:40,929
+it'll read the block from
+
+1520
+01:12:40,929 --> 01:12:42,369
+look at the version number in the block
+
+1521
+01:12:42,369 --> 01:12:44,579
+and if the version number in the block
+
+1522
+01:12:44,579 --> 01:12:47,439
+in pedal is greater than or equal to the
+
+1523
+01:12:47,439 --> 01:12:50,110
+version number in the log entry the
+
+1524
+01:12:50,110 --> 01:12:51,610
+recovery software will simply ignore
+
+1525
+01:12:51,610 --> 01:12:54,340
+that update in the log entry and not do
+
+1526
+01:12:54,340 --> 01:12:57,729
+it because clearly the block had already
+
+1527
+01:12:57,729 --> 01:12:59,139
+been written back by the crash
+
+1528
+01:12:59,139 --> 01:13:01,449
+workstation and then maybe subsequently
+
+1529
+01:13:01,449 --> 01:13:05,409
+modified by other workstations so the
+
+1530
+01:13:05,409 --> 01:13:06,999
+replay is actually selectively based on
+
+1531
+01:13:06,999 --> 01:13:08,829
+this version number that replay it's a
+
+1532
+01:13:08,829 --> 01:13:14,369
+recovery only writes only
+
+1533
+01:13:14,369 --> 01:13:17,170
+replays are right in the log if that
+
+1534
+01:13:17,170 --> 01:13:20,499
+right is actually newer right in the log
+
+1535
+01:13:20,499 --> 01:13:22,599
+entry is newer than the data that's
+
+1536
+01:13:22,599 --> 01:13:31,539
+already stored in peddle so one sort of
+
+1537
+01:13:31,539 --> 01:13:34,650
+irritating question here maybe is that
+
+1538
+01:13:34,650 --> 01:13:37,150
+workstation three is running this
+
+1539
+01:13:37,150 --> 01:13:39,280
+recovery software while other
+
+1540
+01:13:39,280 --> 01:13:41,050
+workstations are still reading and
+
+1541
+01:13:41,050 --> 01:13:42,729
+writing in the file system actively and
+
+1542
+01:13:42,729 --> 01:13:46,229
+have locks and knows what to peddle so
+
+1543
+01:13:46,229 --> 01:13:50,800
+the replay it's gonna go on while we're
+
+1544
+01:13:50,800 --> 01:13:52,030
+station to which that doesn't know
+
+1545
+01:13:52,030 --> 01:13:54,670
+anything about the recovery still active
+
+1546
+01:13:54,670 --> 01:13:57,429
+and indeed workstation two may have the
+
+1547
+01:13:57,429 --> 01:14:00,849
+lock for this directory
+
+1548
+01:14:00,849 --> 01:14:03,760
+while recoveries going on so recovery
+
+1549
+01:14:03,760 --> 01:14:05,769
+may be scanning the log and you no need
+
+1550
+01:14:05,769 --> 01:14:08,409
+to read or write this directories data
+
+1551
+01:14:08,409 --> 01:14:11,650
+in pedal while workstation two still has
+
+1552
+01:14:11,650 --> 01:14:14,499
+the lock on this data the question is
+
+1553
+01:14:14,499 --> 01:14:16,179
+how you know how do we sort this out
+
+1554
+01:14:16,179 --> 01:14:19,510
+like one possibility which actually
+
+1555
+01:14:19,510 --> 01:14:22,150
+turns out not to work is for the
+
+1556
+01:14:22,150 --> 01:14:24,760
+recovery software to first acquire the
+
+1557
+01:14:24,760 --> 01:14:28,749
+lock on anything that it needs to look
+
+1558
+01:14:28,749 --> 01:14:30,969
+at in petal before while it's replaying
+
+1559
+01:14:30,969 --> 01:14:36,189
+the log and the the you know one good
+
+1560
+01:14:36,189 --> 01:14:38,229
+reason why that doesn't work is that it
+
+1561
+01:14:38,229 --> 01:14:39,639
+could be that we're running recovery
+
+1562
+01:14:39,639 --> 01:14:41,800
+after a system-wide power failure for
+
+1563
+01:14:41,800 --> 01:14:43,570
+example in which all knowledge of who
+
+1564
+01:14:43,570 --> 01:14:46,689
+had what locks is lost and therefore we
+
+1565
+01:14:46,689 --> 01:14:49,469
+cannot write the recovery software to
+
+1566
+01:14:49,469 --> 01:14:52,840
+sort of participate in the locking
+
+1567
+01:14:52,840 --> 01:14:54,199
+protocol because
+
+1568
+01:14:54,199 --> 01:14:56,030
+you know all knowledge of what's locked
+
+1569
+01:14:56,030 --> 01:14:57,769
+my slot not locked may have been lost in
+
+1570
+01:14:57,769 --> 01:14:58,459
+the power failure
+
+1571
+01:14:58,459 --> 01:15:01,940
+um but luckily it turns out that the
+
+1572
+01:15:01,940 --> 01:15:03,619
+recovery software can just go ahead and
+
+1573
+01:15:03,619 --> 01:15:07,280
+read or write blocks in pedal without
+
+1574
+01:15:07,280 --> 01:15:09,559
+worrying about sorry read or write data
+
+1575
+01:15:09,559 --> 01:15:11,360
+in pedal without worrying at all about
+
+1576
+01:15:11,360 --> 01:15:15,260
+locks and the reason is that if the
+
+1577
+01:15:15,260 --> 01:15:16,639
+recovery software you know the recovery
+
+1578
+01:15:16,639 --> 01:15:18,110
+software wants to replay this log entry
+
+1579
+01:15:18,110 --> 01:15:20,510
+and possibly modify the data associated
+
+1580
+01:15:20,510 --> 01:15:22,039
+with this directory it just goes ahead
+
+1581
+01:15:22,039 --> 01:15:23,539
+and reads whatever's there for the
+
+1582
+01:15:23,539 --> 01:15:26,630
+directory out of pedal right now and
+
+1583
+01:15:26,630 --> 01:15:28,969
+there's really only two cases either the
+
+1584
+01:15:28,969 --> 01:15:30,650
+crash workstation one had given up its
+
+1585
+01:15:30,650 --> 01:15:33,860
+lock or it hadn't if it hadn't given up
+
+1586
+01:15:33,860 --> 01:15:35,150
+this lock then nobody else can have a
+
+1587
+01:15:35,150 --> 01:15:36,590
+directory locked and so there's no
+
+1588
+01:15:36,590 --> 01:15:39,909
+problem if it had given up its lock then
+
+1589
+01:15:39,909 --> 01:15:42,559
+before I gave it up its lock it must
+
+1590
+01:15:42,559 --> 01:15:46,699
+have written that it's data for the
+
+1591
+01:15:46,699 --> 01:15:50,030
+directory back to pedal and that means
+
+1592
+01:15:50,030 --> 01:15:52,219
+that the version number stored in pedal
+
+1593
+01:15:52,219 --> 01:15:53,929
+must be at least as high as the version
+
+1594
+01:15:53,929 --> 01:15:56,150
+number in the crashed workstations log
+
+1595
+01:15:56,150 --> 01:15:58,459
+entry and therefore when recovery
+
+1596
+01:15:58,459 --> 01:16:00,769
+software compares the log entry version
+
+1597
+01:16:00,769 --> 01:16:02,599
+number with the version number of the
+
+1598
+01:16:02,599 --> 01:16:04,820
+data and pedal it'll see that the log
+
+1599
+01:16:04,820 --> 01:16:07,510
+entry version number is not higher and
+
+1600
+01:16:07,510 --> 01:16:11,479
+therefore won't we play the log entry so
+
+1601
+01:16:11,479 --> 01:16:13,400
+yeah the recovery software will have
+
+1602
+01:16:13,400 --> 01:16:15,139
+read the block without holding the lock
+
+1603
+01:16:15,139 --> 01:16:18,079
+but it's not going to modify it because
+
+1604
+01:16:18,079 --> 01:16:19,489
+if the locked was released the version
+
+1605
+01:16:19,489 --> 01:16:21,650
+number will be high enough to show that
+
+1606
+01:16:21,650 --> 01:16:26,510
+the log entry had already been sort of
+
+1607
+01:16:26,510 --> 01:16:28,519
+processing to pedal before the crashed
+
+1608
+01:16:28,519 --> 01:16:31,459
+workstation crashed no so there's no
+
+1609
+01:16:31,459 --> 01:16:41,809
+locking issue alright this is the I've
+
+1610
+01:16:41,809 --> 01:16:43,849
+gone over that kind of main guts of what
+
+1611
+01:16:43,849 --> 01:16:46,400
+pedal is up to Nam it's cache coherence
+
+1612
+01:16:46,400 --> 01:16:49,070
+it's distributed transactions and it's
+
+1613
+01:16:49,070 --> 01:16:53,840
+distributed crash recovery the other
+
+1614
+01:16:53,840 --> 01:16:55,550
+things to think about are the the paper
+
+1615
+01:16:55,550 --> 01:16:57,139
+talks a bit about performance it's
+
+1616
+01:16:57,139 --> 01:17:00,949
+actually very hard after over 20 years
+
+1617
+01:17:00,949 --> 01:17:02,900
+to interpret performance numbers because
+
+1618
+01:17:02,900 --> 01:17:04,909
+they brand their performance numbers on
+
+1619
+01:17:04,909 --> 01:17:06,889
+very different Hardware in a very
+
+1620
+01:17:06,889 --> 01:17:08,150
+different environment from
+
+1621
+01:17:08,150 --> 01:17:11,179
+you see today roughly speaking the
+
+1622
+01:17:11,179 --> 01:17:12,949
+performance numbers they show or that as
+
+1623
+01:17:12,949 --> 01:17:15,140
+you add more and more friendship and
+
+1624
+01:17:15,140 --> 01:17:19,310
+work stations the system basically
+
+1625
+01:17:19,310 --> 01:17:22,219
+doesn't get slower that is each new
+
+1626
+01:17:22,219 --> 01:17:24,500
+workstation even if it's actively doing
+
+1627
+01:17:24,500 --> 01:17:26,449
+file system operations doesn't slow down
+
+1628
+01:17:26,449 --> 01:17:28,429
+the existing workstation so in that
+
+1629
+01:17:28,429 --> 01:17:30,320
+sense the system you know at least for
+
+1630
+01:17:30,320 --> 01:17:32,600
+the application state look at the system
+
+1631
+01:17:32,600 --> 01:17:34,730
+was giving them reasonable scalability
+
+1632
+01:17:34,730 --> 01:17:36,860
+they could add more workstations without
+
+1633
+01:17:36,860 --> 01:17:42,679
+slowing existing users down looking
+
+1634
+01:17:42,679 --> 01:17:44,890
+backwards
+
+1635
+01:17:44,890 --> 01:17:47,600
+although frangipani is full of like very
+
+1636
+01:17:47,600 --> 01:17:49,130
+interesting techniques that are worth
+
+1637
+01:17:49,130 --> 01:17:51,650
+remembering it didn't have too much
+
+1638
+01:17:51,650 --> 01:17:55,909
+influence in on how on the evolution of
+
+1639
+01:17:55,909 --> 01:17:58,550
+storage systems part of the reason is
+
+1640
+01:17:58,550 --> 01:18:00,560
+that the environment for which is aimed
+
+1641
+01:18:00,560 --> 01:18:02,000
+that is small workgroups
+
+1642
+01:18:02,000 --> 01:18:04,040
+people sitting in front of workstations
+
+1643
+01:18:04,040 --> 01:18:06,860
+on their desks and sharing files that
+
+1644
+01:18:06,860 --> 01:18:09,620
+environment well it still exists in some
+
+1645
+01:18:09,620 --> 01:18:12,140
+places isn't really where the action is
+
+1646
+01:18:12,140 --> 01:18:13,730
+in distributed storage the action the
+
+1647
+01:18:13,730 --> 01:18:15,230
+real action is moved into sort of big
+
+1648
+01:18:15,230 --> 01:18:19,400
+data center or big websites big data
+
+1649
+01:18:19,400 --> 01:18:22,250
+computations and there you know in that
+
+1650
+01:18:22,250 --> 01:18:24,380
+world first of all the file system
+
+1651
+01:18:24,380 --> 01:18:25,909
+interface just isn't very useful
+
+1652
+01:18:25,909 --> 01:18:28,850
+compared to databases like people really
+
+1653
+01:18:28,850 --> 01:18:31,190
+like transactions in the big website
+
+1654
+01:18:31,190 --> 01:18:33,620
+world but they need them for very small
+
+1655
+01:18:33,620 --> 01:18:35,360
+items of data the kind of data that you
+
+1656
+01:18:35,360 --> 01:18:39,080
+would store in a database rather than
+
+1657
+01:18:39,080 --> 01:18:40,340
+the kind of data that would you would
+
+1658
+01:18:40,340 --> 01:18:44,929
+naturally store in a file system so you
+
+1659
+01:18:44,929 --> 01:18:47,270
+know some of this technology might sort
+
+1660
+01:18:47,270 --> 01:18:49,370
+of you can see echoes of it in modern
+
+1661
+01:18:49,370 --> 01:18:50,929
+systems but it usually takes the form of
+
+1662
+01:18:50,929 --> 01:18:53,030
+some database the other big kind of
+
+1663
+01:18:53,030 --> 01:18:56,030
+storage this out there is storing big
+
+1664
+01:18:56,030 --> 01:18:59,030
+files as needed for big data
+
+1665
+01:18:59,030 --> 01:19:01,730
+computations like MapReduce and indeed
+
+1666
+01:19:01,730 --> 01:19:04,969
+GFS is a you know to some extent looks
+
+1667
+01:19:04,969 --> 01:19:06,650
+like a file system and is the kind of
+
+1668
+01:19:06,650 --> 01:19:08,800
+storage system you want for MapReduce
+
+1669
+01:19:08,800 --> 01:19:12,530
+but for GFS and for big data
+
+1670
+01:19:12,530 --> 01:19:15,710
+computations frangipane ease you know
+
+1671
+01:19:15,710 --> 01:19:19,040
+focus on local caching and workstations
+
+1672
+01:19:19,040 --> 01:19:22,010
+and very close attention to
+
+1673
+01:19:22,010 --> 01:19:24,410
+cache coherence and locking it's just
+
+1674
+01:19:24,410 --> 01:19:27,170
+not very useful you know for both the
+
+1675
+01:19:27,170 --> 01:19:29,890
+data read and write
+
+1676
+01:19:29,890 --> 01:19:33,530
+typically caching is not useful at all
+
+1677
+01:19:33,530 --> 01:19:35,990
+right if you're reading through ten
+
+1678
+01:19:35,990 --> 01:19:38,450
+terabytes of data it's really
+
+1679
+01:19:38,450 --> 01:19:41,090
+counterproductive almost to cache it so
+
+1680
+01:19:41,090 --> 01:19:45,470
+a lot of the focus in frangipani is sort
+
+1681
+01:19:45,470 --> 01:19:47,060
+of time is pass it by a little bit it's
+
+1682
+01:19:47,060 --> 01:19:50,230
+still useful in some situations but it's
+
+1683
+01:19:50,230 --> 01:19:52,370
+not what people are really thinking
+
+1684
+01:19:52,370 --> 01:19:56,390
+about in designing new systems for all
+
+1685
+01:19:56,390 --> 01:19:59,500
+right that is it
+

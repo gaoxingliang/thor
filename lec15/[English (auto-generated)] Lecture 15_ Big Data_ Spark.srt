@@ -1,0 +1,5508 @@
+1
+00:00:06,899 --> 00:00:13,209
+all right today today we're going to
+
+2
+00:00:13,209 --> 00:00:17,770
+talk about spark spark say essentially a
+
+3
+00:00:17,770 --> 00:00:21,370
+successor to MapReduce you can think of
+
+4
+00:00:21,370 --> 00:00:24,400
+it as a kind of evolutionary step in
+
+5
+00:00:24,400 --> 00:00:28,600
+MapReduce and one reason we're looking
+
+6
+00:00:28,600 --> 00:00:31,210
+at it is that it's widely used today for
+
+7
+00:00:31,210 --> 00:00:34,149
+data center computations that's turned
+
+8
+00:00:34,149 --> 00:00:37,260
+out to be very popular and very useful
+
+9
+00:00:37,260 --> 00:00:40,359
+one interesting thing it does which will
+
+10
+00:00:40,359 --> 00:00:41,589
+pay attention to is that it it
+
+11
+00:00:41,589 --> 00:00:43,780
+generalizes the kind of two stages of
+
+12
+00:00:43,780 --> 00:00:47,550
+MapReduce the map introduced into a
+
+13
+00:00:47,550 --> 00:00:51,339
+complete notion of multi-step data flow
+
+14
+00:00:51,339 --> 00:00:57,579
+graphs that and this is both helpful for
+
+15
+00:00:57,579 --> 00:00:59,679
+flexibility for the programmer it's more
+
+16
+00:00:59,679 --> 00:01:02,139
+expressive and it also gives the system
+
+17
+00:01:02,139 --> 00:01:04,229
+the SPARC system a lot more to chew on
+
+18
+00:01:04,229 --> 00:01:07,530
+when it comes to optimization and
+
+19
+00:01:07,530 --> 00:01:09,490
+dealing with faults dealing with
+
+20
+00:01:09,490 --> 00:01:12,759
+failures and also for the from the
+
+21
+00:01:12,759 --> 00:01:14,110
+programmers point of view it supports
+
+22
+00:01:14,110 --> 00:01:16,539
+iterative applications application said
+
+23
+00:01:16,539 --> 00:01:19,140
+you know loop over the data effectively
+
+24
+00:01:19,140 --> 00:01:21,909
+much better than that produced us you
+
+25
+00:01:21,909 --> 00:01:24,180
+can cobble together a lot of stuff with
+
+26
+00:01:24,180 --> 00:01:27,579
+multiple MapReduce applications running
+
+27
+00:01:27,579 --> 00:01:30,100
+one after another but it's all a lot
+
+28
+00:01:30,100 --> 00:01:36,149
+more convenient in and SPARC okay so I
+
+29
+00:01:36,149 --> 00:01:38,350
+think I'm just gonna start right off
+
+30
+00:01:38,350 --> 00:01:41,909
+with an example application this is the
+
+31
+00:01:41,909 --> 00:01:47,439
+code for PageRank and I'll just copy
+
+32
+00:01:47,439 --> 00:01:52,840
+this code with a few a few changes from
+
+33
+00:01:52,840 --> 00:01:56,789
+some sample source code in the
+
+34
+00:01:57,520 --> 00:02:01,510
+in the spark source I guess it's
+
+35
+00:02:01,510 --> 00:02:02,680
+actually a little bit hard to read let
+
+36
+00:02:02,680 --> 00:02:04,240
+me just give me a second law try to make
+
+37
+00:02:04,240 --> 00:02:06,479
+it bigger
+
+38
+00:02:14,860 --> 00:02:18,140
+all right okay so if this is if this is
+
+39
+00:02:18,140 --> 00:02:20,120
+too hard to read is there's a copy of it
+
+40
+00:02:20,120 --> 00:02:22,940
+in the notes and it's an expansion of
+
+41
+00:02:22,940 --> 00:02:26,570
+the code and section 3 to 2 in the paper
+
+42
+00:02:26,570 --> 00:02:31,040
+a page rank which is a algorithm that
+
+43
+00:02:31,040 --> 00:02:33,500
+Google uses pretty famous algorithm for
+
+44
+00:02:33,500 --> 00:02:38,800
+calculating how important different web
+
+45
+00:02:38,800 --> 00:02:42,380
+search results are what PageRank is
+
+46
+00:02:42,380 --> 00:02:43,400
+trying to do
+
+47
+00:02:43,400 --> 00:02:46,700
+well actually PageRank is sort of widely
+
+48
+00:02:46,700 --> 00:02:49,180
+used as an example of something that
+
+49
+00:02:49,180 --> 00:02:51,350
+doesn't actually work that well and
+
+50
+00:02:51,350 --> 00:02:53,680
+MapReduce and the reason is that
+
+51
+00:02:53,680 --> 00:02:56,510
+PageRank involves a bunch of sort of
+
+52
+00:02:56,510 --> 00:02:58,640
+distinct steps and worse PageRank
+
+53
+00:02:58,640 --> 00:03:01,130
+involves iteration there's a loop in it
+
+54
+00:03:01,130 --> 00:03:03,550
+that's got to be run many times and
+
+55
+00:03:03,550 --> 00:03:06,130
+MapReduce just has nothing to say about
+
+56
+00:03:06,130 --> 00:03:12,970
+about iteration the input the PageRank
+
+57
+00:03:12,970 --> 00:03:15,860
+for this version of PageRank is just a
+
+58
+00:03:15,860 --> 00:03:20,959
+giant collection of lines one per link
+
+59
+00:03:20,959 --> 00:03:23,360
+in the web and each line then has two
+
+60
+00:03:23,360 --> 00:03:26,120
+URLs the URL of the page containing a
+
+61
+00:03:26,120 --> 00:03:28,550
+link and the URL of the link that that
+
+62
+00:03:28,550 --> 00:03:31,730
+page points to and you know if the
+
+63
+00:03:31,730 --> 00:03:33,920
+intent is that you get this file from by
+
+64
+00:03:33,920 --> 00:03:36,050
+crawling the web and looking at all the
+
+65
+00:03:36,050 --> 00:03:38,390
+all collecting together all the links in
+
+66
+00:03:38,390 --> 00:03:40,370
+the web's the input is absolutely
+
+67
+00:03:40,370 --> 00:03:46,790
+enormous and as just a sort of silly
+
+68
+00:03:46,790 --> 00:03:49,610
+little example for us from when I
+
+69
+00:03:49,610 --> 00:03:53,180
+actually run this code I've given some
+
+70
+00:03:53,180 --> 00:03:55,400
+example input here and this is the way
+
+71
+00:03:55,400 --> 00:03:56,959
+the impro would really look it's just
+
+72
+00:03:56,959 --> 00:03:59,390
+lines each line with two URLs and I'm
+
+73
+00:03:59,390 --> 00:04:03,290
+using u1 that's the URL of a page and u3
+
+74
+00:04:03,290 --> 00:04:07,519
+for example as the URL of a link that
+
+75
+00:04:07,519 --> 00:04:09,489
+that page points to just for convenience
+
+76
+00:04:09,489 --> 00:04:12,830
+and so the web graph that this input
+
+77
+00:04:12,830 --> 00:04:15,230
+file represents there's only three pages
+
+78
+00:04:15,230 --> 00:04:21,320
+in it one two three I could just
+
+79
+00:04:21,320 --> 00:04:22,610
+interpret the links there's a link from
+
+80
+00:04:22,610 --> 00:04:24,430
+one two three
+
+81
+00:04:24,430 --> 00:04:27,419
+there's a link from one back to itself
+
+82
+00:04:27,419 --> 00:04:30,240
+there's a web link from two to three
+
+83
+00:04:30,240 --> 00:04:32,710
+there's a web link from two back to
+
+84
+00:04:32,710 --> 00:04:35,500
+itself and there's a web link from three
+
+85
+00:04:35,500 --> 00:04:39,190
+to one just like a very simple graph
+
+86
+00:04:39,190 --> 00:04:42,820
+structure what PageRank is trying to do
+
+87
+00:04:42,820 --> 00:04:45,100
+it's you know estimating the importance
+
+88
+00:04:45,100 --> 00:04:47,800
+of each page what that really means is
+
+89
+00:04:47,800 --> 00:04:50,620
+that it's estimating the importance
+
+90
+00:04:50,620 --> 00:04:53,500
+based on whether other important pages
+
+91
+00:04:53,500 --> 00:04:56,979
+have links to a given page and what's
+
+92
+00:04:56,979 --> 00:04:58,210
+really going on here is this kind of
+
+93
+00:04:58,210 --> 00:05:01,150
+modeling the estimated probability that
+
+94
+00:05:01,150 --> 00:05:05,050
+a user who clicks on links will end on
+
+95
+00:05:05,050 --> 00:05:08,199
+each given page so it has this user
+
+96
+00:05:08,199 --> 00:05:11,710
+model in which the user has a 85 percent
+
+97
+00:05:11,710 --> 00:05:14,289
+chance of following a link from the
+
+98
+00:05:14,289 --> 00:05:17,199
+users current page following a randomly
+
+99
+00:05:17,199 --> 00:05:19,150
+selected link from the users current
+
+100
+00:05:19,150 --> 00:05:21,810
+page to wherever that link leads and a
+
+101
+00:05:21,810 --> 00:05:25,900
+15% chance of simply switching to some
+
+102
+00:05:25,900 --> 00:05:27,220
+other page even though there's not a
+
+103
+00:05:27,220 --> 00:05:29,080
+link to it as you would if you you know
+
+104
+00:05:29,080 --> 00:05:33,330
+entered a URL directly into the browser
+
+105
+00:05:33,330 --> 00:05:38,949
+and the idea is that the he drank
+
+106
+00:05:38,949 --> 00:05:43,570
+algorithm kind of runs this repeatedly
+
+107
+00:05:43,570 --> 00:05:45,400
+it sort of simulates the user looking at
+
+108
+00:05:45,400 --> 00:05:48,400
+a page and then following a link and
+
+109
+00:05:48,400 --> 00:05:51,610
+kind of adds the from pages importance
+
+110
+00:05:51,610 --> 00:05:53,860
+to the target pages importance and then
+
+111
+00:05:53,860 --> 00:05:55,720
+sort of runs this again and it's going
+
+112
+00:05:55,720 --> 00:06:00,909
+to end up in the system like page rank
+
+113
+00:06:00,909 --> 00:06:02,889
+on SPARC it's going to kind of run this
+
+114
+00:06:02,889 --> 00:06:06,280
+simulation for all pages in parallel it
+
+115
+00:06:06,280 --> 00:06:09,030
+or literately
+
+116
+00:06:09,900 --> 00:06:13,030
+the and the idea is that it's going to
+
+117
+00:06:13,030 --> 00:06:14,680
+keep track the algorithms gonna keep
+
+118
+00:06:14,680 --> 00:06:16,780
+track of the page rank of every single
+
+119
+00:06:16,780 --> 00:06:19,560
+page or every single URL and update it
+
+120
+00:06:19,560 --> 00:06:22,300
+as it sort of simulates random user
+
+121
+00:06:22,300 --> 00:06:24,610
+clicks I mean that eventually that those
+
+122
+00:06:24,610 --> 00:06:27,870
+ranks will converge on kind of the true
+
+123
+00:06:27,870 --> 00:06:31,529
+final values now
+
+124
+00:06:31,529 --> 00:06:34,739
+because it's iterative although you can
+
+125
+00:06:34,739 --> 00:06:37,259
+code this up in rapid MapReduce it's a
+
+126
+00:06:37,259 --> 00:06:39,329
+pain it can't be just a single MapReduce
+
+127
+00:06:39,329 --> 00:06:45,439
+program it has to be multiple you know
+
+128
+00:06:45,439 --> 00:06:48,599
+multiple calls to a MapReduce
+
+129
+00:06:48,599 --> 00:06:51,359
+application where each call sort of
+
+130
+00:06:51,359 --> 00:06:53,879
+simulates one step in the iteration so
+
+131
+00:06:53,879 --> 00:06:55,739
+you can do in a MapReduce but it's a
+
+132
+00:06:55,739 --> 00:06:58,049
+pain and it's also kind of slope because
+
+133
+00:06:58,049 --> 00:07:00,479
+MapReduce it's only thinking about one
+
+134
+00:07:00,479 --> 00:07:02,429
+map and one reduce and it's always
+
+135
+00:07:02,429 --> 00:07:05,279
+reading its input from the GFS from disk
+
+136
+00:07:05,279 --> 00:07:07,139
+and the GFS filesystem and always
+
+137
+00:07:07,139 --> 00:07:09,089
+writing its output which would be this
+
+138
+00:07:09,089 --> 00:07:12,989
+sort of updated per page ranks every
+
+139
+00:07:12,989 --> 00:07:17,069
+stage also writes those updated per page
+
+140
+00:07:17,069 --> 00:07:19,829
+ranks to files in GFS also so there's a
+
+141
+00:07:19,829 --> 00:07:23,009
+lot of file i/o if you run this as sort
+
+142
+00:07:23,009 --> 00:07:26,839
+of a sequence of MapReduce applications
+
+143
+00:07:26,839 --> 00:07:31,279
+all right so we have here this sum
+
+144
+00:07:31,279 --> 00:07:32,779
+there's an a PageRank code that came
+
+145
+00:07:32,779 --> 00:07:35,869
+with um came a spark I'm actually gonna
+
+146
+00:07:35,869 --> 00:07:38,629
+run it for you I'm gonna run the whole
+
+147
+00:07:38,629 --> 00:07:40,009
+thing for you
+
+148
+00:07:40,009 --> 00:07:42,499
+this code shown here on the input that
+
+149
+00:07:42,499 --> 00:07:44,359
+I've shown just to see what the final
+
+150
+00:07:44,359 --> 00:07:46,999
+output is and then I'll look through and
+
+151
+00:07:46,999 --> 00:07:50,259
+we're going to step by step and
+
+152
+00:07:52,679 --> 00:07:56,529
+show how it executes alright so here's
+
+153
+00:07:56,529 --> 00:08:02,619
+the you should see a screen share now at
+
+154
+00:08:02,619 --> 00:08:05,739
+a terminal window and I'm showing you
+
+155
+00:08:05,739 --> 00:08:10,199
+the input file then I got a hand to this
+
+156
+00:08:10,199 --> 00:08:14,349
+PageRank program and now here's how I
+
+157
+00:08:14,349 --> 00:08:17,019
+read it I've you know I've downloaded a
+
+158
+00:08:17,019 --> 00:08:19,809
+copy of SPARC to my laptop it turns out
+
+159
+00:08:19,809 --> 00:08:23,529
+to be pretty easy and if it's a pre
+
+160
+00:08:23,529 --> 00:08:27,129
+compiled version of it I can just run it
+
+161
+00:08:27,129 --> 00:08:29,229
+just runs in the Java Virtual Machine I
+
+162
+00:08:29,229 --> 00:08:30,849
+can run it very easily so it's actually
+
+163
+00:08:30,849 --> 00:08:33,789
+doing downloading SPARC and running
+
+164
+00:08:33,789 --> 00:08:35,769
+simple stuff turns out to be pretty
+
+165
+00:08:35,769 --> 00:08:37,559
+straightforward so I'm gonna run the
+
+166
+00:08:37,559 --> 00:08:40,149
+code that I show with the input that I
+
+167
+00:08:40,149 --> 00:08:43,419
+show and we're gonna see a lot of sort
+
+168
+00:08:43,419 --> 00:08:48,160
+of junk error messages go by but in the
+
+169
+00:08:48,160 --> 00:08:52,089
+end support runs the program and prints
+
+170
+00:08:52,089 --> 00:08:53,620
+the final result and we get these three
+
+171
+00:08:53,620 --> 00:08:56,399
+ranks for the three pages I have and
+
+172
+00:08:56,399 --> 00:09:01,889
+apparently page one has the highest rank
+
+173
+00:09:02,819 --> 00:09:06,490
+and I'm not completely sure why but
+
+174
+00:09:06,490 --> 00:09:09,160
+that's what the algorithm ends up doing
+
+175
+00:09:09,160 --> 00:09:10,930
+so you know of course we're not really
+
+176
+00:09:10,930 --> 00:09:13,439
+that interested in the algorithm itself
+
+177
+00:09:13,439 --> 00:09:18,790
+so much as how we execute arc execute
+
+178
+00:09:18,790 --> 00:09:26,470
+sit all right so I'm gonna hand to
+
+179
+00:09:26,470 --> 00:09:29,170
+understand what the programming model is
+
+180
+00:09:29,170 --> 00:09:33,339
+and spark because it's perhaps not quite
+
+181
+00:09:33,339 --> 00:09:36,730
+what it looks like I'm gonna hand the
+
+182
+00:09:36,730 --> 00:09:40,779
+program line by line to the SPARC
+
+183
+00:09:40,779 --> 00:09:44,500
+interpreter so you can just fire up this
+
+184
+00:09:44,500 --> 00:09:49,240
+spark shell thing and type code to it
+
+185
+00:09:49,240 --> 00:09:53,430
+directly so I've sort of prepared a
+
+186
+00:09:53,430 --> 00:09:57,730
+version of the MapReduce program that I
+
+187
+00:09:57,730 --> 00:10:01,029
+can run a line at a time here so the
+
+188
+00:10:01,029 --> 00:10:05,800
+first line is this line in which it
+
+189
+00:10:05,800 --> 00:10:08,649
+reads the or asking SPARC to read this
+
+190
+00:10:08,649 --> 00:10:11,019
+input file and it's you know the input
+
+191
+00:10:11,019 --> 00:10:15,990
+file I showed with the three pages in it
+
+192
+00:10:16,110 --> 00:10:19,059
+okay so one thing there notice here is
+
+193
+00:10:19,059 --> 00:10:23,110
+is that when Sparky's a file what is
+
+194
+00:10:23,110 --> 00:10:27,029
+actually doing is reading a file from a
+
+195
+00:10:27,029 --> 00:10:29,769
+GFS like distributed file system and
+
+196
+00:10:29,769 --> 00:10:33,519
+happens to be HDFS the Hadoop file
+
+197
+00:10:33,519 --> 00:10:36,579
+system but this HDFS file system is very
+
+198
+00:10:36,579 --> 00:10:38,709
+much like GFS so if you have a huge file
+
+199
+00:10:38,709 --> 00:10:40,720
+as you would with got a file with all
+
+200
+00:10:40,720 --> 00:10:44,110
+the URLs all the links and the web on it
+
+201
+00:10:44,110 --> 00:10:46,720
+on HDFS is gonna split that file up
+
+202
+00:10:46,720 --> 00:10:49,449
+among lots and lots you know bite by
+
+203
+00:10:49,449 --> 00:10:51,730
+chunks it's gonna shard the file over
+
+204
+00:10:51,730 --> 00:10:54,850
+lots and lots of servers and so what
+
+205
+00:10:54,850 --> 00:10:57,329
+reading the file really means is that
+
+206
+00:10:57,329 --> 00:11:00,759
+spark is gonna arrange to run a
+
+207
+00:11:00,759 --> 00:11:02,740
+computation on each of many many
+
+208
+00:11:02,740 --> 00:11:05,980
+machines each of which reads one chunk
+
+209
+00:11:05,980 --> 00:11:10,209
+or one partition of the input file and
+
+210
+00:11:10,209 --> 00:11:13,779
+in fact actually the system ends up or
+
+211
+00:11:13,779 --> 00:11:16,209
+HDFS ends up splitting the file big
+
+212
+00:11:16,209 --> 00:11:17,889
+files typically into many more
+
+213
+00:11:17,889 --> 00:11:19,319
+partitions
+
+214
+00:11:19,319 --> 00:11:22,389
+then there are worker machines and so
+
+215
+00:11:22,389 --> 00:11:23,860
+every worker machine is going to end up
+
+216
+00:11:23,860 --> 00:11:26,410
+being responsible for looking at
+
+217
+00:11:26,410 --> 00:11:28,990
+multiple partitions of the input files
+
+218
+00:11:28,990 --> 00:11:33,440
+this is all a lot like the way map works
+
+219
+00:11:33,440 --> 00:11:37,670
+mapreduce okay so this is the first line
+
+220
+00:11:37,670 --> 00:11:41,270
+in the program and you may wonder what
+
+221
+00:11:41,270 --> 00:11:44,180
+the variable lines actually hold so in
+
+222
+00:11:44,180 --> 00:11:46,700
+printed the result of lines but with the
+
+223
+00:11:46,700 --> 00:11:50,840
+lines points - it turns out that even
+
+224
+00:11:50,840 --> 00:11:53,330
+though it looks like we've typed a line
+
+225
+00:11:53,330 --> 00:11:55,880
+of code that's asking the system to read
+
+226
+00:11:55,880 --> 00:11:58,580
+a file in fact it hasn't read the file
+
+227
+00:11:58,580 --> 00:12:02,090
+and won't read the file for a while what
+
+228
+00:12:02,090 --> 00:12:03,470
+we're really building here with this
+
+229
+00:12:03,470 --> 00:12:07,030
+code what this code is doing is not
+
+230
+00:12:07,030 --> 00:12:09,830
+causing the input to be processed
+
+231
+00:12:09,830 --> 00:12:13,130
+instead what this code does is builds a
+
+232
+00:12:13,130 --> 00:12:16,400
+lineage graph it builds a recipe for the
+
+233
+00:12:16,400 --> 00:12:19,250
+computation we want like a little kind
+
+234
+00:12:19,250 --> 00:12:20,780
+of lineage graph that you see in Figure
+
+235
+00:12:20,780 --> 00:12:23,450
+three in the paper so what this code is
+
+236
+00:12:23,450 --> 00:12:25,520
+doing it's just building the lineage
+
+237
+00:12:25,520 --> 00:12:27,320
+graph building the computation recipe
+
+238
+00:12:27,320 --> 00:12:30,890
+and not doing the computation when the
+
+239
+00:12:30,890 --> 00:12:32,960
+computations only gonna actually start
+
+240
+00:12:32,960 --> 00:12:35,750
+to happen once we execute what the paper
+
+241
+00:12:35,750 --> 00:12:39,080
+calls an action which is a function like
+
+242
+00:12:39,080 --> 00:12:42,800
+collect for example to finally tell mark
+
+243
+00:12:42,800 --> 00:12:44,390
+oh look I actually want the output now
+
+244
+00:12:44,390 --> 00:12:48,230
+please go and actually execute the
+
+245
+00:12:48,230 --> 00:12:50,360
+lineage graph and tell me what the
+
+246
+00:12:50,360 --> 00:12:51,080
+result is
+
+247
+00:12:51,080 --> 00:12:53,840
+so what lines holds is actually a piece
+
+248
+00:12:53,840 --> 00:12:58,790
+of the lineage graph not a result now in
+
+249
+00:12:58,790 --> 00:13:01,220
+order to understand what the computation
+
+250
+00:13:01,220 --> 00:13:03,110
+will do when we finally run it we could
+
+251
+00:13:03,110 --> 00:13:07,730
+actually ask SPARC at this point we can
+
+252
+00:13:07,730 --> 00:13:09,650
+ask the interpreter to please go ahead
+
+253
+00:13:09,650 --> 00:13:14,840
+and tell us what you know I actually
+
+254
+00:13:14,840 --> 00:13:16,640
+execute the lineage graph up to this
+
+255
+00:13:16,640 --> 00:13:19,780
+point and tell us what the results are
+
+256
+00:13:19,780 --> 00:13:22,310
+so and you do that by calling an action
+
+257
+00:13:22,310 --> 00:13:24,350
+I'm going to call collect which so just
+
+258
+00:13:24,350 --> 00:13:27,380
+prints out all the results of executing
+
+259
+00:13:27,380 --> 00:13:31,070
+the lineage graph so far and what we're
+
+260
+00:13:31,070 --> 00:13:32,930
+expecting to see here is you know all
+
+261
+00:13:32,930 --> 00:13:34,790
+we've asked it to do so far the lineage
+
+262
+00:13:34,790 --> 00:13:36,740
+graph just says please read a file so
+
+263
+00:13:36,740 --> 00:13:38,120
+we're expecting to see that the final
+
+264
+00:13:38,120 --> 00:13:40,570
+output is just the contents of the file
+
+265
+00:13:40,570 --> 00:13:44,020
+and indeed that's what we get and what
+
+266
+00:13:44,020 --> 00:13:46,090
+what
+
+267
+00:13:46,090 --> 00:13:48,890
+this lineage graph this one
+
+268
+00:13:48,890 --> 00:13:52,520
+transformation lineage graph is results
+
+269
+00:13:52,520 --> 00:13:57,350
+in is just the sequence of lines one at
+
+270
+00:13:57,350 --> 00:14:01,180
+a time so it's really a set of lines a
+
+271
+00:14:01,180 --> 00:14:03,620
+set of strings each of which contains
+
+272
+00:14:03,620 --> 00:14:05,720
+one line of the input alright so that's
+
+273
+00:14:05,720 --> 00:14:10,010
+the first line of the program the second
+
+274
+00:14:10,010 --> 00:14:17,180
+line is is collect essentially just
+
+275
+00:14:17,180 --> 00:14:19,760
+just-in-time compilation of the symbolic
+
+276
+00:14:19,760 --> 00:14:23,360
+execution chain yeah yeah yeah yeah
+
+277
+00:14:23,360 --> 00:14:25,280
+that's what's going on so what collect
+
+278
+00:14:25,280 --> 00:14:28,220
+does is it actually huge amount of stuff
+
+279
+00:14:28,220 --> 00:14:30,280
+happens if you call collect
+
+280
+00:14:30,280 --> 00:14:34,190
+it tells SPARC to take the lineage graph
+
+281
+00:14:34,190 --> 00:14:37,100
+and produce java bytecodes
+
+282
+00:14:37,100 --> 00:14:39,380
+that describe all the various
+
+283
+00:14:39,380 --> 00:14:40,940
+transformations you know which in this
+
+284
+00:14:40,940 --> 00:14:42,290
+case it's not very much since we're just
+
+285
+00:14:42,290 --> 00:14:45,170
+reading a file but so SPARC well when
+
+286
+00:14:45,170 --> 00:14:48,040
+you call collect SPARC well figure out
+
+287
+00:14:48,040 --> 00:14:50,810
+where the data is you want by looking
+
+288
+00:14:50,810 --> 00:14:53,300
+HDFS it'll you know just pick a set of
+
+289
+00:14:53,300 --> 00:14:57,380
+workers to run to process the different
+
+290
+00:14:57,380 --> 00:14:59,120
+partitions of the input data it'll
+
+291
+00:14:59,120 --> 00:15:01,580
+compile the lineage graph and we reach
+
+292
+00:15:01,580 --> 00:15:03,470
+transformation in the lineage graph into
+
+293
+00:15:03,470 --> 00:15:05,660
+java bytecodes it sends the byte codes
+
+294
+00:15:05,660 --> 00:15:08,240
+out to the all the worker machines that
+
+295
+00:15:08,240 --> 00:15:10,850
+spark chose and those worker machines
+
+296
+00:15:10,850 --> 00:15:15,530
+execute the byte codes and the byte
+
+297
+00:15:15,530 --> 00:15:18,050
+codes say oh you know please read tell
+
+298
+00:15:18,050 --> 00:15:19,880
+each worker to read it's partition at
+
+299
+00:15:19,880 --> 00:15:24,770
+the input and then finally collect goes
+
+300
+00:15:24,770 --> 00:15:27,730
+out and fetches all the resulting data
+
+301
+00:15:27,730 --> 00:15:32,120
+back from the workers and so again none
+
+302
+00:15:32,120 --> 00:15:33,590
+of this happens until you actually
+
+303
+00:15:33,590 --> 00:15:34,910
+wanted an action and we sort of
+
+304
+00:15:34,910 --> 00:15:37,820
+prematurely run collect now you wouldn't
+
+305
+00:15:37,820 --> 00:15:39,170
+ordinarily do that I just because I just
+
+306
+00:15:39,170 --> 00:15:40,970
+want to see what the the output is to
+
+307
+00:15:40,970 --> 00:15:43,460
+understand what the transformations are
+
+308
+00:15:43,460 --> 00:15:46,929
+doing okay
+
+309
+00:15:46,929 --> 00:15:51,490
+if you look at the code that I'm showing
+
+310
+00:15:51,490 --> 00:15:58,179
+the second line is this map call so the
+
+311
+00:15:58,179 --> 00:16:01,779
+leave so line sort of refers to the
+
+312
+00:16:01,779 --> 00:16:03,429
+output of the first transformation which
+
+313
+00:16:03,429 --> 00:16:06,369
+is the set of strings correspond to
+
+314
+00:16:06,369 --> 00:16:09,550
+lines in the input we're gonna call map
+
+315
+00:16:09,550 --> 00:16:11,740
+we've asked the system call map on that
+
+316
+00:16:11,740 --> 00:16:13,660
+and what map does is it runs a function
+
+317
+00:16:13,660 --> 00:16:16,660
+over each element of the input that is
+
+318
+00:16:16,660 --> 00:16:18,699
+in this case or each line of the input
+
+319
+00:16:18,699 --> 00:16:22,019
+and that little function is the S arrow
+
+320
+00:16:22,019 --> 00:16:25,089
+whatever which basically describes a
+
+321
+00:16:25,089 --> 00:16:27,160
+function that calls the split function
+
+322
+00:16:27,160 --> 00:16:30,069
+on each line split just takes a string
+
+323
+00:16:30,069 --> 00:16:34,990
+and returns a array of strings broken at
+
+324
+00:16:34,990 --> 00:16:37,360
+the places where there are spaces and
+
+325
+00:16:37,360 --> 00:16:39,730
+the final part of this line that refers
+
+326
+00:16:39,730 --> 00:16:42,459
+to parts 0 & 1 says that for each line
+
+327
+00:16:42,459 --> 00:16:44,740
+of input we want to at the output of
+
+328
+00:16:44,740 --> 00:16:48,670
+this transformation be the first string
+
+329
+00:16:48,670 --> 00:16:51,040
+on the line and then the second string
+
+330
+00:16:51,040 --> 00:16:52,269
+of the line so we're just doing a little
+
+331
+00:16:52,269 --> 00:16:54,189
+transformation to turn these strings
+
+332
+00:16:54,189 --> 00:16:55,869
+into something that's a little bit
+
+333
+00:16:55,869 --> 00:16:59,019
+easier to process and again at a
+
+334
+00:16:59,019 --> 00:17:00,029
+curiosity
+
+335
+00:17:00,029 --> 00:17:02,799
+I'm gonna call collect on links one just
+
+336
+00:17:02,799 --> 00:17:04,689
+to verify that we understand what it
+
+337
+00:17:04,689 --> 00:17:09,329
+does and you can see where as lines held
+
+338
+00:17:09,329 --> 00:17:13,898
+just string lines links one now holds
+
+339
+00:17:13,898 --> 00:17:18,490
+pairs of strings of from URL and to URL
+
+340
+00:17:18,490 --> 00:17:26,470
+one for each link and when this executes
+
+341
+00:17:26,470 --> 00:17:28,630
+this map executes it can execute totally
+
+342
+00:17:28,630 --> 00:17:30,669
+independently on each worker on its own
+
+343
+00:17:30,669 --> 00:17:32,799
+partition of the input because it's just
+
+344
+00:17:32,799 --> 00:17:34,720
+considering each line independently
+
+345
+00:17:34,720 --> 00:17:37,630
+there's no interaction involved between
+
+346
+00:17:37,630 --> 00:17:39,100
+different lines or different partitions
+
+347
+00:17:39,100 --> 00:17:41,950
+these are it's running if these this map
+
+348
+00:17:41,950 --> 00:17:45,220
+is a purely local operation on each
+
+349
+00:17:45,220 --> 00:17:47,860
+input record so can run totally in
+
+350
+00:17:47,860 --> 00:17:49,990
+parallel on all the workers on all their
+
+351
+00:17:49,990 --> 00:17:55,929
+partitions ok the next line in the
+
+352
+00:17:55,929 --> 00:17:59,400
+program is this called the distinct and
+
+353
+00:17:59,400 --> 00:18:02,320
+what's going on here is that we only
+
+354
+00:18:02,320 --> 00:18:04,809
+want to count each link once so if a
+
+355
+00:18:04,809 --> 00:18:07,390
+given page has multiple links to another
+
+356
+00:18:07,390 --> 00:18:10,990
+page we want to only consider one of
+
+357
+00:18:10,990 --> 00:18:15,789
+them for the purposes of PageRank and so
+
+358
+00:18:15,789 --> 00:18:17,679
+this just looks for duplicates now if
+
+359
+00:18:17,679 --> 00:18:19,710
+you think about what it actually takes
+
+360
+00:18:19,710 --> 00:18:23,080
+to look for duplicates in a you know
+
+361
+00:18:23,080 --> 00:18:28,320
+multi terabyte collection of data items
+
+362
+00:18:28,320 --> 00:18:30,039
+it's no joke
+
+363
+00:18:30,039 --> 00:18:32,110
+because the data items are in some
+
+364
+00:18:32,110 --> 00:18:34,299
+random order and the input and what
+
+365
+00:18:34,299 --> 00:18:36,909
+distinct needs to do since an e sirup
+
+366
+00:18:36,909 --> 00:18:39,669
+replace each duplicated input with a
+
+367
+00:18:39,669 --> 00:18:42,940
+single input distinct needs to somehow
+
+368
+00:18:42,940 --> 00:18:45,970
+bring together all of the items that are
+
+369
+00:18:45,970 --> 00:18:48,010
+identical and that's going to require
+
+370
+00:18:48,010 --> 00:18:49,780
+communication remember that all these
+
+371
+00:18:49,780 --> 00:18:51,720
+data is spread out over all the workers
+
+372
+00:18:51,720 --> 00:18:54,100
+we want to make sure that any you know
+
+373
+00:18:54,100 --> 00:18:55,659
+that we bring we sort of shuffle the
+
+374
+00:18:55,659 --> 00:18:58,000
+data around so that any two items that
+
+375
+00:18:58,000 --> 00:18:59,620
+are identical or on the same worker so
+
+376
+00:18:59,620 --> 00:19:00,970
+that that worker can do this I'll wait a
+
+377
+00:19:00,970 --> 00:19:02,080
+minute there's three of these I'm gonna
+
+378
+00:19:02,080 --> 00:19:04,450
+replace it these three with a single one
+
+379
+00:19:04,450 --> 00:19:06,789
+I mean that means that distinct when it
+
+380
+00:19:06,789 --> 00:19:09,130
+finally comes to execute requires
+
+381
+00:19:09,130 --> 00:19:12,760
+communication it's a shuffle and so the
+
+382
+00:19:12,760 --> 00:19:13,990
+shuffle is going to be driven by either
+
+383
+00:19:13,990 --> 00:19:17,110
+hashing the items the hashing the items
+
+384
+00:19:17,110 --> 00:19:18,400
+to pick the worker that will process
+
+385
+00:19:18,400 --> 00:19:20,169
+that item and then sending the item
+
+386
+00:19:20,169 --> 00:19:22,059
+across the network or you know possibly
+
+387
+00:19:22,059 --> 00:19:24,460
+you could be implemented with a sort or
+
+388
+00:19:24,460 --> 00:19:26,320
+the system sort of sorts all the input
+
+389
+00:19:26,320 --> 00:19:30,809
+and then splits up the sorted input
+
+390
+00:19:31,870 --> 00:19:35,660
+overall the workers I'd actually don't
+
+391
+00:19:35,660 --> 00:19:37,910
+know which it does but anyway I'm gonna
+
+392
+00:19:37,910 --> 00:19:40,490
+require a lot of computation in this
+
+393
+00:19:40,490 --> 00:19:42,440
+case however almost fact nothing
+
+394
+00:19:42,440 --> 00:19:44,240
+whatsoever happens because there were no
+
+395
+00:19:44,240 --> 00:19:49,300
+duplicates and sorry whoops
+
+396
+00:19:49,300 --> 00:19:54,860
+links to all right so anyone collect and
+
+397
+00:19:54,860 --> 00:19:58,370
+the links to which is the output a
+
+398
+00:19:58,370 --> 00:20:02,650
+distinct is basically except for order
+
+399
+00:20:02,650 --> 00:20:05,630
+identical two links one which was the
+
+400
+00:20:05,630 --> 00:20:07,820
+input to that transformation and the
+
+401
+00:20:07,820 --> 00:20:09,080
+orders change because of course it has
+
+402
+00:20:09,080 --> 00:20:12,230
+to hash or sort or something all right
+
+403
+00:20:12,230 --> 00:20:19,310
+the next the next transformation is is
+
+404
+00:20:19,310 --> 00:20:24,560
+grouped by key and here what we're
+
+405
+00:20:24,560 --> 00:20:27,890
+heading towards is we want to collect
+
+406
+00:20:27,890 --> 00:20:33,050
+all of the links it turns out for the
+
+407
+00:20:33,050 --> 00:20:35,120
+computation with little C we want to
+
+408
+00:20:35,120 --> 00:20:36,680
+collect together all the links from a
+
+409
+00:20:36,680 --> 00:20:40,400
+given page into one place so the group
+
+410
+00:20:40,400 --> 00:20:43,100
+by key is gonna group by it's gonna move
+
+411
+00:20:43,100 --> 00:20:45,380
+all the records all these from two URL
+
+412
+00:20:45,380 --> 00:20:47,840
+pairs it's gonna group them by the from
+
+413
+00:20:47,840 --> 00:20:51,160
+URL that is it's gonna bring together
+
+414
+00:20:51,160 --> 00:20:55,490
+all the links that are from the same
+
+415
+00:20:55,490 --> 00:20:57,650
+page and it's gonna actually collapse
+
+416
+00:20:57,650 --> 00:20:59,840
+them down into the whole collection of
+
+417
+00:20:59,840 --> 00:21:02,000
+links from each page is gonna collapse
+
+418
+00:21:02,000 --> 00:21:04,190
+them down into a list of links into that
+
+419
+00:21:04,190 --> 00:21:07,780
+pages URL plus a list of the links that
+
+420
+00:21:07,780 --> 00:21:10,970
+start at that page and again this is
+
+421
+00:21:10,970 --> 00:21:17,050
+gonna require communication although
+
+422
+00:21:17,050 --> 00:21:19,490
+spark I suspect spark is clever enough
+
+423
+00:21:19,490 --> 00:21:21,590
+to optimize this because the distinct
+
+424
+00:21:21,590 --> 00:21:27,620
+already um put all records with the same
+
+425
+00:21:27,620 --> 00:21:31,580
+from URL on the same worker the group by
+
+426
+00:21:31,580 --> 00:21:35,180
+key could easily and may well just I'm
+
+427
+00:21:35,180 --> 00:21:36,500
+not have to communicate at all because
+
+428
+00:21:36,500 --> 00:21:38,090
+it can observe that the data is already
+
+429
+00:21:38,090 --> 00:21:41,960
+grouped by the from URL key all right so
+
+430
+00:21:41,960 --> 00:21:44,570
+let's print links three
+
+431
+00:21:44,570 --> 00:21:47,149
+let's run collect actually drive the
+
+432
+00:21:47,149 --> 00:21:52,929
+computation and see what the result is
+
+433
+00:21:52,929 --> 00:21:55,429
+and indeed what we're looking at here is
+
+434
+00:21:55,429 --> 00:21:59,570
+an array of couples where the first part
+
+435
+00:21:59,570 --> 00:22:01,639
+of each tuple is the URL the from page
+
+436
+00:22:01,639 --> 00:22:05,539
+and the second is the list of links that
+
+437
+00:22:05,539 --> 00:22:08,209
+start at that front page and so you can
+
+438
+00:22:08,209 --> 00:22:10,159
+see the YouTube has a link to you two
+
+439
+00:22:10,159 --> 00:22:12,199
+and three you three as a link to just u
+
+440
+00:22:12,199 --> 00:22:22,909
+1 and u 1 has a link to u 1 & u 3 okay
+
+441
+00:22:22,909 --> 00:22:29,059
+so that's link 3 now the iteration is
+
+442
+00:22:29,059 --> 00:22:30,769
+going to start in a couple lines from
+
+443
+00:22:30,769 --> 00:22:32,869
+here it's gonna use these things over
+
+444
+00:22:32,869 --> 00:22:35,929
+and over again each iteration of the
+
+445
+00:22:35,929 --> 00:22:39,619
+loop is going to use this this
+
+446
+00:22:39,619 --> 00:22:44,629
+information in links 3 in order to sort
+
+447
+00:22:44,629 --> 00:22:46,549
+of propagate probabilities in order to
+
+448
+00:22:46,549 --> 00:22:49,429
+sort of simulate these user clicking I'm
+
+449
+00:22:49,429 --> 00:22:52,459
+from from all pages to all other link to
+
+450
+00:22:52,459 --> 00:22:55,309
+two pages so this length stuff is these
+
+451
+00:22:55,309 --> 00:22:57,139
+links data is gonna be used over and
+
+452
+00:22:57,139 --> 00:22:58,459
+over again and we're gonna want to save
+
+453
+00:22:58,459 --> 00:23:00,259
+it it turns out that each time I've
+
+454
+00:23:00,259 --> 00:23:02,709
+called collect so far spark has
+
+455
+00:23:02,709 --> 00:23:05,089
+re-execute 'add the computation from
+
+456
+00:23:05,089 --> 00:23:06,979
+scratch so every call to collect I've
+
+457
+00:23:06,979 --> 00:23:09,799
+made has involved spark rereading the
+
+458
+00:23:09,799 --> 00:23:12,289
+input file re running that first map
+
+459
+00:23:12,289 --> 00:23:14,809
+rerunning the distinct and if I were to
+
+460
+00:23:14,809 --> 00:23:17,149
+call collect again it would rerun this
+
+461
+00:23:17,149 --> 00:23:18,769
+route by key but we don't want to have
+
+462
+00:23:18,769 --> 00:23:20,299
+to do that over and over again on sort
+
+463
+00:23:20,299 --> 00:23:25,279
+of multiple terabytes of links for each
+
+464
+00:23:25,279 --> 00:23:28,039
+loop iteration because we've computed it
+
+465
+00:23:28,039 --> 00:23:29,659
+once and it's gonna state this list of
+
+466
+00:23:29,659 --> 00:23:31,369
+links is gonna stay the same we just
+
+467
+00:23:31,369 --> 00:23:34,669
+want to save it and reuse it so in order
+
+468
+00:23:34,669 --> 00:23:38,419
+to tell spark that look we want to use
+
+469
+00:23:38,419 --> 00:23:39,709
+this over and over again the programmer
+
+470
+00:23:39,709 --> 00:23:43,009
+is required to explicitly what the paper
+
+471
+00:23:43,009 --> 00:23:48,679
+calls persist this data and in fact
+
+472
+00:23:48,679 --> 00:23:51,800
+modern spark the function you call
+
+473
+00:23:51,800 --> 00:23:53,270
+not persist if you want to sleep in a
+
+474
+00:23:53,270 --> 00:23:55,910
+memory but but it's called cash and so
+
+475
+00:23:55,910 --> 00:23:59,030
+links for is just identical the links we
+
+476
+00:23:59,030 --> 00:24:03,560
+accept with the annotation that we'd
+
+477
+00:24:03,560 --> 00:24:06,620
+like sparked keep links for in memory
+
+478
+00:24:06,620 --> 00:24:07,910
+because we're gonna use it over and over
+
+479
+00:24:07,910 --> 00:24:14,300
+again ok so that the last thing we need
+
+480
+00:24:14,300 --> 00:24:16,340
+to do before the loop starts is we're
+
+481
+00:24:16,340 --> 00:24:20,510
+gonna have a set of page ranks for every
+
+482
+00:24:20,510 --> 00:24:23,570
+page indexed by source URL and we need
+
+483
+00:24:23,570 --> 00:24:28,250
+to initialize every pages rank it's not
+
+484
+00:24:28,250 --> 00:24:29,410
+really ranks here it's kind of
+
+485
+00:24:29,410 --> 00:24:33,050
+probabilities we're gonna initialize all
+
+486
+00:24:33,050 --> 00:24:35,900
+the probabilities to one so they all
+
+487
+00:24:35,900 --> 00:24:38,300
+start out with a probability one with
+
+488
+00:24:38,300 --> 00:24:41,660
+the same rank but we're gonna well we're
+
+489
+00:24:41,660 --> 00:24:43,700
+gonna actually you code that looks like
+
+490
+00:24:43,700 --> 00:24:49,610
+it's changing ranks but in fact when we
+
+491
+00:24:49,610 --> 00:24:52,130
+execute the loop in the code I'm showing
+
+492
+00:24:52,130 --> 00:24:54,410
+it really produces a new version of
+
+493
+00:24:54,410 --> 00:24:56,540
+ranks for every loop iteration that's
+
+494
+00:24:56,540 --> 00:25:00,170
+updated to reflect the fact that the
+
+495
+00:25:00,170 --> 00:25:02,630
+code algorithm is kind of pushed page
+
+496
+00:25:02,630 --> 00:25:07,870
+ranks from each from each P
+
+497
+00:25:07,870 --> 00:25:10,150
+to the page is that it links to so let's
+
+498
+00:25:10,150 --> 00:25:13,050
+print ranks also to see what's inside
+
+499
+00:25:13,050 --> 00:25:17,260
+it's just a mapping from URL from source
+
+500
+00:25:17,260 --> 00:25:20,470
+URL to the current page rank value for
+
+501
+00:25:20,470 --> 00:25:23,260
+every page ok not gonna start executing
+
+502
+00:25:23,260 --> 00:25:27,850
+inside the spark allow the user to
+
+503
+00:25:27,850 --> 00:25:30,220
+request more fine-grained scheduling
+
+504
+00:25:30,220 --> 00:25:32,500
+primitives than cache that is to control
+
+505
+00:25:32,500 --> 00:25:33,700
+where that is stored or how the
+
+506
+00:25:33,700 --> 00:25:38,260
+computations are performed well yeah so
+
+507
+00:25:38,260 --> 00:25:41,020
+cache cache is a special case of a more
+
+508
+00:25:41,020 --> 00:25:44,650
+general persist call which can tell
+
+509
+00:25:44,650 --> 00:25:46,780
+spark look I want to you know save this
+
+510
+00:25:46,780 --> 00:25:49,200
+data in memory or I want to save it in
+
+511
+00:25:49,200 --> 00:25:52,179
+HDFS so that it's replicated and all
+
+512
+00:25:52,179 --> 00:25:53,830
+survived crashes so you got a little
+
+513
+00:25:53,830 --> 00:25:58,660
+flexibility there in general you know we
+
+514
+00:25:58,660 --> 00:26:00,010
+didn't have to say anything about the
+
+515
+00:26:00,010 --> 00:26:04,240
+partitioning in this code and spark will
+
+516
+00:26:04,240 --> 00:26:07,120
+just choose something at first the
+
+517
+00:26:07,120 --> 00:26:09,510
+partitioning is driven by the
+
+518
+00:26:09,510 --> 00:26:11,650
+partitioning of the original input files
+
+519
+00:26:11,650 --> 00:26:16,000
+but when we run transformations that had
+
+520
+00:26:16,000 --> 00:26:17,440
+to shuffle had to change the
+
+521
+00:26:17,440 --> 00:26:19,059
+partitioning like distinct it does that
+
+522
+00:26:19,059 --> 00:26:21,700
+and group by key does that spark will do
+
+523
+00:26:21,700 --> 00:26:25,059
+something internally that if we don't do
+
+524
+00:26:25,059 --> 00:26:26,500
+any we don't say anything it'll just
+
+525
+00:26:26,500 --> 00:26:28,960
+pick some scheme like hashing the keys
+
+526
+00:26:28,960 --> 00:26:30,990
+over the available workers for example
+
+527
+00:26:30,990 --> 00:26:34,090
+but you can tell it look you know I it
+
+528
+00:26:34,090 --> 00:26:35,650
+turns out that this particular way of
+
+529
+00:26:35,650 --> 00:26:39,130
+partitioning the data you know use a
+
+530
+00:26:39,130 --> 00:26:40,510
+different hash function or maybe
+
+531
+00:26:40,510 --> 00:26:42,490
+partitioned by ranges instead of hashing
+
+532
+00:26:42,490 --> 00:26:46,000
+you can tell it if you like more clever
+
+533
+00:26:46,000 --> 00:26:53,950
+ways to control the partitioning okay so
+
+534
+00:26:53,950 --> 00:26:55,170
+I'm about to start
+
+535
+00:26:55,170 --> 00:26:57,780
+the first thing the loop does and I hope
+
+536
+00:26:57,780 --> 00:27:02,340
+you can see the the code on line 12 we
+
+537
+00:27:02,340 --> 00:27:06,150
+actually gonna run this join this is the
+
+538
+00:27:06,150 --> 00:27:08,760
+first statement of the first iteration
+
+539
+00:27:08,760 --> 00:27:12,900
+of the loop with this joint is doing is
+
+540
+00:27:12,900 --> 00:27:17,150
+joining the links with the ranks and
+
+541
+00:27:17,150 --> 00:27:20,630
+what that does is pull together the
+
+542
+00:27:20,630 --> 00:27:22,710
+corresponding entries in the links which
+
+543
+00:27:22,710 --> 00:27:24,720
+said for every URL what is the point
+
+544
+00:27:24,720 --> 00:27:28,050
+what does it have links to and I'm sort
+
+545
+00:27:28,050 --> 00:27:29,820
+of putting together the links with the
+
+546
+00:27:29,820 --> 00:27:31,500
+ranks and but the rank says is for every
+
+547
+00:27:31,500 --> 00:27:33,720
+URL what's this current PageRank so now
+
+548
+00:27:33,720 --> 00:27:38,580
+we have together and a single item for
+
+549
+00:27:38,580 --> 00:27:39,630
+every page
+
+550
+00:27:39,630 --> 00:27:41,880
+both what its current PageRank is and
+
+551
+00:27:41,880 --> 00:27:43,650
+what links it points to because we're
+
+552
+00:27:43,650 --> 00:27:47,220
+gonna push every pages current PageRank
+
+553
+00:27:47,220 --> 00:27:50,400
+to all the pages it appoints to and
+
+554
+00:27:50,400 --> 00:27:52,350
+again this joint is uh is what the paper
+
+555
+00:27:52,350 --> 00:27:57,840
+calls a wide transformation because it
+
+556
+00:27:57,840 --> 00:28:04,110
+doesn't it's not a local the I mean it
+
+557
+00:28:04,110 --> 00:28:07,670
+needs to it may need to shuffle the data
+
+558
+00:28:07,670 --> 00:28:10,620
+by the URL key in order to bring
+
+559
+00:28:10,620 --> 00:28:13,230
+corresponding elements of links and
+
+560
+00:28:13,230 --> 00:28:17,490
+ranks together now in fact I believe
+
+561
+00:28:17,490 --> 00:28:19,650
+spark is clever enough to notice that
+
+562
+00:28:19,650 --> 00:28:23,010
+links and ranks are already partitioned
+
+563
+00:28:23,010 --> 00:28:27,210
+by key in the same way actually that
+
+564
+00:28:27,210 --> 00:28:30,120
+assumes that it cleverly created links
+
+565
+00:28:30,120 --> 00:28:33,000
+well when we created ranks its assumes
+
+566
+00:28:33,000 --> 00:28:34,880
+that it cleverly created
+
+567
+00:28:34,880 --> 00:28:39,510
+ranks using the same hash scheme as used
+
+568
+00:28:39,510 --> 00:28:41,820
+when it created links but if it was that
+
+569
+00:28:41,820 --> 00:28:43,530
+clever then it will notice that links
+
+570
+00:28:43,530 --> 00:28:45,740
+and ranks are passed in the same way
+
+571
+00:28:45,740 --> 00:28:48,630
+that is to say that the links ranks are
+
+572
+00:28:48,630 --> 00:28:53,670
+already on the same workers or sorry the
+
+573
+00:28:53,670 --> 00:28:55,380
+corresponding partitions with the same
+
+574
+00:28:55,380 --> 00:28:57,050
+keys are already in the same workers and
+
+575
+00:28:57,050 --> 00:29:00,120
+hopefully spark will notice that and not
+
+576
+00:29:00,120 --> 00:29:01,950
+have to move any data around if
+
+577
+00:29:01,950 --> 00:29:03,210
+something goes wrong though in links and
+
+578
+00:29:03,210 --> 00:29:04,320
+ranks are partitioned in different ways
+
+579
+00:29:04,320 --> 00:29:05,700
+then data will have to move at this
+
+580
+00:29:05,700 --> 00:29:06,790
+point
+
+581
+00:29:06,790 --> 00:29:10,410
+to join up corresponding keys in the two
+
+582
+00:29:10,410 --> 00:29:15,130
+and the two rdd's alright so JJ
+
+583
+00:29:15,130 --> 00:29:17,980
+contained now contains both every pages
+
+584
+00:29:17,980 --> 00:29:25,510
+rank and every pages list of links as
+
+585
+00:29:25,510 --> 00:29:28,660
+you can see now we have a even more
+
+586
+00:29:28,660 --> 00:29:31,210
+complex data structure it's an array
+
+587
+00:29:31,210 --> 00:29:34,120
+with an element per page with the pages
+
+588
+00:29:34,120 --> 00:29:37,660
+URL with a list of the links and the one
+
+589
+00:29:37,660 --> 00:29:40,420
+point over there is the page you choose
+
+590
+00:29:40,420 --> 00:29:45,040
+current rank and these are all all this
+
+591
+00:29:45,040 --> 00:29:47,320
+information is any sort of a single
+
+592
+00:29:47,320 --> 00:29:48,880
+record that has all this information for
+
+593
+00:29:48,880 --> 00:29:52,290
+each page together where we need it
+
+594
+00:29:52,290 --> 00:29:56,080
+alright the next step is that we're
+
+595
+00:29:56,080 --> 00:29:58,120
+gonna figure out every page is gonna
+
+596
+00:29:58,120 --> 00:30:02,200
+push a fraction of its current page rank
+
+597
+00:30:02,200 --> 00:30:04,030
+to all the pages that it links to it's
+
+598
+00:30:04,030 --> 00:30:05,440
+kind of sort of divided up its current
+
+599
+00:30:05,440 --> 00:30:07,240
+page rank among all the pages it links
+
+600
+00:30:07,240 --> 00:30:09,270
+to
+
+601
+00:30:11,160 --> 00:30:16,440
+and that's what this contribs does you
+
+602
+00:30:16,440 --> 00:30:18,420
+know basically what's going on is that
+
+603
+00:30:18,420 --> 00:30:23,970
+it's a one another one call to map and
+
+604
+00:30:23,970 --> 00:30:27,060
+we're mapping over the for each page
+
+605
+00:30:27,060 --> 00:30:29,970
+were running map over the URLs that that
+
+606
+00:30:29,970 --> 00:30:32,220
+pages points to and for each page it
+
+607
+00:30:32,220 --> 00:30:37,380
+points to we're just calculating this
+
+608
+00:30:37,380 --> 00:30:39,600
+number which is the from pages current
+
+609
+00:30:39,600 --> 00:30:41,550
+rank divided by the total number of
+
+610
+00:30:41,550 --> 00:30:44,130
+pages that points to so this sort of
+
+611
+00:30:44,130 --> 00:30:47,040
+figured you know creates a mapping from
+
+612
+00:30:47,040 --> 00:30:50,400
+link name to one of the many
+
+613
+00:30:50,400 --> 00:30:55,290
+contributions to that pages new page
+
+614
+00:30:55,290 --> 00:31:04,050
+rank and we can sneak peek it what this
+
+615
+00:31:04,050 --> 00:31:07,470
+is gonna produce I think is a much
+
+616
+00:31:07,470 --> 00:31:10,020
+simpler thing it just as a list of URLs
+
+617
+00:31:10,020 --> 00:31:13,740
+and contributions to the URLs page ranks
+
+618
+00:31:13,740 --> 00:31:15,510
+and there's there's more there's you
+
+619
+00:31:15,510 --> 00:31:16,950
+know more than one record for each URL
+
+620
+00:31:16,950 --> 00:31:19,740
+here because there's gonna for any given
+
+621
+00:31:19,740 --> 00:31:21,300
+page there's gonna be a record here for
+
+622
+00:31:21,300 --> 00:31:22,800
+every single link that points to it
+
+623
+00:31:22,800 --> 00:31:27,060
+indicating this contribution of from
+
+624
+00:31:27,060 --> 00:31:29,400
+whatever that link came from to this
+
+625
+00:31:29,400 --> 00:31:32,660
+page to this pages new updated PageRank
+
+626
+00:31:32,660 --> 00:31:35,130
+what has to happen now is that we need
+
+627
+00:31:35,130 --> 00:31:38,730
+to sum up for every page we need to sum
+
+628
+00:31:38,730 --> 00:31:42,420
+up the PageRank contributions for that
+
+629
+00:31:42,420 --> 00:31:44,220
+page that are in contribs so again we
+
+630
+00:31:44,220 --> 00:31:46,470
+going to need to do a shuffle here it's
+
+631
+00:31:46,470 --> 00:31:49,470
+gonna be a wide a transformation with a
+
+632
+00:31:49,470 --> 00:31:50,850
+wide input because we need to bring
+
+633
+00:31:50,850 --> 00:31:55,070
+together all of the elements of contribs
+
+634
+00:31:55,070 --> 00:31:57,420
+for each page we need to bring together
+
+635
+00:31:57,420 --> 00:31:59,280
+and to the same worker to the same
+
+636
+00:31:59,280 --> 00:32:03,170
+partition so they can all be summed up
+
+637
+00:32:03,530 --> 00:32:07,620
+and the way that's done the bay PageRank
+
+638
+00:32:07,620 --> 00:32:10,470
+does that is with this reduced by key
+
+639
+00:32:10,470 --> 00:32:15,920
+call would reduce spike he does is
+
+640
+00:32:15,920 --> 00:32:17,480
+it first of all it brings together all
+
+641
+00:32:17,480 --> 00:32:19,990
+the records with the same key and then
+
+642
+00:32:19,990 --> 00:32:24,350
+sums up the second element of each one
+
+643
+00:32:24,350 --> 00:32:26,870
+of those records for a given key and
+
+644
+00:32:26,870 --> 00:32:30,320
+produces as output the key which is a
+
+645
+00:32:30,320 --> 00:32:33,740
+URL and the sum of the numbers which is
+
+646
+00:32:33,740 --> 00:32:39,020
+the updated PageRank there's actually
+
+647
+00:32:39,020 --> 00:32:40,700
+two transformations here the first ones
+
+648
+00:32:40,700 --> 00:32:43,100
+is reduced by key and the second is this
+
+649
+00:32:43,100 --> 00:32:46,400
+map values which and and this is the
+
+650
+00:32:46,400 --> 00:32:49,640
+part that implements the 15% probability
+
+651
+00:32:49,640 --> 00:32:52,250
+of going to a random page and the 85%
+
+652
+00:32:52,250 --> 00:33:00,220
+chance of following a link all right
+
+653
+00:33:00,220 --> 00:33:02,360
+let's look at ranks by the way even
+
+654
+00:33:02,360 --> 00:33:04,460
+though we've assigned two ranks here um
+
+655
+00:33:04,460 --> 00:33:06,590
+what this is going to end up doing is
+
+656
+00:33:06,590 --> 00:33:08,750
+creating an entirely new transformation
+
+657
+00:33:08,750 --> 00:33:12,080
+I'm so not it's not changing the value
+
+658
+00:33:12,080 --> 00:33:14,780
+is already computed or when it comes to
+
+659
+00:33:14,780 --> 00:33:16,070
+executing this it won't change any
+
+660
+00:33:16,070 --> 00:33:17,660
+values are already computed it just
+
+661
+00:33:17,660 --> 00:33:20,840
+creates a new a new transformation with
+
+662
+00:33:20,840 --> 00:33:27,500
+new output and we can see what's gonna
+
+663
+00:33:27,500 --> 00:33:29,840
+happen in indeed we now have member
+
+664
+00:33:29,840 --> 00:33:32,390
+ranks originally was just a bunch of
+
+665
+00:33:32,390 --> 00:33:35,930
+pairs of URL PageRank now again we
+
+666
+00:33:35,930 --> 00:33:37,190
+appears if you are I'll page rank
+
+667
+00:33:37,190 --> 00:33:38,540
+another different we'd actually updated
+
+668
+00:33:38,540 --> 00:33:43,210
+them sort of changed them by one step
+
+669
+00:33:43,570 --> 00:33:45,700
+and I don't know if you remember the
+
+670
+00:33:45,700 --> 00:33:48,650
+original PageRank values we saw but
+
+671
+00:33:48,650 --> 00:33:51,560
+these are closer to those final output
+
+672
+00:33:51,560 --> 00:33:54,350
+that we saw then the original values of
+
+673
+00:33:54,350 --> 00:33:58,280
+all one are okay so that was one
+
+674
+00:33:58,280 --> 00:34:01,190
+iteration of the algorithm when the loop
+
+675
+00:34:01,190 --> 00:34:02,780
+goes back up to the top it's gonna do
+
+676
+00:34:02,780 --> 00:34:08,230
+the same join flat map and reduce by key
+
+677
+00:34:08,230 --> 00:34:13,340
+and each time it's again you know what
+
+678
+00:34:13,340 --> 00:34:15,110
+the loop is actually doing is producing
+
+679
+00:34:15,110 --> 00:34:18,620
+this lineage graph and so it's not
+
+680
+00:34:18,620 --> 00:34:20,330
+updating the variables that are
+
+681
+00:34:20,330 --> 00:34:21,650
+mentioned in the loop it's really
+
+682
+00:34:21,650 --> 00:34:25,210
+creating essentially appending new
+
+683
+00:34:25,210 --> 00:34:27,739
+transformation nodes to the lineage
+
+684
+00:34:27,739 --> 00:34:30,399
+graph that it's building
+
+685
+00:34:30,399 --> 00:34:34,280
+but I've only run that Elite once after
+
+686
+00:34:34,280 --> 00:34:37,520
+the loop and then now this is what the
+
+687
+00:34:37,520 --> 00:34:39,290
+real code does the real code actually
+
+688
+00:34:39,290 --> 00:34:42,409
+runs collect at this point and so they
+
+689
+00:34:42,409 --> 00:34:43,790
+were in the real PageRank implementation
+
+690
+00:34:43,790 --> 00:34:46,668
+only at this point with the computation
+
+691
+00:34:46,668 --> 00:34:49,129
+even start because of the call to
+
+692
+00:34:49,129 --> 00:34:50,480
+collect here and I go off and read the
+
+693
+00:34:50,480 --> 00:34:52,550
+end burden we're on the input through
+
+694
+00:34:52,550 --> 00:34:54,909
+all these transformations and shuffles
+
+695
+00:34:54,909 --> 00:34:57,890
+for the wide dependencies and finally
+
+696
+00:34:57,890 --> 00:34:59,720
+collect the output together on the
+
+697
+00:34:59,720 --> 00:35:02,420
+computer that's running this program by
+
+698
+00:35:02,420 --> 00:35:03,530
+the way the computer that runs the
+
+699
+00:35:03,530 --> 00:35:05,390
+program that the paper calls it the
+
+700
+00:35:05,390 --> 00:35:07,940
+driver the driver computer is the one
+
+701
+00:35:07,940 --> 00:35:09,650
+that actually runs this scallop program
+
+702
+00:35:09,650 --> 00:35:13,220
+that's kind of driving the spark
+
+703
+00:35:13,220 --> 00:35:15,950
+computation and then the program takes
+
+704
+00:35:15,950 --> 00:35:18,859
+this output variable and runs it through
+
+705
+00:35:18,859 --> 00:35:26,660
+a nice nicely formatted print on each of
+
+706
+00:35:26,660 --> 00:35:35,210
+the records in the collect up okay so
+
+707
+00:35:35,210 --> 00:35:37,630
+that's the
+
+708
+00:35:39,140 --> 00:35:41,210
+kind of style of programming that people
+
+709
+00:35:41,210 --> 00:35:48,880
+use for Scala and I mean for for spark
+
+710
+00:35:51,910 --> 00:35:54,289
+went one thing to note here relative to
+
+711
+00:35:54,289 --> 00:35:57,920
+MapReduce is that this program well you
+
+712
+00:35:57,920 --> 00:35:59,630
+know and look looks a little bit complex
+
+713
+00:35:59,630 --> 00:36:02,720
+but the fact is that this program is
+
+714
+00:36:02,720 --> 00:36:07,630
+doing the work of many many MapReduce or
+
+715
+00:36:07,630 --> 00:36:09,680
+doing an amount of work that would
+
+716
+00:36:09,680 --> 00:36:12,049
+require many separate MapReduce programs
+
+717
+00:36:12,049 --> 00:36:16,700
+in order to implement so you know it's
+
+718
+00:36:16,700 --> 00:36:18,859
+21 lines and maybe you used two
+
+719
+00:36:18,859 --> 00:36:20,240
+MapReduce programs that are simpler than
+
+720
+00:36:20,240 --> 00:36:22,579
+that but this is doing a lot of work for
+
+721
+00:36:22,579 --> 00:36:25,339
+21 lines and it turns out that this is
+
+722
+00:36:25,339 --> 00:36:27,109
+you know this is sort of a real
+
+723
+00:36:27,109 --> 00:36:29,450
+algorithm to so it's like a pretty
+
+724
+00:36:29,450 --> 00:36:32,059
+concise and easy program easy to program
+
+725
+00:36:32,059 --> 00:36:37,069
+way to express vast Big Data
+
+726
+00:36:37,069 --> 00:36:42,769
+computations you know people like pretty
+
+727
+00:36:42,769 --> 00:36:50,770
+successful okay so again
+
+728
+00:36:50,770 --> 00:36:52,690
+just want to repeat that until the final
+
+729
+00:36:52,690 --> 00:36:54,700
+collect or this code is doing is
+
+730
+00:36:54,700 --> 00:36:56,740
+generating a lineage graph and not
+
+731
+00:36:56,740 --> 00:36:58,600
+processing the data and the the lineage
+
+732
+00:36:58,600 --> 00:37:01,390
+graph that it produces actually the
+
+733
+00:37:01,390 --> 00:37:01,690
+paper
+
+734
+00:37:01,690 --> 00:37:05,020
+I'm just copied this from the paper this
+
+735
+00:37:05,020 --> 00:37:06,280
+is what the lineage graph looks like
+
+736
+00:37:06,280 --> 00:37:09,700
+it's you know this is all that the
+
+737
+00:37:09,700 --> 00:37:11,740
+program is producing it's just this
+
+738
+00:37:11,740 --> 00:37:14,650
+graph until the final collect and you
+
+739
+00:37:14,650 --> 00:37:16,210
+can see that it's a sequence of these
+
+740
+00:37:16,210 --> 00:37:20,350
+processing stage where we read the file
+
+741
+00:37:20,350 --> 00:37:21,580
+to produce links and then completely
+
+742
+00:37:21,580 --> 00:37:23,050
+separately we produce these initial
+
+743
+00:37:23,050 --> 00:37:26,680
+ranks and then there's repeated joins
+
+744
+00:37:26,680 --> 00:37:34,300
+and reduced by key pairs each loop
+
+745
+00:37:34,300 --> 00:37:41,170
+iteration produces a join and a each of
+
+746
+00:37:41,170 --> 00:37:42,700
+these pairs is one loop iteration and
+
+747
+00:37:42,700 --> 00:37:44,230
+you can see again that the loop is
+
+748
+00:37:44,230 --> 00:37:46,510
+appended more and more nodes to the
+
+749
+00:37:46,510 --> 00:37:49,420
+graph rather than what it is not doing
+
+750
+00:37:49,420 --> 00:37:51,960
+in particular it is not producing a
+
+751
+00:37:51,960 --> 00:37:56,800
+cyclic graph the loop is producing all
+
+752
+00:37:56,800 --> 00:37:59,470
+these graphs are a cyclic another thing
+
+753
+00:37:59,470 --> 00:38:01,000
+to notice that you wouldn't have seen a
+
+754
+00:38:01,000 --> 00:38:03,700
+MapReduce is that this data here which
+
+755
+00:38:03,700 --> 00:38:05,200
+was the data that we cashed that we
+
+756
+00:38:05,200 --> 00:38:07,330
+persisted is used over and over again
+
+757
+00:38:07,330 --> 00:38:09,490
+and every loop iteration and so it
+
+758
+00:38:09,490 --> 00:38:12,360
+sparks going to keep this in memory and
+
+759
+00:38:12,360 --> 00:38:16,500
+it's going to consult it multiple times
+
+760
+00:38:20,070 --> 00:38:26,380
+alright so it actually happens during
+
+761
+00:38:26,380 --> 00:38:28,570
+execution what is the execution look
+
+762
+00:38:28,570 --> 00:38:36,190
+like so again the the assumption is that
+
+763
+00:38:36,190 --> 00:38:39,040
+the data the input data starts out kind
+
+764
+00:38:39,040 --> 00:38:45,540
+of pre partitioned by over in HDFS
+
+765
+00:38:45,540 --> 00:38:48,460
+we assume our one file it's our input
+
+766
+00:38:48,460 --> 00:38:51,100
+files already split up into lots of you
+
+767
+00:38:51,100 --> 00:38:53,470
+know 64 megabyte or whatever it may
+
+768
+00:38:53,470 --> 00:38:58,560
+happen pieces in HDFS spark knows that
+
+769
+00:38:58,560 --> 00:39:01,030
+when you started you actually call
+
+770
+00:39:01,030 --> 00:39:02,530
+collect the start of computation spark
+
+771
+00:39:02,530 --> 00:39:03,760
+knows that the input data is already
+
+772
+00:39:03,760 --> 00:39:08,070
+partitioned HDFS and it's gonna try to
+
+773
+00:39:08,070 --> 00:39:11,440
+split up the work the workers in a
+
+774
+00:39:11,440 --> 00:39:13,840
+corresponding way so if it knows that
+
+775
+00:39:13,840 --> 00:39:15,940
+there's I actually don't know what the
+
+776
+00:39:15,940 --> 00:39:19,990
+details are a bit it might actually try
+
+777
+00:39:19,990 --> 00:39:21,340
+to run the computation on the same
+
+778
+00:39:21,340 --> 00:39:25,420
+machines that store the HDFS data or it
+
+779
+00:39:25,420 --> 00:39:31,650
+may just set up a bunch of workers to
+
+780
+00:39:31,650 --> 00:39:35,140
+read each of the HDFS partitions and
+
+781
+00:39:35,140 --> 00:39:37,330
+again there's likely to be more than one
+
+782
+00:39:37,330 --> 00:39:41,740
+partition per per worker so we have the
+
+783
+00:39:41,740 --> 00:39:45,580
+input file and the very first thing is
+
+784
+00:39:45,580 --> 00:39:50,650
+that each worker reads as part of the
+
+785
+00:39:50,650 --> 00:39:53,260
+input file so this is the read their
+
+786
+00:39:53,260 --> 00:39:55,960
+file read if you remember the next step
+
+787
+00:39:55,960 --> 00:39:57,760
+is a map where the each worker supposed
+
+788
+00:39:57,760 --> 00:39:59,980
+to map a little function that splits up
+
+789
+00:39:59,980 --> 00:40:02,770
+each line of input into a from two
+
+790
+00:40:02,770 --> 00:40:06,040
+linked tupple um but this is a purely
+
+791
+00:40:06,040 --> 00:40:08,410
+local operation and so it can go on in
+
+792
+00:40:08,410 --> 00:40:10,660
+the same worker so we imagine that we
+
+793
+00:40:10,660 --> 00:40:13,450
+read the data and then in the very same
+
+794
+00:40:13,450 --> 00:40:16,600
+worker spark is gonna do that initial
+
+795
+00:40:16,600 --> 00:40:19,750
+map so you know I'm drawing an arrow
+
+796
+00:40:19,750 --> 00:40:21,670
+here's really an arrow from each worker
+
+797
+00:40:21,670 --> 00:40:22,960
+to itself so there's no network
+
+798
+00:40:22,960 --> 00:40:24,730
+communication involved indeed it's just
+
+799
+00:40:24,730 --> 00:40:28,540
+you know we run the first read and the
+
+800
+00:40:28,540 --> 00:40:30,190
+output can be directly fed to that
+
+801
+00:40:30,190 --> 00:40:33,700
+little map function and in fact this is
+
+802
+00:40:33,700 --> 00:40:39,210
+that that initial map in fact spark
+
+803
+00:40:39,210 --> 00:40:40,980
+certainly streams the data record by
+
+804
+00:40:40,980 --> 00:40:43,020
+record through these transformations so
+
+805
+00:40:43,020 --> 00:40:45,260
+instead of reading the entire input
+
+806
+00:40:45,260 --> 00:40:47,609
+partition and then running the map on
+
+807
+00:40:47,609 --> 00:40:52,020
+the entire input partition SPARC reads
+
+808
+00:40:52,020 --> 00:40:53,700
+the first record or maybe the first just
+
+809
+00:40:53,700 --> 00:40:56,310
+couple of records and then runs the map
+
+810
+00:40:56,310 --> 00:40:58,650
+on just sort of all I'm each record in
+
+811
+00:40:58,650 --> 00:41:02,010
+fact runs each record of E if it was
+
+812
+00:41:02,010 --> 00:41:05,310
+many transformations as it can before
+
+813
+00:41:05,310 --> 00:41:06,660
+going on and reading the next little bit
+
+814
+00:41:06,660 --> 00:41:08,190
+from the file and that's so that it
+
+815
+00:41:08,190 --> 00:41:10,050
+doesn't have to store yes these files
+
+816
+00:41:10,050 --> 00:41:13,109
+could be very large it isn't one half so
+
+817
+00:41:13,109 --> 00:41:14,849
+like store the entire input file it's
+
+818
+00:41:14,849 --> 00:41:16,950
+much more efficient just to process it
+
+819
+00:41:16,950 --> 00:41:18,990
+record by record okay so there's a
+
+820
+00:41:18,990 --> 00:41:22,109
+question so the first node in each chain
+
+821
+00:41:22,109 --> 00:41:24,420
+is the worker holding the HDFS chunks
+
+822
+00:41:24,420 --> 00:41:26,580
+and the remaining nodes in the chain are
+
+823
+00:41:26,580 --> 00:41:28,349
+the nodes in the lineage oh yeah I'm
+
+824
+00:41:28,349 --> 00:41:29,640
+afraid I've been a little bit confusing
+
+825
+00:41:29,640 --> 00:41:32,220
+here I think the way to think of this is
+
+826
+00:41:32,220 --> 00:41:35,070
+that so far all this happen is happening
+
+827
+00:41:35,070 --> 00:41:37,800
+on it on individual workers so this is
+
+828
+00:41:37,800 --> 00:41:40,460
+worker one maybe this is another worker
+
+829
+00:41:40,460 --> 00:41:43,460
+and
+
+830
+00:41:45,890 --> 00:41:48,560
+each worker is sort of proceeding
+
+831
+00:41:48,560 --> 00:41:50,210
+independently and I'm imagining that
+
+832
+00:41:50,210 --> 00:41:53,030
+they're all running on the same machines
+
+833
+00:41:53,030 --> 00:41:55,220
+that stored the different partitions of
+
+834
+00:41:55,220 --> 00:41:57,170
+the HTTPS fob but there could be Network
+
+835
+00:41:57,170 --> 00:41:59,630
+communication here to get from HDFS to
+
+836
+00:41:59,630 --> 00:42:02,360
+the to the responsible worker but after
+
+837
+00:42:02,360 --> 00:42:04,990
+that it's very fast kind of local
+
+838
+00:42:04,990 --> 00:42:17,450
+operations all right and so this is what
+
+839
+00:42:17,450 --> 00:42:20,090
+happens for the with the people called
+
+840
+00:42:20,090 --> 00:42:22,540
+the narrow
+
+841
+00:42:23,210 --> 00:42:25,619
+dependencies that is transformations
+
+842
+00:42:25,619 --> 00:42:28,529
+that just look consider each record of
+
+843
+00:42:28,529 --> 00:42:30,809
+data independently without ever having
+
+844
+00:42:30,809 --> 00:42:33,749
+to worry about the relationship to other
+
+845
+00:42:33,749 --> 00:42:37,319
+records so by the way this is already
+
+846
+00:42:37,319 --> 00:42:39,239
+potentially more efficient than
+
+847
+00:42:39,239 --> 00:42:43,400
+MapReduce and that's because if we have
+
+848
+00:42:43,400 --> 00:42:46,769
+what amount to multiple map phases here
+
+849
+00:42:46,769 --> 00:42:48,420
+they just string together in memory
+
+850
+00:42:48,420 --> 00:42:50,999
+whereas MapReduce if you're not super
+
+851
+00:42:50,999 --> 00:42:51,630
+clever
+
+852
+00:42:51,630 --> 00:42:54,630
+if you run multiple MapReduce is even if
+
+853
+00:42:54,630 --> 00:42:56,479
+they're sort of degenerate map only
+
+854
+00:42:56,479 --> 00:42:59,640
+MapReduce applications each stage would
+
+855
+00:42:59,640 --> 00:43:02,489
+reduce input from G of s compute and
+
+856
+00:43:02,489 --> 00:43:04,619
+write its output back to GFS then the
+
+857
+00:43:04,619 --> 00:43:07,079
+next stage would be compute right so
+
+858
+00:43:07,079 --> 00:43:08,309
+here we've eliminated the reading
+
+859
+00:43:08,309 --> 00:43:10,680
+writing in it you know it's not a very
+
+860
+00:43:10,680 --> 00:43:14,309
+deep advantage but it sure helps
+
+861
+00:43:14,309 --> 00:43:20,630
+enormous Li for efficiency okay however
+
+862
+00:43:20,630 --> 00:43:23,130
+not all the transformations are narrow
+
+863
+00:43:23,130 --> 00:43:26,509
+not all just sort of read their input
+
+864
+00:43:26,509 --> 00:43:28,529
+record by record kind of with every
+
+865
+00:43:28,529 --> 00:43:30,359
+record independent from other records
+
+866
+00:43:30,359 --> 00:43:32,489
+and so what I'm worried about is the
+
+867
+00:43:32,489 --> 00:43:34,710
+distinct call which needed to know all
+
+868
+00:43:34,710 --> 00:43:37,559
+instances all records that had a
+
+869
+00:43:37,559 --> 00:43:39,839
+particular key similarly group by key
+
+870
+00:43:39,839 --> 00:43:42,749
+needs to know about all instances that
+
+871
+00:43:42,749 --> 00:43:45,779
+have a key join also it's gotta move
+
+872
+00:43:45,779 --> 00:43:50,210
+things around so that takes two inputs
+
+873
+00:43:50,210 --> 00:43:53,400
+needs to join together all keys from
+
+874
+00:43:53,400 --> 00:43:54,960
+both inputs so that this all records
+
+875
+00:43:54,960 --> 00:43:56,279
+from both inputs that are the same key
+
+876
+00:43:56,279 --> 00:43:58,650
+so there's a bunch of these non-local
+
+877
+00:43:58,650 --> 00:44:01,440
+transformations which the paper calls
+
+878
+00:44:01,440 --> 00:44:04,469
+wide transformations because they
+
+879
+00:44:04,469 --> 00:44:05,989
+potentially have to look at all
+
+880
+00:44:05,989 --> 00:44:08,579
+partitions of the input that's a lot
+
+881
+00:44:08,579 --> 00:44:12,269
+like reduce in MapReduce serve example
+
+882
+00:44:12,269 --> 00:44:14,430
+distinct exposing we're talking about
+
+883
+00:44:14,430 --> 00:44:18,839
+the distinct stage you know the distinct
+
+884
+00:44:18,839 --> 00:44:20,489
+is going to be run on multiple workers
+
+885
+00:44:20,489 --> 00:44:24,660
+also and no distinct works on each key
+
+886
+00:44:24,660 --> 00:44:27,299
+independently and so we can partition
+
+887
+00:44:27,299 --> 00:44:31,589
+the computation by key but the
+
+888
+00:44:31,589 --> 00:44:33,239
+data currently is not partitioned by key
+
+889
+00:44:33,239 --> 00:44:34,529
+at all actually isn't really partitioned
+
+890
+00:44:34,529 --> 00:44:36,569
+by anything but just sort of however
+
+891
+00:44:36,569 --> 00:44:41,329
+HDFS have my distorted so four distinct
+
+892
+00:44:41,329 --> 00:44:44,479
+we're gonna run distinct on all the word
+
+893
+00:44:44,479 --> 00:44:46,019
+partition and all the workers
+
+894
+00:44:46,019 --> 00:44:50,009
+partitioned by key but you know any one
+
+895
+00:44:50,009 --> 00:44:52,799
+worker needs to see all of the input
+
+896
+00:44:52,799 --> 00:44:54,930
+records with a given key which may be
+
+897
+00:44:54,930 --> 00:45:00,380
+spread out over all of the preceding
+
+898
+00:45:00,680 --> 00:45:04,190
+workers for the preceding transformation
+
+899
+00:45:04,190 --> 00:45:07,499
+and all of all of the you know they're
+
+900
+00:45:07,499 --> 00:45:09,239
+all for the workers are responsible for
+
+901
+00:45:09,239 --> 00:45:10,469
+different keys but the keys may be
+
+902
+00:45:10,469 --> 00:45:13,039
+spread out over
+
+903
+00:45:16,849 --> 00:45:19,569
+workers for the preceeding
+
+904
+00:45:19,569 --> 00:45:21,319
+transformation now in fact the workers
+
+905
+00:45:21,319 --> 00:45:23,359
+are the same typically it's gonna be the
+
+906
+00:45:23,359 --> 00:45:25,759
+same workers running the map is running
+
+907
+00:45:25,759 --> 00:45:27,559
+running the distinct but the data needs
+
+908
+00:45:27,559 --> 00:45:28,940
+to be moved between the two
+
+909
+00:45:28,940 --> 00:45:30,920
+transformations to bring all the keys
+
+910
+00:45:30,920 --> 00:45:33,049
+together and so what sparks actually
+
+911
+00:45:33,049 --> 00:45:34,489
+gonna do it's gonna take the output of
+
+912
+00:45:34,489 --> 00:45:38,269
+this map hash the each record by its key
+
+913
+00:45:38,269 --> 00:45:40,519
+and use that you know mod the number of
+
+914
+00:45:40,519 --> 00:45:42,769
+workers to select which workers should
+
+915
+00:45:42,769 --> 00:45:46,220
+see it and in fact the implementation is
+
+916
+00:45:46,220 --> 00:45:48,349
+a lot like your implementation of
+
+917
+00:45:48,349 --> 00:45:51,019
+MapReduce the very last thing that
+
+918
+00:45:51,019 --> 00:45:55,549
+happens in in the last of the narrow
+
+919
+00:45:55,549 --> 00:45:59,029
+stages is that the output is going to be
+
+920
+00:45:59,029 --> 00:46:01,700
+chopped up into buckets corresponding to
+
+921
+00:46:01,700 --> 00:46:05,690
+the different workers for the next
+
+922
+00:46:05,690 --> 00:46:06,890
+transformation where it's going to be
+
+923
+00:46:06,890 --> 00:46:10,640
+left waiting for them to fetch I saw the
+
+924
+00:46:10,640 --> 00:46:13,579
+scoop is that each of the workers run
+
+925
+00:46:13,579 --> 00:46:15,499
+the sort of as many stages all the
+
+926
+00:46:15,499 --> 00:46:16,940
+narrows stages they can through the
+
+927
+00:46:16,940 --> 00:46:19,849
+completion and store the output split up
+
+928
+00:46:19,849 --> 00:46:21,289
+into buckets when all of these are
+
+929
+00:46:21,289 --> 00:46:24,969
+finished then we can start running the
+
+930
+00:46:24,969 --> 00:46:27,859
+workers for the distinct transformation
+
+931
+00:46:27,859 --> 00:46:30,349
+whose first step is go and fetch from
+
+932
+00:46:30,349 --> 00:46:32,660
+every other worker the relevant bucket
+
+933
+00:46:32,660 --> 00:46:35,180
+of the output of the last narrow stage
+
+934
+00:46:35,180 --> 00:46:38,239
+and then we can run the distinct because
+
+935
+00:46:38,239 --> 00:46:40,160
+all the given keys are on the same
+
+936
+00:46:40,160 --> 00:46:42,259
+worker and they can all start producing
+
+937
+00:46:42,259 --> 00:46:46,150
+output themselves
+
+938
+00:46:48,199 --> 00:46:50,669
+all right now of course these Y
+
+939
+00:46:50,669 --> 00:46:52,709
+transformations are quite expensive the
+
+940
+00:46:52,709 --> 00:46:54,239
+now transformations are super efficient
+
+941
+00:46:54,239 --> 00:46:56,459
+because we're just sort of taking each
+
+942
+00:46:56,459 --> 00:46:58,289
+record and running a bunch of functions
+
+943
+00:46:58,289 --> 00:47:00,929
+on it totally locally the Y
+
+944
+00:47:00,929 --> 00:47:02,759
+transformations require pushing a lot of
+
+945
+00:47:02,759 --> 00:47:04,349
+data impact essentially all of the data
+
+946
+00:47:04,349 --> 00:47:06,239
+in for PageRank you know you get
+
+947
+00:47:06,239 --> 00:47:08,880
+terabytes of input data that means that
+
+948
+00:47:08,880 --> 00:47:10,649
+you know it's still the same data at
+
+949
+00:47:10,649 --> 00:47:12,359
+this stage because it's all the links
+
+950
+00:47:12,359 --> 00:47:15,059
+and then in the web so now we're pushing
+
+951
+00:47:15,059 --> 00:47:17,309
+terabytes and terabytes of data over the
+
+952
+00:47:17,309 --> 00:47:19,319
+network to implement this shuffle from
+
+953
+00:47:19,319 --> 00:47:23,009
+the output of the map functions to the
+
+954
+00:47:23,009 --> 00:47:24,659
+input of the distinct functions so these
+
+955
+00:47:24,659 --> 00:47:28,229
+wide transformations are pretty
+
+956
+00:47:28,229 --> 00:47:28,709
+heavyweight
+
+957
+00:47:28,709 --> 00:47:31,529
+a lot of communication and they're also
+
+958
+00:47:31,529 --> 00:47:33,479
+kind of computation barrier because we
+
+959
+00:47:33,479 --> 00:47:35,669
+have to wait all for all the narrow
+
+960
+00:47:35,669 --> 00:47:37,589
+processing to finish before we can go on
+
+961
+00:47:37,589 --> 00:47:42,919
+to the so there's wide transformation
+
+962
+00:47:45,979 --> 00:47:53,239
+all right that said the there are some
+
+963
+00:47:54,289 --> 00:47:57,469
+optimizations that are possible because
+
+964
+00:47:57,469 --> 00:47:59,819
+SPARC has a view SPARC creates the
+
+965
+00:47:59,819 --> 00:48:04,949
+entire lineage graph before it starts
+
+966
+00:48:04,949 --> 00:48:06,659
+any of the data processing so smart can
+
+967
+00:48:06,659 --> 00:48:08,429
+inspect the lineage graph and look for
+
+968
+00:48:08,429 --> 00:48:10,139
+opportunities for optimization and
+
+969
+00:48:10,139 --> 00:48:13,499
+certainly running all of if there's a
+
+970
+00:48:13,499 --> 00:48:15,599
+sequence of narrow stages running them
+
+971
+00:48:15,599 --> 00:48:17,099
+all in the same machine by basically
+
+972
+00:48:17,099 --> 00:48:19,619
+sequential function calls on each input
+
+973
+00:48:19,619 --> 00:48:21,479
+record that's definitely an optimization
+
+974
+00:48:21,479 --> 00:48:24,179
+that you can only notice if you sort of
+
+975
+00:48:24,179 --> 00:48:26,929
+see the entire lineage graph all at once
+
+976
+00:48:26,929 --> 00:48:30,889
+another optimization that
+
+977
+00:48:34,470 --> 00:48:37,230
+spark does is noticing when the data has
+
+978
+00:48:37,230 --> 00:48:40,140
+all has has already been partitioned due
+
+979
+00:48:40,140 --> 00:48:42,330
+to a wide shuffle that the data is
+
+980
+00:48:42,330 --> 00:48:44,310
+already partitioned in the way that it's
+
+981
+00:48:44,310 --> 00:48:47,450
+going to be needed for the next wide
+
+982
+00:48:47,450 --> 00:48:51,240
+transformation so in the in our original
+
+983
+00:48:51,240 --> 00:48:57,990
+program let's see I think we have two
+
+984
+00:48:57,990 --> 00:49:00,030
+wide transformations in a row distinct
+
+985
+00:49:00,030 --> 00:49:02,940
+requires a shuffle but group by key also
+
+986
+00:49:02,940 --> 00:49:05,849
+it's gonna bring together all the
+
+987
+00:49:05,849 --> 00:49:08,190
+records with a given key and replace
+
+988
+00:49:08,190 --> 00:49:11,609
+them with a list of for every key the
+
+989
+00:49:11,609 --> 00:49:14,670
+list of links you know starting at that
+
+990
+00:49:14,670 --> 00:49:16,859
+URL these are both wide operators they
+
+991
+00:49:16,859 --> 00:49:19,710
+both are grouping by key and so maybe we
+
+992
+00:49:19,710 --> 00:49:21,150
+have to do a shuffle for the distinct
+
+993
+00:49:21,150 --> 00:49:24,150
+but spark can cleverly recognize a high
+
+994
+00:49:24,150 --> 00:49:25,560
+you know that is already shuffled in a
+
+995
+00:49:25,560 --> 00:49:26,880
+way that's appropriate for a group by
+
+996
+00:49:26,880 --> 00:49:28,920
+key we don't have to do in other shuffle
+
+997
+00:49:28,920 --> 00:49:30,450
+so even though group by key is in
+
+998
+00:49:30,450 --> 00:49:32,730
+principle it could be a wide
+
+999
+00:49:32,730 --> 00:49:36,300
+transformation in fact I suspect spark
+
+1000
+00:49:36,300 --> 00:49:38,130
+implements it without communication
+
+1001
+00:49:38,130 --> 00:49:39,900
+because the data is already partitioned
+
+1002
+00:49:39,900 --> 00:49:44,540
+by key so maybe the group by key
+
+1003
+00:49:45,569 --> 00:49:48,400
+can be done in this particular case
+
+1004
+00:49:48,400 --> 00:49:53,640
+without shuffling data without expense
+
+1005
+00:49:53,999 --> 00:49:56,349
+of course it you know can only do this
+
+1006
+00:49:56,349 --> 00:49:58,329
+because it produced the entire lineage
+
+1007
+00:49:58,329 --> 00:50:00,579
+graph first and only then ran the
+
+1008
+00:50:00,579 --> 00:50:02,559
+computation so this part gets a chance
+
+1009
+00:50:02,559 --> 00:50:07,329
+to sort of examine and optimize and
+
+1010
+00:50:07,329 --> 00:50:10,410
+maybe transform the graph
+
+1011
+00:50:13,770 --> 00:50:16,890
+so that looks topic actually any any
+
+1012
+00:50:16,890 --> 00:50:20,730
+questions about lineage graphs or how
+
+1013
+00:50:20,730 --> 00:50:21,840
+things are executed
+
+1014
+00:50:21,840 --> 00:50:28,380
+I feel free to interact the next thing I
+
+1015
+00:50:28,380 --> 00:50:33,020
+want to talk about is fault tolerance
+
+1016
+00:50:33,020 --> 00:50:40,080
+and here the you know these kind of
+
+1017
+00:50:40,080 --> 00:50:41,730
+computations they're not the fault
+
+1018
+00:50:41,730 --> 00:50:42,990
+tolerance are looking for is not the
+
+1019
+00:50:42,990 --> 00:50:45,120
+sort of absolute fault tolerance you
+
+1020
+00:50:45,120 --> 00:50:46,620
+would want with the database what you
+
+1021
+00:50:46,620 --> 00:50:48,600
+really just cannot ever afford to lose
+
+1022
+00:50:48,600 --> 00:50:49,950
+anything what you really want is a
+
+1023
+00:50:49,950 --> 00:50:53,400
+database that never loses data here the
+
+1024
+00:50:53,400 --> 00:50:54,900
+fault tolerance we're looking for is
+
+1025
+00:50:54,900 --> 00:50:58,740
+more like well it's expensive if we have
+
+1026
+00:50:58,740 --> 00:51:00,540
+to repeat the computation we can totally
+
+1027
+00:51:00,540 --> 00:51:02,310
+repeat this computation if we have to
+
+1028
+00:51:02,310 --> 00:51:04,590
+but you know it would take us a couple
+
+1029
+00:51:04,590 --> 00:51:06,870
+of hours and that's irritating but not
+
+1030
+00:51:06,870 --> 00:51:09,510
+the end of the world so we're looking to
+
+1031
+00:51:09,510 --> 00:51:12,630
+you know tolerate common errors but we
+
+1032
+00:51:12,630 --> 00:51:15,140
+don't have to certainly don't have to
+
+1033
+00:51:15,140 --> 00:51:19,580
+having bulletproof ability to tolerate
+
+1034
+00:51:19,580 --> 00:51:26,700
+any possible error so for example spark
+
+1035
+00:51:26,700 --> 00:51:29,520
+doesn't replicate that driver machine if
+
+1036
+00:51:29,520 --> 00:51:31,890
+the driver which was sort of controlling
+
+1037
+00:51:31,890 --> 00:51:33,180
+the computation and knew about the
+
+1038
+00:51:33,180 --> 00:51:34,860
+lineage graph of the driver crashes I
+
+1039
+00:51:34,860 --> 00:51:36,120
+think you have to rerun the whole thing
+
+1040
+00:51:36,120 --> 00:51:38,280
+but you know any only any one machine
+
+1041
+00:51:38,280 --> 00:51:40,470
+only crashes maybe every few months so
+
+1042
+00:51:40,470 --> 00:51:41,430
+that's no big deal
+
+1043
+00:51:41,430 --> 00:51:45,900
+another thing to notice is that HDFS is
+
+1044
+00:51:45,900 --> 00:51:48,090
+sort of a separate thing SPARC is just
+
+1045
+00:51:48,090 --> 00:51:52,050
+assuming that the input is replicated in
+
+1046
+00:51:52,050 --> 00:51:55,290
+a fault-tolerant way on HDFS and indeed
+
+1047
+00:51:55,290 --> 00:51:58,290
+just just like GFS HDFS does indeed keep
+
+1048
+00:51:58,290 --> 00:51:59,760
+multiple copies of the data on multiple
+
+1049
+00:51:59,760 --> 00:52:02,310
+servers if one of them crashes can
+
+1050
+00:52:02,310 --> 00:52:05,220
+soldier on with the other copy so the
+
+1051
+00:52:05,220 --> 00:52:09,630
+input data is assumed to be to be
+
+1052
+00:52:09,630 --> 00:52:11,340
+relatively fault tolerant and
+
+1053
+00:52:11,340 --> 00:52:12,780
+what that means that at the highest
+
+1054
+00:52:12,780 --> 00:52:17,310
+level is that spark strategy if one of
+
+1055
+00:52:17,310 --> 00:52:20,640
+the workers fail is just to recompute
+
+1056
+00:52:20,640 --> 00:52:23,730
+the whatever that worker was responsible
+
+1057
+00:52:23,730 --> 00:52:26,570
+for to just repeat those computations
+
+1058
+00:52:26,570 --> 00:52:29,340
+they were lost with the worker on some
+
+1059
+00:52:29,340 --> 00:52:32,420
+other worker and on some other machine
+
+1060
+00:52:32,420 --> 00:52:37,130
+so that's basically what's going on and
+
+1061
+00:52:37,130 --> 00:52:40,110
+it you know it might take a while if you
+
+1062
+00:52:40,110 --> 00:52:42,150
+have a long lineage like you would
+
+1063
+00:52:42,150 --> 00:52:44,340
+actually get with PageRank because you
+
+1064
+00:52:44,340 --> 00:52:45,270
+know PageRank with many iterations
+
+1065
+00:52:45,270 --> 00:52:50,310
+produces a very long lineage graph one
+
+1066
+00:52:50,310 --> 00:52:53,790
+way that spark makes it not so bad that
+
+1067
+00:52:53,790 --> 00:52:55,500
+it has to be may have to be computer
+
+1068
+00:52:55,500 --> 00:52:56,880
+everything from scratch if a worker
+
+1069
+00:52:56,880 --> 00:53:00,780
+fails is that each workers actually
+
+1070
+00:53:00,780 --> 00:53:02,790
+responsible for multiple partitions at
+
+1071
+00:53:02,790 --> 00:53:06,150
+the input so spark can move those parts
+
+1072
+00:53:06,150 --> 00:53:08,910
+move give each remaining worker just one
+
+1073
+00:53:08,910 --> 00:53:10,410
+of the partitions and they'll be able to
+
+1074
+00:53:10,410 --> 00:53:13,850
+basically paralyzed the recomputation
+
+1075
+00:53:13,850 --> 00:53:17,310
+that was lost with the failed worker by
+
+1076
+00:53:17,310 --> 00:53:19,140
+running each of its partitions on a on a
+
+1077
+00:53:19,140 --> 00:53:22,140
+different worker in parallel so if all
+
+1078
+00:53:22,140 --> 00:53:24,870
+else fails spark just goes back to the
+
+1079
+00:53:24,870 --> 00:53:27,840
+beginning from being input and just
+
+1080
+00:53:27,840 --> 00:53:29,310
+recomputes everything that was running
+
+1081
+00:53:29,310 --> 00:53:36,990
+on that machine however and for now our
+
+1082
+00:53:36,990 --> 00:53:38,880
+dependencies that's pretty much the end
+
+1083
+00:53:38,880 --> 00:53:39,690
+of the story
+
+1084
+00:53:39,690 --> 00:53:42,030
+however there actually is a problem with
+
+1085
+00:53:42,030 --> 00:53:43,800
+the wide dependencies that makes that
+
+1086
+00:53:43,800 --> 00:53:48,210
+story not as attractive as you might
+
+1087
+00:53:48,210 --> 00:53:53,580
+hope so this is a topic here is failure
+
+1088
+00:53:53,580 --> 00:53:58,730
+one failed node 1 failed worker
+
+1089
+00:54:00,920 --> 00:54:05,160
+in a lineage graph that has wide
+
+1090
+00:54:05,160 --> 00:54:13,200
+dependencies so the a reasonable or a
+
+1091
+00:54:13,200 --> 00:54:14,730
+sort of sample graph you might have is
+
+1092
+00:54:14,730 --> 00:54:16,799
+you know maybe you have a dependency
+
+1093
+00:54:16,799 --> 00:54:19,529
+graph that's you know starts with some
+
+1094
+00:54:19,529 --> 00:54:26,549
+power dependencies but then after a
+
+1095
+00:54:26,549 --> 00:54:29,519
+while you have a wide dependency so you
+
+1096
+00:54:29,519 --> 00:54:37,740
+got transformations that depend on all
+
+1097
+00:54:37,740 --> 00:54:39,299
+the preceding transformations and then
+
+1098
+00:54:39,299 --> 00:54:44,190
+some small narrow ones all right and you
+
+1099
+00:54:44,190 --> 00:54:45,960
+know the game is that a single workers
+
+1100
+00:54:45,960 --> 00:54:48,119
+fail and we need to reconstruct the
+
+1101
+00:54:48,119 --> 00:54:50,579
+Maeby's field before we've gone to the
+
+1102
+00:54:50,579 --> 00:54:55,200
+final action and produce the output so
+
+1103
+00:54:55,200 --> 00:54:57,450
+we need to kind of reconstruct recompute
+
+1104
+00:54:57,450 --> 00:55:02,220
+what was on this field work the the
+
+1105
+00:55:02,220 --> 00:55:05,009
+damaging thing here is that ordinarily
+
+1106
+00:55:05,009 --> 00:55:09,359
+as spark is executing along it you know
+
+1107
+00:55:09,359 --> 00:55:12,920
+it executes each of the transformations
+
+1108
+00:55:12,920 --> 00:55:14,700
+gives us output to the next
+
+1109
+00:55:14,700 --> 00:55:16,380
+transformation but doesn't hold on to
+
+1110
+00:55:16,380 --> 00:55:18,599
+the original output unless you unless
+
+1111
+00:55:18,599 --> 00:55:20,930
+you happen to tell it to like the links
+
+1112
+00:55:20,930 --> 00:55:24,509
+data is persisted with that cache call
+
+1113
+00:55:24,509 --> 00:55:27,509
+but in general that data is not held on
+
+1114
+00:55:27,509 --> 00:55:31,069
+to because now if you have a like the
+
+1115
+00:55:31,069 --> 00:55:34,349
+PageRank lineage graph maybe dozens or
+
+1116
+00:55:34,349 --> 00:55:35,940
+hundreds of steps long you don't want to
+
+1117
+00:55:35,940 --> 00:55:37,739
+hold on to all that data it's way way
+
+1118
+00:55:37,739 --> 00:55:40,710
+too much to fit in memory so as the
+
+1119
+00:55:40,710 --> 00:55:42,180
+SPARC sort of moves through these
+
+1120
+00:55:42,180 --> 00:55:45,559
+transformations it discards all the data
+
+1121
+00:55:45,559 --> 00:55:48,509
+associated with earlier transformations
+
+1122
+00:55:48,509 --> 00:55:50,279
+that means when we get here and if this
+
+1123
+00:55:50,279 --> 00:55:53,940
+worker fails we need to we need to
+
+1124
+00:55:53,940 --> 00:55:56,640
+restart its computation on a different
+
+1125
+00:55:56,640 --> 00:55:58,799
+worker now so we can be the input and
+
+1126
+00:55:58,799 --> 00:56:01,670
+maybe do the original narrow
+
+1127
+00:56:01,670 --> 00:56:04,250
+transformations
+
+1128
+00:56:04,250 --> 00:56:05,690
+they just depend on the input which we
+
+1129
+00:56:05,690 --> 00:56:07,250
+have to reread but then if we get to
+
+1130
+00:56:07,250 --> 00:56:08,660
+this y transformation we have this
+
+1131
+00:56:08,660 --> 00:56:11,480
+problem that it requires input not just
+
+1132
+00:56:11,480 --> 00:56:13,970
+from the same partition on the same
+
+1133
+00:56:13,970 --> 00:56:15,680
+worker but also from every other
+
+1134
+00:56:15,680 --> 00:56:18,440
+partition and these workers so they're
+
+1135
+00:56:18,440 --> 00:56:20,839
+still alive have in this example have
+
+1136
+00:56:20,839 --> 00:56:23,450
+proceeded past this transformation and
+
+1137
+00:56:23,450 --> 00:56:28,450
+therefore discarded the output of this
+
+1138
+00:56:28,450 --> 00:56:31,310
+transformation since it may have been a
+
+1139
+00:56:31,310 --> 00:56:33,700
+while ago and therefore the input did
+
+1140
+00:56:33,700 --> 00:56:36,770
+our recomputation needs from all the
+
+1141
+00:56:36,770 --> 00:56:39,260
+other partitions doesn't exist anymore
+
+1142
+00:56:39,260 --> 00:56:41,839
+and so if we're not careful that means
+
+1143
+00:56:41,839 --> 00:56:44,690
+that in order to rebuild this the
+
+1144
+00:56:44,690 --> 00:56:46,819
+computation on this field worker we may
+
+1145
+00:56:46,819 --> 00:56:51,680
+in fact have to re execute this part of
+
+1146
+00:56:51,680 --> 00:56:55,040
+every other worker as well as well as
+
+1147
+00:56:55,040 --> 00:56:58,250
+the entire lineage graph on the failed
+
+1148
+00:56:58,250 --> 00:57:01,250
+worker and so this could be very
+
+1149
+00:57:01,250 --> 00:57:02,839
+damaging right if we're talking about oh
+
+1150
+00:57:02,839 --> 00:57:05,089
+I mean I've been running this giant
+
+1151
+00:57:05,089 --> 00:57:07,490
+spark job for a day and then one of a
+
+1152
+00:57:07,490 --> 00:57:10,369
+thousand machines fails that may mean we
+
+1153
+00:57:10,369 --> 00:57:12,440
+have to we know anything more clever
+
+1154
+00:57:12,440 --> 00:57:13,970
+than this that we have to go back to the
+
+1155
+00:57:13,970 --> 00:57:15,170
+very beginning on every one of the
+
+1156
+00:57:15,170 --> 00:57:18,680
+workers and recompute the whole thing
+
+1157
+00:57:18,680 --> 00:57:21,530
+from scratch no it's gonna be the same
+
+1158
+00:57:21,530 --> 00:57:22,730
+amount of work is going to take the same
+
+1159
+00:57:22,730 --> 00:57:27,109
+day to recompute a day's computation so
+
+1160
+00:57:27,109 --> 00:57:30,170
+this would be unacceptable we'd really
+
+1161
+00:57:30,170 --> 00:57:32,119
+like it so that if if one worker out of
+
+1162
+00:57:32,119 --> 00:57:33,680
+a thousand crashes that we have to do
+
+1163
+00:57:33,680 --> 00:57:36,800
+relatively little work to recover from
+
+1164
+00:57:36,800 --> 00:57:42,560
+that and because of that spark allows
+
+1165
+00:57:42,560 --> 00:57:46,130
+you to check point to make periodic
+
+1166
+00:57:46,130 --> 00:57:48,560
+check points of specific transformation
+
+1167
+00:57:48,560 --> 00:57:52,640
+so um so in this graph what we would do
+
+1168
+00:57:52,640 --> 00:57:57,260
+is in the scallop program we would call
+
+1169
+00:57:57,260 --> 00:57:59,599
+I think it's the persist call actually
+
+1170
+00:57:59,599 --> 00:58:00,920
+we call the persist call with a special
+
+1171
+00:58:00,920 --> 00:58:04,730
+argument that says look after you
+
+1172
+00:58:04,730 --> 00:58:06,520
+compute the output of this
+
+1173
+00:58:06,520 --> 00:58:09,770
+transformation please save the output to
+
+1174
+00:58:09,770 --> 00:58:11,770
+HDFS
+
+1175
+00:58:11,770 --> 00:58:14,750
+and so everything and then if something
+
+1176
+00:58:14,750 --> 00:58:18,560
+fails the spark will know that aha the
+
+1177
+00:58:18,560 --> 00:58:21,410
+output of the proceeding transformation
+
+1178
+00:58:21,410 --> 00:58:24,680
+was safe th th d fs and so we just have
+
+1179
+00:58:24,680 --> 00:58:28,510
+to read it from each DFS instead of
+
+1180
+00:58:28,510 --> 00:58:30,770
+recomputing it on all for all partitions
+
+1181
+00:58:30,770 --> 00:58:34,280
+back to the beginning of time um and
+
+1182
+00:58:34,280 --> 00:58:36,260
+because HDFS is a separate storage
+
+1183
+00:58:36,260 --> 00:58:38,570
+system which is itself replicated in
+
+1184
+00:58:38,570 --> 00:58:40,250
+fault-tolerant the fact that one worker
+
+1185
+00:58:40,250 --> 00:58:43,190
+fails you know the HDFS is still going
+
+1186
+00:58:43,190 --> 00:58:47,950
+to be available even if a worker fails
+
+1187
+00:58:49,690 --> 00:58:55,390
+so I think so for our example PageRank I
+
+1188
+00:58:55,390 --> 00:58:59,480
+think what would be traditional would be
+
+1189
+00:58:59,480 --> 00:59:02,350
+to tell
+
+1190
+00:59:02,350 --> 00:59:06,410
+spark to check point the output to check
+
+1191
+00:59:06,410 --> 00:59:08,720
+put ranks and you wouldn't even know you
+
+1192
+00:59:08,720 --> 00:59:10,340
+can tell it to only check point
+
+1193
+00:59:10,340 --> 00:59:12,500
+periodically so you know if you're gonna
+
+1194
+00:59:12,500 --> 00:59:16,010
+run this thing for 100 iterations it
+
+1195
+00:59:16,010 --> 00:59:18,410
+actually takes a fair amount of time to
+
+1196
+00:59:18,410 --> 00:59:24,020
+save the entire ranks to HDFS because
+
+1197
+00:59:24,020 --> 00:59:25,610
+again we're talking about terabytes of
+
+1198
+00:59:25,610 --> 00:59:28,250
+data in total so maybe we would we can
+
+1199
+00:59:28,250 --> 00:59:31,730
+tell SPARC look only check point ranks
+
+1200
+00:59:31,730 --> 00:59:38,150
+to HDFS every every 10th iteration or
+
+1201
+00:59:38,150 --> 00:59:40,640
+something to limit the expanse although
+
+1202
+00:59:40,640 --> 00:59:42,530
+you know it's a trade-off between the
+
+1203
+00:59:42,530 --> 00:59:44,870
+expensive repeatedly saving stuff to
+
+1204
+00:59:44,870 --> 00:59:48,290
+disk and how much of a cost if a worker
+
+1205
+00:59:48,290 --> 00:59:51,700
+failed you had to go back and redo it
+
+1206
+00:59:55,630 --> 00:59:59,910
+Bertha's a question when we call
+
+1207
+00:59:59,910 --> 01:00:02,220
+that does act as a checkpoint you know
+
+1208
+01:00:02,220 --> 01:00:03,810
+okay so this is a very good question
+
+1209
+01:00:03,810 --> 01:00:05,490
+which I don't know the answer to the
+
+1210
+01:00:05,490 --> 01:00:08,100
+observation is that we could call cash
+
+1211
+01:00:08,100 --> 01:00:10,890
+here and we do call cashier and we could
+
+1212
+01:00:10,890 --> 01:00:14,010
+call cashier and the usual use of cash
+
+1213
+01:00:14,010 --> 01:00:18,960
+is just to save data in memory with the
+
+1214
+01:00:18,960 --> 01:00:21,540
+intent to reuse it that's certainly why
+
+1215
+01:00:21,540 --> 01:00:22,740
+it's being called here because we're
+
+1216
+01:00:22,740 --> 01:00:26,490
+using links for but in my example it
+
+1217
+01:00:26,490 --> 01:00:30,690
+would also have the effect of making the
+
+1218
+01:00:30,690 --> 01:00:32,400
+output of this stage available in memory
+
+1219
+01:00:32,400 --> 01:00:34,980
+although not on not an HDFS but in the
+
+1220
+01:00:34,980 --> 01:00:39,030
+memory of these workers and the paper
+
+1221
+01:00:39,030 --> 01:00:45,360
+never talks about this possibility and
+
+1222
+01:00:45,360 --> 01:00:46,920
+I'm not really sure what's going on
+
+1223
+01:00:46,920 --> 01:00:49,890
+maybe that would work or maybe the fact
+
+1224
+01:00:49,890 --> 01:00:52,980
+that the cash requests are merely
+
+1225
+01:00:52,980 --> 01:00:56,460
+advisory and maybe evicted if the
+
+1226
+01:00:56,460 --> 01:00:59,480
+workers run out of space means that
+
+1227
+01:00:59,480 --> 01:01:01,740
+calling cash doesn't give you it isn't
+
+1228
+01:01:01,740 --> 01:01:04,860
+like a reliable directed to make sure
+
+1229
+01:01:04,860 --> 01:01:06,660
+the data really is available it's just
+
+1230
+01:01:06,660 --> 01:01:08,940
+well it'll probably be available on most
+
+1231
+01:01:08,940 --> 01:01:10,440
+nodes but not all nodes because remember
+
+1232
+01:01:10,440 --> 01:01:16,680
+even a single node loses its data and
+
+1233
+01:01:16,680 --> 01:01:17,760
+we're gonna have to do a bunch of
+
+1234
+01:01:17,760 --> 01:01:22,280
+recomputation so III I'm guessing that
+
+1235
+01:01:22,280 --> 01:01:25,920
+persists with replication is a firm
+
+1236
+01:01:25,920 --> 01:01:28,230
+directive to guarantee that the data
+
+1237
+01:01:28,230 --> 01:01:29,850
+will be available even if there's a
+
+1238
+01:01:29,850 --> 01:01:30,210
+failure
+
+1239
+01:01:30,210 --> 01:01:34,340
+I don't really know it's a good question
+
+1240
+01:01:40,110 --> 01:01:46,650
+alright okay so that's the programming
+
+1241
+01:01:46,650 --> 01:01:48,630
+model and the execution model and the
+
+1242
+01:01:48,630 --> 01:01:52,430
+failure strategy and by the way just a
+
+1243
+01:01:52,430 --> 01:01:54,600
+beat on the failure strategy a little
+
+1244
+01:01:54,600 --> 01:01:56,820
+bit more the way these systems do
+
+1245
+01:01:56,820 --> 01:02:00,450
+failure recovery is it's not a minor
+
+1246
+01:02:00,450 --> 01:02:04,440
+thing as as people build bigger and
+
+1247
+01:02:04,440 --> 01:02:06,420
+bigger clusters with thousands and
+
+1248
+01:02:06,420 --> 01:02:08,430
+thousands of machines you know the
+
+1249
+01:02:08,430 --> 01:02:10,020
+probability that job will be interrupted
+
+1250
+01:02:10,020 --> 01:02:13,200
+by at least one worker failure it really
+
+1251
+01:02:13,200 --> 01:02:16,700
+does start to approach one and so the
+
+1252
+01:02:16,700 --> 01:02:20,040
+the designs recent designs intended to
+
+1253
+01:02:20,040 --> 01:02:22,740
+run on big clusters have really been to
+
+1254
+01:02:22,740 --> 01:02:25,920
+a great extent dominated by the failure
+
+1255
+01:02:25,920 --> 01:02:28,170
+recovery strategy and that's for example
+
+1256
+01:02:28,170 --> 01:02:31,680
+a lot of the explanation for why SPARC
+
+1257
+01:02:31,680 --> 01:02:35,240
+insists that the transformations be
+
+1258
+01:02:35,240 --> 01:02:39,780
+deterministic and why the are these its
+
+1259
+01:02:39,780 --> 01:02:44,340
+rdd's are immutable because you know
+
+1260
+01:02:44,340 --> 01:02:47,820
+that's what allows it to recover from
+
+1261
+01:02:47,820 --> 01:02:49,800
+failure by simply recomputing one
+
+1262
+01:02:49,800 --> 01:02:51,570
+partition instead of having to start the
+
+1263
+01:02:51,570 --> 01:02:53,750
+entire computation from scratch and
+
+1264
+01:02:53,750 --> 01:02:56,460
+there have been in the past plenty of
+
+1265
+01:02:56,460 --> 01:02:59,850
+proposed sort of cluster big data
+
+1266
+01:02:59,850 --> 01:03:02,490
+execution models in which there really
+
+1267
+01:03:02,490 --> 01:03:03,930
+was mutable data and in which
+
+1268
+01:03:03,930 --> 01:03:06,330
+computations could be non-deterministic
+
+1269
+01:03:06,330 --> 01:03:08,130
+make if you look up distributed shared
+
+1270
+01:03:08,130 --> 01:03:10,860
+memory systems those all support mutable
+
+1271
+01:03:10,860 --> 01:03:14,340
+data and they support non-deterministic
+
+1272
+01:03:14,340 --> 01:03:18,090
+execution but because of that they tend
+
+1273
+01:03:18,090 --> 01:03:20,480
+not to have a good failure strategy so
+
+1274
+01:03:20,480 --> 01:03:22,860
+you know thirty years ago when a big
+
+1275
+01:03:22,860 --> 01:03:25,410
+cluster was for computers none of this
+
+1276
+01:03:25,410 --> 01:03:26,970
+mattered because the failure probability
+
+1277
+01:03:26,970 --> 01:03:29,250
+was little very low and so many
+
+1278
+01:03:29,250 --> 01:03:32,990
+different kinds of computation models
+
+1279
+01:03:32,990 --> 01:03:36,240
+seemed reasonable then but as the
+
+1280
+01:03:36,240 --> 01:03:37,710
+clusters have grown to be hundreds and
+
+1281
+01:03:37,710 --> 01:03:41,600
+thousands of workers really the only
+
+1282
+01:03:41,600 --> 01:03:44,130
+models that have survived are ones for
+
+1283
+01:03:44,130 --> 01:03:47,400
+which you can devise a very efficient to
+
+1284
+01:03:47,400 --> 01:03:49,350
+failure recovery strategy that does not
+
+1285
+01:03:49,350 --> 01:03:52,890
+require backing all the way up to the
+
+1286
+01:03:52,890 --> 01:03:53,730
+beginning
+
+1287
+01:03:53,730 --> 01:03:56,160
+and restarting the paper talks about
+
+1288
+01:03:56,160 --> 01:03:57,750
+this a little bit when it's criticizing
+
+1289
+01:03:57,750 --> 01:04:01,140
+I'm distributed shared memory and it's a
+
+1290
+01:04:01,140 --> 01:04:05,900
+very valid criticism I bet it's a big
+
+1291
+01:04:05,900 --> 01:04:14,030
+design constraint okay so the sparks not
+
+1292
+01:04:14,030 --> 01:04:17,220
+perfect for all kinds of processing it's
+
+1293
+01:04:17,220 --> 01:04:19,640
+really geared up for batch processing of
+
+1294
+01:04:19,640 --> 01:04:23,880
+giant amounts of data bulk bulk data
+
+1295
+01:04:23,880 --> 01:04:25,440
+processing so if you have terabytes of
+
+1296
+01:04:25,440 --> 01:04:27,660
+data and you want to you know chew away
+
+1297
+01:04:27,660 --> 01:04:31,500
+on it for for a couple hours smart great
+
+1298
+01:04:31,500 --> 01:04:34,290
+if you're running a bank and you need to
+
+1299
+01:04:34,290 --> 01:04:37,530
+process bank transfers or people's
+
+1300
+01:04:37,530 --> 01:04:40,050
+balance queries then SPARC is just not
+
+1301
+01:04:40,050 --> 01:04:43,650
+relevant to that kind of processing
+
+1302
+01:04:43,650 --> 01:04:45,600
+known or to sort of typical websites
+
+1303
+01:04:45,600 --> 01:04:48,119
+where I log into you know I access
+
+1304
+01:04:48,119 --> 01:04:52,260
+Amazon and I want to order some paper
+
+1305
+01:04:52,260 --> 01:04:53,880
+towels and put them into my shopping
+
+1306
+01:04:53,880 --> 01:04:55,670
+cart SPARC is not going to help you
+
+1307
+01:04:55,670 --> 01:04:58,680
+maintain this part the shopping cart
+
+1308
+01:04:58,680 --> 01:05:00,480
+SPARC may be useful for analyzing your
+
+1309
+01:05:00,480 --> 01:05:03,800
+customers buying habits sort of offline
+
+1310
+01:05:03,800 --> 01:05:07,400
+but not for sort of online processing
+
+1311
+01:05:07,400 --> 01:05:11,369
+the other sort of kind of a little more
+
+1312
+01:05:11,369 --> 01:05:14,250
+close to home situation that spark in
+
+1313
+01:05:14,250 --> 01:05:15,900
+the papers not so great at is stream
+
+1314
+01:05:15,900 --> 01:05:18,359
+processing i SPARC definitely assumes
+
+1315
+01:05:18,359 --> 01:05:19,790
+that all the input is already available
+
+1316
+01:05:19,790 --> 01:05:22,590
+but in many situations the input that
+
+1317
+01:05:22,590 --> 01:05:26,010
+people have is really a stream of input
+
+1318
+01:05:26,010 --> 01:05:28,680
+like they're logging all user clicks on
+
+1319
+01:05:28,680 --> 01:05:30,180
+their web sites and they want to analyze
+
+1320
+01:05:30,180 --> 01:05:32,369
+them to understand user behavior you
+
+1321
+01:05:32,369 --> 01:05:35,100
+know it's not a kind of fixed amount of
+
+1322
+01:05:35,100 --> 01:05:36,740
+data is really a stream of input data
+
+1323
+01:05:36,740 --> 01:05:40,470
+and you know SPARC as in describing the
+
+1324
+01:05:40,470 --> 01:05:42,510
+paper doesn't really have anything to
+
+1325
+01:05:42,510 --> 01:05:46,109
+say about processing streams of data but
+
+1326
+01:05:46,109 --> 01:05:47,520
+it turned out to be quite close to home
+
+1327
+01:05:47,520 --> 01:05:51,480
+for people who like to use spark and and
+
+1328
+01:05:51,480 --> 01:05:52,890
+now there's a variant of SPARC called
+
+1329
+01:05:52,890 --> 01:05:54,810
+spark streaming that that is a little
+
+1330
+01:05:54,810 --> 01:05:57,420
+more geared up to kind of processing
+
+1331
+01:05:57,420 --> 01:05:59,550
+data as it arrives and you know sort of
+
+1332
+01:05:59,550 --> 01:06:01,500
+breaks it up into smaller batches and
+
+1333
+01:06:01,500 --> 01:06:05,390
+runs in a batch at a time to spark
+
+1334
+01:06:05,390 --> 01:06:07,680
+so it's good for a lot of bad stuff but
+
+1335
+01:06:07,680 --> 01:06:10,920
+that's certainly on to be thing right to
+
+1336
+01:06:10,920 --> 01:06:13,620
+wrap up the UH you should view spark as
+
+1337
+01:06:13,620 --> 01:06:16,920
+a kind of evolution after MapReduce and
+
+1338
+01:06:16,920 --> 01:06:19,940
+I may fix some expressivity and
+
+1339
+01:06:19,940 --> 01:06:25,080
+performance sort of problems or that
+
+1340
+01:06:25,080 --> 01:06:28,800
+MapReduce has what a lot of what SPARC
+
+1341
+01:06:28,800 --> 01:06:31,080
+is doing is making the data flow graph
+
+1342
+01:06:31,080 --> 01:06:34,410
+explicit sort of he wants you to think
+
+1343
+01:06:34,410 --> 01:06:36,360
+of computations in the style of figure
+
+1344
+01:06:36,360 --> 01:06:39,000
+three of entire lineage graphs stages of
+
+1345
+01:06:39,000 --> 01:06:41,610
+computation and the data moving between
+
+1346
+01:06:41,610 --> 01:06:44,460
+these stages and it does optimizations
+
+1347
+01:06:44,460 --> 01:06:47,310
+on this graph and failure recovery is
+
+1348
+01:06:47,310 --> 01:06:49,140
+very much thinking about the lineage
+
+1349
+01:06:49,140 --> 01:06:52,440
+graph as well so it's really part of a
+
+1350
+01:06:52,440 --> 01:06:54,120
+larger move and big data processing
+
+1351
+01:06:54,120 --> 01:06:57,600
+towards explicit thinking about the data
+
+1352
+01:06:57,600 --> 01:07:00,480
+flow graphs as a way to describe
+
+1353
+01:07:00,480 --> 01:07:04,500
+computations a lot of the specific win
+
+1354
+01:07:04,500 --> 01:07:06,980
+and SPARC have to do with performance
+
+1355
+01:07:06,980 --> 01:07:09,630
+part of the prepend these are
+
+1356
+01:07:09,630 --> 01:07:11,040
+straightforward but nevertheless
+
+1357
+01:07:11,040 --> 01:07:13,980
+important some of the performance comes
+
+1358
+01:07:13,980 --> 01:07:15,780
+from leaving the data in memory between
+
+1359
+01:07:15,780 --> 01:07:18,750
+transformations rather than you know
+
+1360
+01:07:18,750 --> 01:07:20,460
+writing them to GFS and then reading
+
+1361
+01:07:20,460 --> 01:07:21,600
+them back at the beginning of the next
+
+1362
+01:07:21,600 --> 01:07:23,490
+transformation which you essentially
+
+1363
+01:07:23,490 --> 01:07:25,950
+have to do with MapReduce and the other
+
+1364
+01:07:25,950 --> 01:07:28,530
+is the ability to define these data sets
+
+1365
+01:07:28,530 --> 01:07:32,760
+these are Dedes and tell SPARC to leave
+
+1366
+01:07:32,760 --> 01:07:34,920
+this RDD in memory because I'm going to
+
+1367
+01:07:34,920 --> 01:07:37,920
+reuse it again and subsequent stages and
+
+1368
+01:07:37,920 --> 01:07:39,750
+it's cheaper to reuse it than it is to
+
+1369
+01:07:39,750 --> 01:07:41,760
+recompute it and that sort of a thing
+
+1370
+01:07:41,760 --> 01:07:45,600
+that's easy and SPARC and hard to get at
+
+1371
+01:07:45,600 --> 01:07:48,720
+in MapReduce and the result is a system
+
+1372
+01:07:48,720 --> 01:07:51,120
+that's extremely successful and
+
+1373
+01:07:51,120 --> 01:07:55,560
+extremely widely used and if you deserve
+
+1374
+01:07:55,560 --> 01:07:59,820
+real success okay that that's all I have
+
+1375
+01:07:59,820 --> 01:08:01,980
+to say and I'm happy to take questions
+
+1376
+01:08:01,980 --> 01:08:04,820
+if anyone has them
+
+1377
+01:08:09,910 --> 01:08:11,970
+you
+

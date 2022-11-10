@@ -1,0 +1,6852 @@
+1
+00:00:00,060 --> 00:00:02,370
+I'd like to like to talk about farms day
+
+2
+00:00:02,370 --> 00:00:06,150
+and optimistic concurrency control which
+
+3
+00:00:06,150 --> 00:00:07,710
+is the main interesting technique that
+
+4
+00:00:07,710 --> 00:00:10,860
+uses the reason we're talking about farm
+
+5
+00:00:10,860 --> 00:00:14,460
+it's this the last paper in the series
+
+6
+00:00:14,460 --> 00:00:16,350
+about transactions and replication and
+
+7
+00:00:16,350 --> 00:00:19,410
+sharding and this is still an open
+
+8
+00:00:19,410 --> 00:00:21,720
+research area where people are totally
+
+9
+00:00:21,720 --> 00:00:25,800
+not satisfied with performance or in the
+
+10
+00:00:25,800 --> 00:00:30,359
+kind of performance versus consistency
+
+11
+00:00:30,359 --> 00:00:31,470
+trade-offs that are available and
+
+12
+00:00:31,470 --> 00:00:32,668
+they're still trying to do better
+
+13
+00:00:32,668 --> 00:00:34,800
+and in particular this particular paper
+
+14
+00:00:34,800 --> 00:00:36,780
+is motivated by the huge performance
+
+15
+00:00:36,780 --> 00:00:41,570
+potential of these new RDMA NICs
+
+16
+00:00:41,570 --> 00:00:43,800
+so you may be wondering since we just
+
+17
+00:00:43,800 --> 00:00:44,760
+read about spanner
+
+18
+00:00:44,760 --> 00:00:48,000
+how farm differs some spanner both of
+
+19
+00:00:48,000 --> 00:00:49,379
+them after all replicate and they use
+
+20
+00:00:49,379 --> 00:00:51,660
+two-phase commit for transactions of
+
+21
+00:00:51,660 --> 00:00:54,020
+that level they seem pretty similar
+
+22
+00:00:54,020 --> 00:00:56,850
+spanner as a is a deployed systems been
+
+23
+00:00:56,850 --> 00:01:00,059
+used a lot for a long time its main
+
+24
+00:01:00,059 --> 00:01:02,640
+focus is on Geographic replication that
+
+25
+00:01:02,640 --> 00:01:04,559
+is to be able to have copies on there
+
+26
+00:01:04,559 --> 00:01:06,930
+like east and west coasts and different
+
+27
+00:01:06,930 --> 00:01:09,000
+data centers and be able to have
+
+28
+00:01:09,000 --> 00:01:11,189
+reasonably efficient transactions that
+
+29
+00:01:11,189 --> 00:01:13,799
+involve pieces of data in lots of
+
+30
+00:01:13,799 --> 00:01:16,590
+different places and the most innovative
+
+31
+00:01:16,590 --> 00:01:18,810
+thing about it because in order to try
+
+32
+00:01:18,810 --> 00:01:20,640
+to solve the problem of how long it
+
+33
+00:01:20,640 --> 00:01:22,950
+takes to do two-phase commit over long
+
+34
+00:01:22,950 --> 00:01:26,119
+distances is that it has a special
+
+35
+00:01:26,119 --> 00:01:27,780
+optimization path for read-only
+
+36
+00:01:27,780 --> 00:01:32,189
+transactions using synchronized time and
+
+37
+00:01:32,189 --> 00:01:34,520
+the performance you get out of spanner
+
+38
+00:01:34,520 --> 00:01:36,680
+if you remember is that a read/write
+
+39
+00:01:36,680 --> 00:01:40,380
+transaction takes 10 to 100 milliseconds
+
+40
+00:01:40,380 --> 00:01:42,509
+depending on how close together the
+
+41
+00:01:42,509 --> 00:01:46,170
+different data centers are farm makes a
+
+42
+00:01:46,170 --> 00:01:49,079
+very different set of design decisions
+
+43
+00:01:49,079 --> 00:01:50,790
+and targets a different kind of workload
+
+44
+00:01:50,790 --> 00:01:52,710
+first of all it's a research prototype
+
+45
+00:01:52,710 --> 00:01:54,540
+so it's not by any means a finished
+
+46
+00:01:54,540 --> 00:01:57,390
+product and the goal is to explore the
+
+47
+00:01:57,390 --> 00:02:00,509
+potential of these new RDMA high speed
+
+48
+00:02:00,509 --> 00:02:04,259
+networking hardware so it's really still
+
+49
+00:02:04,259 --> 00:02:08,128
+an exploratory system it assumes that
+
+50
+00:02:08,128 --> 00:02:09,619
+all replicas are in the same data center
+
+51
+00:02:09,619 --> 00:02:11,340
+absolutely it doesn't wouldn't make
+
+52
+00:02:11,340 --> 00:02:11,880
+sense
+
+53
+00:02:11,880 --> 00:02:13,830
+the replicas were in even in different
+
+54
+00:02:13,830 --> 00:02:15,600
+data centers let alone on East Coast
+
+55
+00:02:15,600 --> 00:02:18,360
+versus West Coast so it's not trying to
+
+56
+00:02:18,360 --> 00:02:20,640
+solve a problem that spanner is about
+
+57
+00:02:20,640 --> 00:02:22,020
+what happens if an entire data center
+
+58
+00:02:22,020 --> 00:02:23,790
+goes down can I so get out my data
+
+59
+00:02:23,790 --> 00:02:25,920
+really that's does the extent that it
+
+60
+00:02:25,920 --> 00:02:27,540
+has fault tolerance is for individual
+
+61
+00:02:27,540 --> 00:02:30,900
+crashes or maybe try to recover after a
+
+62
+00:02:30,900 --> 00:02:33,720
+whole data center loses power and gets
+
+63
+00:02:33,720 --> 00:02:37,560
+restored again it uses this RDMA
+
+64
+00:02:37,560 --> 00:02:39,210
+technique which I'll talk about but
+
+65
+00:02:39,210 --> 00:02:41,040
+already may turns out to seriously
+
+66
+00:02:41,040 --> 00:02:43,650
+restrict the design options and because
+
+67
+00:02:43,650 --> 00:02:46,740
+of this farm is forced to use optimistic
+
+68
+00:02:46,740 --> 00:02:49,980
+concurrency control on the other hand
+
+69
+00:02:49,980 --> 00:02:52,590
+the performance they get is far far
+
+70
+00:02:52,590 --> 00:02:56,300
+higher than spanner farm can do a
+
+71
+00:02:56,300 --> 00:02:58,770
+transit a simple transaction in 58
+
+72
+00:02:58,770 --> 00:03:00,900
+microseconds and this is from figure 7
+
+73
+00:03:00,900 --> 00:03:03,750
+and section 6.3 so this is 58
+
+74
+00:03:03,750 --> 00:03:06,780
+microseconds versus to 10 milliseconds
+
+75
+00:03:06,780 --> 00:03:10,170
+that the spanner takes is that's about a
+
+76
+00:03:10,170 --> 00:03:12,960
+hundred times faster than spanner so
+
+77
+00:03:12,960 --> 00:03:15,900
+that's maybe the main huge differences
+
+78
+00:03:15,900 --> 00:03:17,730
+that farm us how much higher performance
+
+79
+00:03:17,730 --> 00:03:21,390
+but is not aimed at Geographic
+
+80
+00:03:21,390 --> 00:03:26,640
+replication so this you know farms
+
+81
+00:03:26,640 --> 00:03:28,830
+performance is extremely impressive like
+
+82
+00:03:28,830 --> 00:03:31,790
+how much faster than anything else
+
+83
+00:03:31,790 --> 00:03:33,720
+another way to look at it is that
+
+84
+00:03:33,720 --> 00:03:35,370
+spanner and farm target different
+
+85
+00:03:35,370 --> 00:03:37,470
+bottlenecks and span are the main
+
+86
+00:03:37,470 --> 00:03:39,150
+bottleneck the people worried about is
+
+87
+00:03:39,150 --> 00:03:41,430
+the speed of light and network speed of
+
+88
+00:03:41,430 --> 00:03:42,900
+light delays and network leaves between
+
+89
+00:03:42,900 --> 00:03:46,560
+data centers whereas in farm the main
+
+90
+00:03:46,560 --> 00:03:50,130
+bottlenecks that the design is worried
+
+91
+00:03:50,130 --> 00:03:52,560
+about is is CPU time on the server's
+
+92
+00:03:52,560 --> 00:03:54,209
+because they kind of wished away the
+
+93
+00:03:54,209 --> 00:03:55,620
+speed of light and network delays by
+
+94
+00:03:55,620 --> 00:03:57,180
+putting all the replicas in the same
+
+95
+00:03:57,180 --> 00:04:01,070
+data center all right
+
+96
+00:04:01,220 --> 00:04:03,540
+so sort of the background of how this
+
+97
+00:04:03,540 --> 00:04:08,459
+fits into the 684 sequence the setup and
+
+98
+00:04:08,459 --> 00:04:10,080
+farm is that you have it's all running
+
+99
+00:04:10,080 --> 00:04:15,860
+in one datacenter there's a sort of
+
+100
+00:04:16,040 --> 00:04:18,779
+configuration manager this which we've
+
+101
+00:04:18,779 --> 00:04:21,120
+seen before and the configuration
+
+102
+00:04:21,120 --> 00:04:24,210
+managers in charge of deciding which rep
+
+103
+00:04:24,210 --> 00:04:25,110
+which
+
+104
+00:04:25,110 --> 00:04:26,879
+servers should be the primary in the
+
+105
+00:04:26,879 --> 00:04:30,479
+backup before each shard of data and if
+
+106
+00:04:30,479 --> 00:04:31,560
+you read carefully you'll see that they
+
+107
+00:04:31,560 --> 00:04:37,110
+use zookeeper in order to help them
+
+108
+00:04:37,110 --> 00:04:38,520
+implement this configuration manager but
+
+109
+00:04:38,520 --> 00:04:40,139
+it's not not the focus of the paper at
+
+110
+00:04:40,139 --> 00:04:40,409
+all
+
+111
+00:04:40,409 --> 00:04:42,539
+instead the interesting thing is that
+
+112
+00:04:42,539 --> 00:04:44,669
+the data is sharded split up by key
+
+113
+00:04:44,669 --> 00:04:47,490
+across a bunch of primary backup payers
+
+114
+00:04:47,490 --> 00:04:50,129
+so I mean one shard goes on you know
+
+115
+00:04:50,129 --> 00:04:52,919
+primary one server primary one backup
+
+116
+00:04:52,919 --> 00:04:55,919
+one another short one primary to backup
+
+117
+00:04:55,919 --> 00:04:59,879
+two and so forth and that means that
+
+118
+00:04:59,879 --> 00:05:01,740
+anytime you update data you need to
+
+119
+00:05:01,740 --> 00:05:03,870
+update it both on the primary and on the
+
+120
+00:05:03,870 --> 00:05:06,659
+backup and these are not these primaries
+
+121
+00:05:06,659 --> 00:05:08,250
+these replicas are not maintained by
+
+122
+00:05:08,250 --> 00:05:11,759
+PACs or anything like it instead all the
+
+123
+00:05:11,759 --> 00:05:14,969
+replicas of the data are updated
+
+124
+00:05:14,969 --> 00:05:16,830
+whenever there's a change and if you
+
+125
+00:05:16,830 --> 00:05:18,180
+read you always have to read from the
+
+126
+00:05:18,180 --> 00:05:21,120
+primary the reason for this replication
+
+127
+00:05:21,120 --> 00:05:24,210
+of course is fault tolerance and the
+
+128
+00:05:24,210 --> 00:05:26,159
+kind of fault tolerance they get is that
+
+129
+00:05:26,159 --> 00:05:29,039
+as long as one replicas of a given shard
+
+130
+00:05:29,039 --> 00:05:31,529
+is available then that shard will be
+
+131
+00:05:31,529 --> 00:05:33,409
+available so they only require one
+
+132
+00:05:33,409 --> 00:05:37,620
+living replica not a majority and the
+
+133
+00:05:37,620 --> 00:05:39,900
+system as a whole if there's say a data
+
+134
+00:05:39,900 --> 00:05:42,089
+center white power failure it can
+
+135
+00:05:42,089 --> 00:05:43,889
+recover as long as there's at least one
+
+136
+00:05:43,889 --> 00:05:47,089
+replicas of every shard in the system
+
+137
+00:05:47,089 --> 00:05:49,560
+another way of putting that is if you
+
+138
+00:05:49,560 --> 00:05:52,199
+they have F plus one replicas then they
+
+139
+00:05:52,199 --> 00:05:54,330
+can tolerate up to F failures for that
+
+140
+00:05:54,330 --> 00:05:58,229
+shard in addition to the primary backup
+
+141
+00:05:58,229 --> 00:06:00,860
+copies of each sort of data there's
+
+142
+00:06:00,860 --> 00:06:04,770
+transaction code that runs it's maybe
+
+143
+00:06:04,770 --> 00:06:06,479
+most convenient to think of the
+
+144
+00:06:06,479 --> 00:06:07,949
+transaction code is running as separate
+
+145
+00:06:07,949 --> 00:06:11,789
+clients in fact they run the transaction
+
+146
+00:06:11,789 --> 00:06:13,379
+code in their experiments on the same
+
+147
+00:06:13,379 --> 00:06:16,560
+machines as the actual farm storage
+
+148
+00:06:16,560 --> 00:06:21,180
+servers but I'll mostly think of them as
+
+149
+00:06:21,180 --> 00:06:24,270
+as being a separate set of clients and
+
+150
+00:06:24,270 --> 00:06:27,120
+the clients are running transactions and
+
+151
+00:06:27,120 --> 00:06:29,960
+the transactions need to read and write
+
+152
+00:06:29,960 --> 00:06:34,120
+data objects that are stored in the
+
+153
+00:06:34,120 --> 00:06:38,020
+in the sharded servers in addition these
+
+154
+00:06:38,020 --> 00:06:40,150
+transaction these clients each client
+
+155
+00:06:40,150 --> 00:06:42,849
+not only runs the transactions but also
+
+156
+00:06:42,849 --> 00:06:45,879
+acts as that transaction coordinator for
+
+157
+00:06:45,879 --> 00:06:48,330
+two-phase commit
+
+158
+00:06:48,330 --> 00:06:52,059
+okay so it's the basic set up the way
+
+159
+00:06:52,059 --> 00:06:53,589
+they get performance because this really
+
+160
+00:06:53,589 --> 00:06:55,419
+this is a paper all about how you can
+
+161
+00:06:55,419 --> 00:06:57,669
+get high performance and still have
+
+162
+00:06:57,669 --> 00:06:59,919
+transactions one way they get high
+
+163
+00:06:59,919 --> 00:07:04,150
+performances with sharding these are the
+
+164
+00:07:04,150 --> 00:07:09,189
+ingredients in a sense the main way is
+
+165
+00:07:09,189 --> 00:07:12,219
+through sharding in experiments they
+
+166
+00:07:12,219 --> 00:07:14,379
+shard their data over 90 ways for 90
+
+167
+00:07:14,379 --> 00:07:17,050
+servers or maybe it's 45 ways and not
+
+168
+00:07:17,050 --> 00:07:19,659
+just if as long as the operations and
+
+169
+00:07:19,659 --> 00:07:21,279
+different shards are more or less
+
+170
+00:07:21,279 --> 00:07:23,439
+independent of each other that just gets
+
+171
+00:07:23,439 --> 00:07:25,899
+you an automatic 90 times speed up
+
+172
+00:07:25,899 --> 00:07:27,520
+because you can run whatever it is
+
+173
+00:07:27,520 --> 00:07:30,699
+you're running in parallel on 90 syrups
+
+174
+00:07:30,699 --> 00:07:34,199
+this huge went from shorter sharding um
+
+175
+00:07:34,199 --> 00:07:36,520
+another trick they play in order to get
+
+176
+00:07:36,520 --> 00:07:38,169
+good performance as the data all has to
+
+177
+00:07:38,169 --> 00:07:41,919
+fit in the RAM of the servers they don't
+
+178
+00:07:41,919 --> 00:07:44,349
+really store the data on disk
+
+179
+00:07:44,349 --> 00:07:46,089
+it all has to fit in RAM and that means
+
+180
+00:07:46,089 --> 00:07:46,930
+of course you can get out of pretty
+
+181
+00:07:46,930 --> 00:07:50,620
+quickly another way that they get high
+
+182
+00:07:50,620 --> 00:07:53,289
+performance is they need to tolerate
+
+183
+00:07:53,289 --> 00:07:56,199
+power failures which means that they
+
+184
+00:07:56,199 --> 00:07:57,789
+can't just be using RAM because they
+
+185
+00:07:57,789 --> 00:07:59,499
+need to recover the data after a power
+
+186
+00:07:59,499 --> 00:08:02,110
+failure and RAM loses contents on a
+
+187
+00:08:02,110 --> 00:08:04,589
+power failure so they have a clever
+
+188
+00:08:04,589 --> 00:08:09,189
+non-volatile Ram scheme for having the
+
+189
+00:08:09,189 --> 00:08:11,020
+contents of RAM the data survived power
+
+190
+00:08:11,020 --> 00:08:14,020
+failures this is in contrast to storing
+
+191
+00:08:14,020 --> 00:08:16,360
+the data persistently on disk i'm is
+
+192
+00:08:16,360 --> 00:08:20,080
+much faster than disk um another trick
+
+193
+00:08:20,080 --> 00:08:22,180
+they play is they use this RDMA
+
+194
+00:08:22,180 --> 00:08:25,300
+technique which essentially clever
+
+195
+00:08:25,300 --> 00:08:31,289
+network interface cards that allow that
+
+196
+00:08:31,289 --> 00:08:34,479
+accept packets that instruct that then
+
+197
+00:08:34,479 --> 00:08:35,919
+that we're interface card to directly
+
+198
+00:08:35,919 --> 00:08:37,269
+read and write the memory of the server
+
+199
+00:08:37,269 --> 00:08:42,698
+without interrupting the server I know
+
+200
+00:08:42,698 --> 00:08:45,310
+that trick they play is what you often
+
+201
+00:08:45,310 --> 00:08:48,569
+call kernel bypass
+
+202
+00:08:48,680 --> 00:08:54,260
+which means that the application level
+
+203
+00:08:54,260 --> 00:08:58,790
+code can directly access the network
+
+204
+00:08:58,790 --> 00:09:00,170
+interface card without getting the
+
+205
+00:09:00,170 --> 00:09:02,540
+kernel involved okay so these are all
+
+206
+00:09:02,540 --> 00:09:05,480
+the sort of clever tricks we're looking
+
+207
+00:09:05,480 --> 00:09:07,520
+at out pour it that they used to get
+
+208
+00:09:07,520 --> 00:09:09,860
+high performance and I'll talk about
+
+209
+00:09:09,860 --> 00:09:11,270
+we've already talked about sharding a
+
+210
+00:09:11,270 --> 00:09:13,730
+lot but I'll talk about the rest in this
+
+211
+00:09:13,730 --> 00:09:15,430
+lecture
+
+212
+00:09:15,430 --> 00:09:19,220
+okay so first I'll talk about
+
+213
+00:09:19,220 --> 00:09:21,560
+non-volatile Ram I mean this is really a
+
+214
+00:09:21,560 --> 00:09:27,200
+topic that doesn't doesn't really affect
+
+215
+00:09:27,200 --> 00:09:31,310
+the rest of the design directly as I
+
+216
+00:09:31,310 --> 00:09:34,400
+said all the data and for farm is stored
+
+217
+00:09:34,400 --> 00:09:37,190
+in RAM when you update it when a client
+
+218
+00:09:37,190 --> 00:09:38,600
+transaction updates a piece of data what
+
+219
+00:09:38,600 --> 00:09:39,800
+that really means is it reaches out to
+
+220
+00:09:39,800 --> 00:09:41,570
+the relevant servers that store the data
+
+221
+00:09:41,570 --> 00:09:43,760
+and causes those servers to modify the
+
+222
+00:09:43,760 --> 00:09:46,700
+whatever object is the transaction is
+
+223
+00:09:46,700 --> 00:09:49,370
+modifying to object modify it right in
+
+224
+00:09:49,370 --> 00:09:51,770
+RAM and that's as far as the writes get
+
+225
+00:09:51,770 --> 00:09:53,540
+they don't go to disk and this is you
+
+226
+00:09:53,540 --> 00:09:54,620
+know contrast to your raft
+
+227
+00:09:54,620 --> 00:09:56,959
+implementations for example which spent
+
+228
+00:09:56,959 --> 00:09:59,570
+a lot of time persisting data to disk
+
+229
+00:09:59,570 --> 00:10:04,310
+there's no persisting and in farm this
+
+230
+00:10:04,310 --> 00:10:06,589
+is a big wind writing stuff in RAM write
+
+231
+00:10:06,589 --> 00:10:07,880
+a write to ram takes about 200
+
+232
+00:10:07,880 --> 00:10:09,529
+nanoseconds whereas a raid even to a
+
+233
+00:10:09,529 --> 00:10:11,930
+solid state drive which is pretty fast a
+
+234
+00:10:11,930 --> 00:10:14,480
+right to a stall seek drive takes about
+
+235
+00:10:14,480 --> 00:10:17,330
+a hundred microseconds and a write to
+
+236
+00:10:17,330 --> 00:10:18,440
+our hard drive takes about ten
+
+237
+00:10:18,440 --> 00:10:21,080
+milliseconds so being able to write to
+
+238
+00:10:21,080 --> 00:10:24,320
+ram is worth many many orders of
+
+239
+00:10:24,320 --> 00:10:26,270
+magnitude and speed for transactions
+
+240
+00:10:26,270 --> 00:10:27,589
+that modify things but of course iran
+
+241
+00:10:27,589 --> 00:10:30,770
+loses its content and a power failure so
+
+242
+00:10:30,770 --> 00:10:34,180
+it's not persistent by itself as a side
+
+243
+00:10:34,180 --> 00:10:37,990
+you might think that writing
+
+244
+00:10:37,990 --> 00:10:41,060
+modifications to the RAM of multiple
+
+245
+00:10:41,060 --> 00:10:43,610
+servers that if you have replica servers
+
+246
+00:10:43,610 --> 00:10:45,260
+and you update all the replicas that
+
+247
+00:10:45,260 --> 00:10:48,080
+that might be persistent enough and so
+
+248
+00:10:48,080 --> 00:10:50,180
+after all if you have F 1 F +1 replicas
+
+249
+00:10:50,180 --> 00:10:53,150
+you can tolerate up to F failures and
+
+250
+00:10:53,150 --> 00:10:55,520
+the reason why just simply writing to
+
+251
+00:10:55,520 --> 00:10:57,350
+Ram on multiple servers is not good
+
+252
+00:10:57,350 --> 00:10:59,990
+enough is that a site-wide power failure
+
+253
+00:10:59,990 --> 00:11:00,870
+will destroy
+
+254
+00:11:00,870 --> 00:11:06,150
+all of your servers and thus violating
+
+255
+00:11:06,150 --> 00:11:09,029
+the assumption that the failures are in
+
+256
+00:11:09,029 --> 00:11:11,220
+different servers are independent so we
+
+257
+00:11:11,220 --> 00:11:12,810
+need a scheme that it's gonna work even
+
+258
+00:11:12,810 --> 00:11:16,770
+if power fails to the entire data center
+
+259
+00:11:16,770 --> 00:11:24,210
+so what what forum does is it it puts a
+
+260
+00:11:24,210 --> 00:11:26,490
+battery a big battery in every rack and
+
+261
+00:11:26,490 --> 00:11:28,230
+runs the power supply system through the
+
+262
+00:11:28,230 --> 00:11:31,050
+batteries so the batteries automatically
+
+263
+00:11:31,050 --> 00:11:32,970
+take over if there's a power failure and
+
+264
+00:11:32,970 --> 00:11:34,890
+keep all their machines running at least
+
+265
+00:11:34,890 --> 00:11:37,830
+until the battery fails but of course
+
+266
+00:11:37,830 --> 00:11:39,630
+you know the battery is not very big it
+
+267
+00:11:39,630 --> 00:11:41,490
+may only be able to run their their
+
+268
+00:11:41,490 --> 00:11:44,100
+machines for say 10 minutes or something
+
+269
+00:11:44,100 --> 00:11:45,900
+so the battery by itself is not enough
+
+270
+00:11:45,900 --> 00:11:47,760
+to make this the system be able to
+
+271
+00:11:47,760 --> 00:11:50,760
+withstand a lengthy power failure so
+
+272
+00:11:50,760 --> 00:11:53,580
+instead the battery system when it sees
+
+273
+00:11:53,580 --> 00:11:56,460
+that the main power is failed the
+
+274
+00:11:56,460 --> 00:11:57,630
+battery system while it keeps the
+
+275
+00:11:57,630 --> 00:12:00,330
+server's Marling also alerts the
+
+276
+00:12:00,330 --> 00:12:02,640
+server's all the servers and with some
+
+277
+00:12:02,640 --> 00:12:04,500
+kind of interrupt or message telling
+
+278
+00:12:04,500 --> 00:12:06,480
+them look the powers just failed you
+
+279
+00:12:06,480 --> 00:12:09,020
+know you only got 10 minutes left before
+
+280
+00:12:09,020 --> 00:12:12,150
+the batteries fail also so at that point
+
+281
+00:12:12,150 --> 00:12:16,170
+the software on farms servers copies all
+
+282
+00:12:16,170 --> 00:12:18,570
+of rain active stops all processing it
+
+283
+00:12:18,570 --> 00:12:21,630
+for farm first and then copies each
+
+284
+00:12:21,630 --> 00:12:23,820
+server copies all of its RAM to a
+
+285
+00:12:23,820 --> 00:12:25,650
+solid-state drive attached to that
+
+286
+00:12:25,650 --> 00:12:27,930
+server I'm what wished could take a
+
+287
+00:12:27,930 --> 00:12:30,089
+couple minutes and once all the RAM is
+
+288
+00:12:30,089 --> 00:12:32,100
+copied to the solid-state drive then the
+
+289
+00:12:32,100 --> 00:12:33,600
+machine shuts itself down and turns
+
+290
+00:12:33,600 --> 00:12:37,410
+itself off so if all goes well there's a
+
+291
+00:12:37,410 --> 00:12:39,870
+site-wide power failure all the machines
+
+292
+00:12:39,870 --> 00:12:43,500
+save their RAM to disk when the power
+
+293
+00:12:43,500 --> 00:12:45,180
+comes back up in the datacenter all the
+
+294
+00:12:45,180 --> 00:12:49,160
+machines will when they reboot will read
+
+295
+00:12:49,160 --> 00:12:51,540
+the memory image that was saved on disk
+
+296
+00:12:51,540 --> 00:12:54,570
+restored into RAM and but there's some
+
+297
+00:12:54,570 --> 00:12:57,420
+recovery that has to go on but basically
+
+298
+00:12:57,420 --> 00:12:58,920
+they won't have lost any of their
+
+299
+00:12:58,920 --> 00:13:00,570
+persistent state due to the power
+
+300
+00:13:00,570 --> 00:13:03,720
+failure and so what that really means is
+
+301
+00:13:03,720 --> 00:13:07,310
+that the farm is using conventional Ram
+
+302
+00:13:07,310 --> 00:13:10,470
+but it's essentially made the RAM
+
+303
+00:13:10,470 --> 00:13:13,200
+non-volatile being able to survive power
+
+304
+00:13:13,200 --> 00:13:14,339
+failures with the
+
+305
+00:13:14,339 --> 00:13:17,339
+this trick of using a battery having a
+
+306
+00:13:17,339 --> 00:13:18,779
+battery alert the server having the
+
+307
+00:13:18,779 --> 00:13:21,660
+server store the RAM content solid-state
+
+308
+00:13:21,660 --> 00:13:26,160
+drives any questions about the nvram
+
+309
+00:13:26,160 --> 00:13:33,509
+scheme alright this is a is a useful
+
+310
+00:13:33,509 --> 00:13:37,920
+trick but it is worthwhile keeping mind
+
+311
+00:13:37,920 --> 00:13:40,559
+that it really only helps if there's
+
+312
+00:13:40,559 --> 00:13:44,610
+power failures that is if the you know
+
+313
+00:13:44,610 --> 00:13:46,499
+the whole sequence of events only it
+
+314
+00:13:46,499 --> 00:13:47,730
+gets set in train when the battery
+
+315
+00:13:47,730 --> 00:13:50,639
+notices that the main power is failed if
+
+316
+00:13:50,639 --> 00:13:51,720
+there's some other reason
+
+317
+00:13:51,720 --> 00:13:53,749
+causing the server to fail like
+
+318
+00:13:53,749 --> 00:13:55,620
+something goes wrong with the hardware
+
+319
+00:13:55,620 --> 00:13:57,120
+or there's a bug in the software that
+
+320
+00:13:57,120 --> 00:14:00,600
+causes a crash those crashes the
+
+321
+00:14:00,600 --> 00:14:02,670
+non-volatile Ram system is just nothing
+
+322
+00:14:02,670 --> 00:14:04,230
+to do with those crashes those crashes
+
+323
+00:14:04,230 --> 00:14:06,809
+will cause the machine to reboot and
+
+324
+00:14:06,809 --> 00:14:08,970
+lose the contents of its RAM and it
+
+325
+00:14:08,970 --> 00:14:10,470
+won't be able to recover them so this
+
+326
+00:14:10,470 --> 00:14:14,009
+NVRAM scheme is good for power failures
+
+327
+00:14:14,009 --> 00:14:15,660
+but not other crashes and so that's why
+
+328
+00:14:15,660 --> 00:14:19,319
+in addition to the NVRAM farm also has
+
+329
+00:14:19,319 --> 00:14:21,720
+multiple copies multiple replicas of
+
+330
+00:14:21,720 --> 00:14:26,519
+each shard all right so this NVRAM
+
+331
+00:14:26,519 --> 00:14:28,730
+scheme essentially eliminates
+
+332
+00:14:28,730 --> 00:14:32,490
+persistence rates as a bottleneck in the
+
+333
+00:14:32,490 --> 00:14:35,160
+performance of the system leaving only
+
+334
+00:14:35,160 --> 00:14:37,259
+as performance bottlenecks the network
+
+335
+00:14:37,259 --> 00:14:39,120
+and the CPU which is what we'll talk
+
+336
+00:14:39,120 --> 00:14:43,769
+about next ok so there's a question if
+
+337
+00:14:43,769 --> 00:14:49,679
+the datacenter power fails and farm lose
+
+338
+00:14:49,679 --> 00:14:52,170
+everything for solid-state drive would
+
+339
+00:14:52,170 --> 00:14:53,759
+it be possible to carry all the data to
+
+340
+00:14:53,759 --> 00:14:55,410
+a different data center and continue
+
+341
+00:14:55,410 --> 00:15:01,009
+operation there in principle absolutely
+
+342
+00:15:01,009 --> 00:15:05,069
+in practice I think would be would all
+
+343
+00:15:05,069 --> 00:15:07,230
+certainly be easier to restore power to
+
+344
+00:15:07,230 --> 00:15:10,589
+the data center then to move the drives
+
+345
+00:15:10,589 --> 00:15:12,240
+the problem is there's no power and the
+
+346
+00:15:12,240 --> 00:15:14,519
+power in the dated old data center so
+
+347
+00:15:14,519 --> 00:15:16,230
+you'd have to physically move the drives
+
+348
+00:15:16,230 --> 00:15:19,019
+and the computers maybe just the drives
+
+349
+00:15:19,019 --> 00:15:21,389
+to the new data center so this was if
+
+350
+00:15:21,389 --> 00:15:23,490
+you wanted to do this it might be
+
+351
+00:15:23,490 --> 00:15:27,279
+possible but it's certainly not
+
+352
+00:15:27,279 --> 00:15:29,079
+it's not what the farm designers had in
+
+353
+00:15:29,079 --> 00:15:32,879
+mind they assumed the power be restored
+
+354
+00:15:33,300 --> 00:15:38,589
+okay so that's NVRAM and at this point
+
+355
+00:15:38,589 --> 00:15:40,930
+we can just ignore nvram for the rest of
+
+356
+00:15:40,930 --> 00:15:45,249
+the design it doesn't it doesn't really
+
+357
+00:15:45,249 --> 00:15:46,540
+interact with the rest of the design
+
+358
+00:15:46,540 --> 00:15:48,910
+except that we know we're have to worry
+
+359
+00:15:48,910 --> 00:15:54,269
+about writing data to disk all right so
+
+360
+00:15:54,269 --> 00:15:56,620
+as I mentioned the remaining bottlenecks
+
+361
+00:15:56,620 --> 00:15:59,290
+once you eliminate having a great data
+
+362
+00:15:59,290 --> 00:16:00,879
+to disk for persistence in remaining
+
+363
+00:16:00,879 --> 00:16:02,769
+bottlenecks have to do with the CPU and
+
+364
+00:16:02,769 --> 00:16:07,360
+the network in fact in farman and indeed
+
+365
+00:16:07,360 --> 00:16:09,220
+a lot of the systems that i've been
+
+366
+00:16:09,220 --> 00:16:13,509
+involved with the a huge bottleneck has
+
+367
+00:16:13,509 --> 00:16:16,420
+been the cpu time required to deal with
+
+368
+00:16:16,420 --> 00:16:18,550
+network interactions so now we're can
+
+369
+00:16:18,550 --> 00:16:21,309
+CPU are kind of joint bottlenecks here
+
+370
+00:16:21,309 --> 00:16:23,470
+farm doesn't have any kind of speed of
+
+371
+00:16:23,470 --> 00:16:27,550
+light network problems it just has the
+
+372
+00:16:27,550 --> 00:16:30,009
+problems or it just spends a lot of time
+
+373
+00:16:30,009 --> 00:16:31,689
+eliminating bottlenecks having to do is
+
+374
+00:16:31,689 --> 00:16:34,059
+getting network data into and out of the
+
+375
+00:16:34,059 --> 00:16:38,309
+computers so first as a background I
+
+376
+00:16:38,309 --> 00:16:40,899
+want to lay out what the conventional
+
+377
+00:16:40,899 --> 00:16:43,180
+architecture is for getting things like
+
+378
+00:16:43,180 --> 00:16:46,029
+remote procedure call packets between
+
+379
+00:16:46,029 --> 00:16:51,610
+applications and on different computers
+
+380
+00:16:51,610 --> 00:16:54,309
+just so that can we have an idea of why
+
+381
+00:16:54,309 --> 00:16:56,949
+this approach that farm takes is more
+
+382
+00:16:56,949 --> 00:16:58,930
+efficient so typically what's going on
+
+383
+00:16:58,930 --> 00:17:03,220
+is on one computer that maybe wants to
+
+384
+00:17:03,220 --> 00:17:05,500
+send a procedure call message you might
+
+385
+00:17:05,500 --> 00:17:09,429
+have an application and then the
+
+386
+00:17:09,429 --> 00:17:11,250
+application is running in user space
+
+387
+00:17:11,250 --> 00:17:15,490
+there's a user kernel boundary here the
+
+388
+00:17:15,490 --> 00:17:17,109
+application makes system calls into the
+
+389
+00:17:17,109 --> 00:17:19,359
+kernel which are not particularly cheap
+
+390
+00:17:19,359 --> 00:17:22,599
+in order to send data and then there's a
+
+391
+00:17:22,599 --> 00:17:24,339
+whole stack of software inside the
+
+392
+00:17:24,339 --> 00:17:26,140
+kernel involved is sending data over the
+
+393
+00:17:26,140 --> 00:17:29,620
+network there might be what's usually
+
+394
+00:17:29,620 --> 00:17:32,559
+called a socket layer that does
+
+395
+00:17:32,559 --> 00:17:36,070
+buffering which involves copying the
+
+396
+00:17:36,070 --> 00:17:38,590
+data which takes time there's typically
+
+397
+00:17:38,590 --> 00:17:40,230
+a complex TCP
+
+398
+00:17:40,230 --> 00:17:42,600
+the protocol stack that knows all about
+
+399
+00:17:42,600 --> 00:17:45,059
+things like retransmitting and sequence
+
+400
+00:17:45,059 --> 00:17:49,130
+numbers and check sums and flow control
+
+401
+00:17:49,130 --> 00:17:51,650
+there's quite a bit of processing there
+
+402
+00:17:51,650 --> 00:17:54,510
+at the bottom there's a piece of
+
+403
+00:17:54,510 --> 00:17:57,299
+hardware called the network interface
+
+404
+00:17:57,299 --> 00:18:00,510
+card which is has a bunch of registers
+
+405
+00:18:00,510 --> 00:18:04,830
+that the kernel can talk to to configure
+
+406
+00:18:04,830 --> 00:18:07,230
+it and it has hardware required to send
+
+407
+00:18:07,230 --> 00:18:09,260
+bits out over the cable onto the network
+
+408
+00:18:09,260 --> 00:18:11,760
+and so there's some sort of network
+
+409
+00:18:11,760 --> 00:18:15,080
+interface card driver in the kernel and
+
+410
+00:18:15,080 --> 00:18:18,179
+then all self respecting that we're
+
+411
+00:18:18,179 --> 00:18:19,919
+gonna price cards use direct memory
+
+412
+00:18:19,919 --> 00:18:22,110
+access to move packets into and out of
+
+413
+00:18:22,110 --> 00:18:23,970
+host memory so there's going to be
+
+414
+00:18:23,970 --> 00:18:26,910
+things like queues of packets that the
+
+415
+00:18:26,910 --> 00:18:28,919
+network interfaces card has D made into
+
+416
+00:18:28,919 --> 00:18:30,630
+memory the waiting for the kernel to
+
+417
+00:18:30,630 --> 00:18:33,630
+read and outgoing hues the packets that
+
+418
+00:18:33,630 --> 00:18:34,740
+the kernel would like then that we're
+
+419
+00:18:34,740 --> 00:18:36,840
+going to face to car to send as soon as
+
+420
+00:18:36,840 --> 00:18:39,390
+convenient all right so you want to send
+
+421
+00:18:39,390 --> 00:18:41,700
+a message like an RPC request let's go
+
+422
+00:18:41,700 --> 00:18:43,049
+down from the application through the
+
+423
+00:18:43,049 --> 00:18:45,240
+stack network interface card sends the
+
+424
+00:18:45,240 --> 00:18:48,390
+bits out on a cable and then there's the
+
+425
+00:18:48,390 --> 00:18:51,840
+reverse stack on the other side isn't
+
+426
+00:18:51,840 --> 00:18:55,950
+network interface Hardware here in the
+
+427
+00:18:55,950 --> 00:18:57,270
+kernel then organ or face might
+
+428
+00:18:57,270 --> 00:19:00,059
+interrupt the kernel kernel runs driver
+
+429
+00:19:00,059 --> 00:19:02,850
+Code which hands packets to the TCP
+
+430
+00:19:02,850 --> 00:19:06,169
+protocol which writes them into buffers
+
+431
+00:19:06,169 --> 00:19:08,630
+waiting for the application to read them
+
+432
+00:19:08,630 --> 00:19:10,830
+at some point the application gets
+
+433
+00:19:10,830 --> 00:19:12,419
+around reading them makes system calls
+
+434
+00:19:12,419 --> 00:19:15,390
+into the kernel copies the data out of
+
+435
+00:19:15,390 --> 00:19:19,440
+these buffers into user space this is a
+
+436
+00:19:19,440 --> 00:19:21,980
+lot of software it's a lot of processing
+
+437
+00:19:21,980 --> 00:19:24,630
+and a lot of fairly expensive CPU
+
+438
+00:19:24,630 --> 00:19:26,100
+operations like system calls and
+
+439
+00:19:26,100 --> 00:19:29,669
+interrupts and copying data as a result
+
+440
+00:19:29,669 --> 00:19:32,820
+so classical Network communication is
+
+441
+00:19:32,820 --> 00:19:35,340
+relatively slow it's quite hard to build
+
+442
+00:19:35,340 --> 00:19:37,470
+an RPC system with the kind of
+
+443
+00:19:37,470 --> 00:19:39,360
+traditional architecture that can
+
+444
+00:19:39,360 --> 00:19:41,730
+deliver more than say a few hundred
+
+445
+00:19:41,730 --> 00:19:45,390
+thousand or BC messages per second and
+
+446
+00:19:45,390 --> 00:19:47,250
+that might seem like a lot but it's
+
+447
+00:19:47,250 --> 00:19:49,500
+orders of magnitude too few for the kind
+
+448
+00:19:49,500 --> 00:19:51,390
+of performance that farm is trying to
+
+449
+00:19:51,390 --> 00:19:53,290
+target and in general that
+
+450
+00:19:53,290 --> 00:19:54,850
+couple hundred thousand our pcs per
+
+451
+00:19:54,850 --> 00:19:58,810
+second is far far less than the speed
+
+452
+00:19:58,810 --> 00:20:01,300
+that the actual network hardware like
+
+453
+00:20:01,300 --> 00:20:03,130
+Network wire in the network interface
+
+454
+00:20:03,130 --> 00:20:05,110
+card is capable of typically these
+
+455
+00:20:05,110 --> 00:20:07,390
+cables run at things like 10 gigabits
+
+456
+00:20:07,390 --> 00:20:11,140
+per second it's very very hard to write
+
+457
+00:20:11,140 --> 00:20:12,970
+our PC software that can generate small
+
+458
+00:20:12,970 --> 00:20:16,630
+messages of the kind that databases
+
+459
+00:20:16,630 --> 00:20:18,760
+often need to use it's very hard to
+
+460
+00:20:18,760 --> 00:20:20,590
+write software in this style that can
+
+461
+00:20:20,590 --> 00:20:24,280
+generate or absorb anything like 10
+
+462
+00:20:24,280 --> 00:20:30,400
+gigabits per second of messages that's
+
+463
+00:20:30,400 --> 00:20:32,080
+millions maybe tens of millions of
+
+464
+00:20:32,080 --> 00:20:34,390
+messages per second ok so this is the
+
+465
+00:20:34,390 --> 00:20:37,660
+plan that farm doesn't use and a sort of
+
+466
+00:20:37,660 --> 00:20:45,610
+a reaction to to this plan instead farm
+
+467
+00:20:45,610 --> 00:20:52,030
+uses - - ideas to reduce the costs of
+
+468
+00:20:52,030 --> 00:20:55,330
+pushing packets around the first one
+
+469
+00:20:55,330 --> 00:21:01,480
+I'll call kernel bypass and the idea
+
+470
+00:21:01,480 --> 00:21:05,010
+here is that instead of the application
+
+471
+00:21:05,010 --> 00:21:06,880
+sending all its data down through a
+
+472
+00:21:06,880 --> 00:21:15,460
+complex stack of kernel code instead the
+
+473
+00:21:15,460 --> 00:21:18,130
+application the kernel configures the
+
+474
+00:21:18,130 --> 00:21:21,370
+protection machinery in the computer to
+
+475
+00:21:21,370 --> 00:21:24,310
+allow the application direct access to
+
+476
+00:21:24,310 --> 00:21:26,410
+network interface card so the
+
+477
+00:21:26,410 --> 00:21:28,060
+application can actually reach out and
+
+478
+00:21:28,060 --> 00:21:30,640
+touch the network interfaces registers
+
+479
+00:21:30,640 --> 00:21:33,340
+and tell it what to do in addition the
+
+480
+00:21:33,340 --> 00:21:35,550
+network interface card when it DMAs
+
+481
+00:21:35,550 --> 00:21:38,770
+and this kernel bypass scheme it DNA's
+
+482
+00:21:38,770 --> 00:21:41,050
+directly into application memory where
+
+483
+00:21:41,050 --> 00:21:42,700
+the application can see the bytes
+
+484
+00:21:42,700 --> 00:21:46,210
+arriving directly without kernel
+
+485
+00:21:46,210 --> 00:21:47,650
+intervention and when the application
+
+486
+00:21:47,650 --> 00:21:49,930
+needs to send data the application can
+
+487
+00:21:49,930 --> 00:21:53,620
+create queues that the network interface
+
+488
+00:21:53,620 --> 00:21:56,830
+card can directly read with DMA and send
+
+489
+00:21:56,830 --> 00:21:58,360
+out over the wire so now we've
+
+490
+00:21:58,360 --> 00:22:01,300
+completely eliminated all the kernel
+
+491
+00:22:01,300 --> 00:22:03,280
+code involved in networking kernels just
+
+492
+00:22:03,280 --> 00:22:04,600
+not involved there's no system calls
+
+493
+00:22:04,600 --> 00:22:06,140
+there's no interrupts
+
+494
+00:22:06,140 --> 00:22:08,120
+the application just directly reason why
+
+495
+00:22:08,120 --> 00:22:09,530
+it's memory that the network interface
+
+496
+00:22:09,530 --> 00:22:11,420
+card sees and of course the same thing
+
+497
+00:22:11,420 --> 00:22:21,920
+on the other side and this is a this is
+
+498
+00:22:21,920 --> 00:22:25,130
+an idea that is actually was not
+
+499
+00:22:25,130 --> 00:22:27,950
+possible years ago with network
+
+500
+00:22:27,950 --> 00:22:30,590
+interface cards but most modern serious
+
+501
+00:22:30,590 --> 00:22:33,200
+network interface cards okay can be set
+
+502
+00:22:33,200 --> 00:22:34,820
+up to do this it does however require
+
+503
+00:22:34,820 --> 00:22:37,250
+that the application you know you know
+
+504
+00:22:37,250 --> 00:22:39,710
+all those things that TCP was doing for
+
+505
+00:22:39,710 --> 00:22:43,280
+you like check sums or retransmission
+
+506
+00:22:43,280 --> 00:22:46,280
+the application would now be in charge
+
+507
+00:22:46,280 --> 00:22:49,190
+if we wanted to do this you can actually
+
+508
+00:22:49,190 --> 00:22:55,510
+do this yourself kernel bypass using a
+
+509
+00:22:55,510 --> 00:22:57,530
+toolkit that you can find on the way up
+
+510
+00:22:57,530 --> 00:22:57,970
+called
+
+511
+00:22:57,970 --> 00:23:02,060
+DP DK and it's relatively easy to use
+
+512
+00:23:02,060 --> 00:23:04,820
+and allows people to write extremely
+
+513
+00:23:04,820 --> 00:23:08,620
+high performance networking applications
+
+514
+00:23:08,620 --> 00:23:12,710
+but and so so form does use this it's
+
+515
+00:23:12,710 --> 00:23:14,180
+applications directly you talk to the
+
+516
+00:23:14,180 --> 00:23:15,680
+neck the neck DM ace things right into
+
+517
+00:23:15,680 --> 00:23:19,850
+application memory we have a student
+
+518
+00:23:19,850 --> 00:23:22,910
+question I'm sorry yes does this mean
+
+519
+00:23:22,910 --> 00:23:24,290
+that farm machines run a modified
+
+520
+00:23:24,290 --> 00:23:31,370
+operating system well I I don't know the
+
+521
+00:23:31,370 --> 00:23:32,750
+actual answer that question I believe
+
+522
+00:23:32,750 --> 00:23:36,500
+farm is runs on Windows some form of
+
+523
+00:23:36,500 --> 00:23:38,120
+Windows whether or not they had to
+
+524
+00:23:38,120 --> 00:23:44,240
+modify Windows I do not know in the sort
+
+525
+00:23:44,240 --> 00:23:46,940
+of Linux world in Linux world there's
+
+526
+00:23:46,940 --> 00:23:48,950
+already full support for this
+
+527
+00:23:48,950 --> 00:23:50,690
+it does require kernel intervention
+
+528
+00:23:50,690 --> 00:23:54,380
+because the kernel has to be willing to
+
+529
+00:23:54,380 --> 00:23:56,600
+give ordinarily application code cannot
+
+530
+00:23:56,600 --> 00:23:58,750
+do anything directly with devices so
+
+531
+00:23:58,750 --> 00:24:01,520
+Linux has had to be modified to allow
+
+532
+00:24:01,520 --> 00:24:05,890
+the allow the kernel to delegate
+
+533
+00:24:05,890 --> 00:24:08,660
+hardware access to applications so it
+
+534
+00:24:08,660 --> 00:24:12,410
+does require kernel modifications those
+
+535
+00:24:12,410 --> 00:24:13,670
+monitor occasions are already in Linux
+
+536
+00:24:13,670 --> 00:24:16,190
+and maybe already in Windows also in
+
+537
+00:24:16,190 --> 00:24:18,419
+addition though this
+
+538
+00:24:18,419 --> 00:24:21,360
+on fairly intelligent Knicks because of
+
+539
+00:24:21,360 --> 00:24:22,380
+course you're going to have multiple
+
+540
+00:24:22,380 --> 00:24:23,940
+applications that want to play this game
+
+541
+00:24:23,940 --> 00:24:25,769
+with a network interface card and so
+
+542
+00:24:25,769 --> 00:24:27,899
+modern NICs actually know about talking
+
+543
+00:24:27,899 --> 00:24:30,390
+to multiple distinct cues so that you
+
+544
+00:24:30,390 --> 00:24:32,039
+can have multiple applications each with
+
+545
+00:24:32,039 --> 00:24:33,870
+its own set of cues and the the Nick
+
+546
+00:24:33,870 --> 00:24:36,269
+knows about so it did it has required
+
+547
+00:24:36,269 --> 00:24:41,460
+modification of a lot of things okay
+
+548
+00:24:41,460 --> 00:24:47,190
+so sort of step one is is Colonel bypass
+
+549
+00:24:47,190 --> 00:24:50,309
+idea step two is even cleverer next and
+
+550
+00:24:50,309 --> 00:24:51,539
+now we're starting to get into hardware
+
+551
+00:24:51,539 --> 00:24:54,919
+that is not in wide use of the moment
+
+552
+00:24:54,919 --> 00:24:59,039
+you can buy it commercially but it's not
+
+553
+00:24:59,039 --> 00:25:03,110
+the default is this RDMA scheme which is
+
+554
+00:25:03,110 --> 00:25:11,929
+remote direct memory access and here
+
+555
+00:25:11,929 --> 00:25:18,600
+this is sort of special kind of network
+
+556
+00:25:18,600 --> 00:25:21,230
+interface cards that support remote
+
+557
+00:25:21,230 --> 00:25:28,470
+support our DMA so now we have an RDM a
+
+558
+00:25:28,470 --> 00:25:35,480
+neck both sides have to have these
+
+559
+00:25:35,570 --> 00:25:38,399
+special network interface cards so I'm
+
+560
+00:25:38,399 --> 00:25:39,899
+drawing these is connected by a cable in
+
+561
+00:25:39,899 --> 00:25:43,919
+fact always there's a switch here that
+
+562
+00:25:43,919 --> 00:25:47,480
+has connections to many different
+
+563
+00:25:47,480 --> 00:25:50,370
+servers and allows any server to talk to
+
+564
+00:25:50,370 --> 00:25:52,110
+any server okay so we have these RDMA
+
+565
+00:25:52,110 --> 00:25:55,200
+necks and we had again we have the
+
+566
+00:25:55,200 --> 00:25:56,820
+applications and application assist
+
+567
+00:25:56,820 --> 00:26:02,010
+memory and now though the application
+
+568
+00:26:02,010 --> 00:26:06,559
+can essentially send a special message
+
+569
+00:26:06,559 --> 00:26:10,260
+through the neck that asks so we have a
+
+570
+00:26:10,260 --> 00:26:13,620
+an application on the source host and
+
+571
+00:26:13,620 --> 00:26:15,980
+maybe we wouldn't call this the
+
+572
+00:26:15,980 --> 00:26:18,750
+destination host can send a special
+
+573
+00:26:18,750 --> 00:26:22,110
+message through the our DMA system that
+
+574
+00:26:22,110 --> 00:26:24,899
+tells this network interface card to
+
+575
+00:26:24,899 --> 00:26:28,919
+directly read or write a byte some bytes
+
+576
+00:26:28,919 --> 00:26:30,450
+of memory probably a cache line of
+
+577
+00:26:30,450 --> 00:26:32,190
+memory in
+
+578
+00:26:32,190 --> 00:26:33,990
+the target applications address space
+
+579
+00:26:33,990 --> 00:26:36,570
+directly so hardware and software on the
+
+580
+00:26:36,570 --> 00:26:38,220
+network interface controller are doing a
+
+581
+00:26:38,220 --> 00:26:40,320
+read and write read or write of the
+
+582
+00:26:40,320 --> 00:26:41,820
+application target applications memory
+
+583
+00:26:41,820 --> 00:26:44,730
+directly and then so we have a sort of
+
+584
+00:26:44,730 --> 00:26:47,700
+request going here that causes the read
+
+585
+00:26:47,700 --> 00:26:49,769
+or write and then sending the result
+
+586
+00:26:49,769 --> 00:26:55,340
+back to really two other incoming queue
+
+587
+00:26:55,340 --> 00:26:58,860
+on the source application and the cool
+
+588
+00:26:58,860 --> 00:27:01,230
+thing about this is that this computer's
+
+589
+00:27:01,230 --> 00:27:03,659
+the CPU this application didn't know
+
+590
+00:27:03,659 --> 00:27:06,450
+anything about the read or write the
+
+591
+00:27:06,450 --> 00:27:09,529
+read or write is executed completely in
+
+592
+00:27:09,529 --> 00:27:12,000
+firmware in the network interface card
+
+593
+00:27:12,000 --> 00:27:13,799
+so it's not there's no interrupts here
+
+594
+00:27:13,799 --> 00:27:15,330
+the application didn't have to think
+
+595
+00:27:15,330 --> 00:27:16,710
+about the request or think about
+
+596
+00:27:16,710 --> 00:27:18,929
+replying network interface card just
+
+597
+00:27:18,929 --> 00:27:20,340
+reads or writes a memory and sends a
+
+598
+00:27:20,340 --> 00:27:22,879
+result back to the source application
+
+599
+00:27:22,879 --> 00:27:25,470
+and this is much much lower overhead way
+
+600
+00:27:25,470 --> 00:27:27,990
+of getting at of all you need to do is
+
+601
+00:27:27,990 --> 00:27:30,419
+read or write memory and stuff in the
+
+602
+00:27:30,419 --> 00:27:32,490
+RAM of the target application this is a
+
+603
+00:27:32,490 --> 00:27:35,399
+much faster way of doing a simple read
+
+604
+00:27:35,399 --> 00:27:37,769
+or write than sending in our PC call
+
+605
+00:27:37,769 --> 00:27:42,769
+even with magic kernel bypass networking
+
+606
+00:27:42,769 --> 00:27:46,379
+it's a question does this mean that
+
+607
+00:27:46,379 --> 00:27:48,960
+already may always require kernel bypass
+
+608
+00:27:48,960 --> 00:27:54,389
+to work at all you know I don't know the
+
+609
+00:27:54,389 --> 00:27:56,820
+answer to that I think I've only ever
+
+610
+00:27:56,820 --> 00:27:59,250
+heard it used in conjunction with kernel
+
+611
+00:27:59,250 --> 00:28:02,070
+bypass cuz you know the people who are
+
+612
+00:28:02,070 --> 00:28:04,080
+interested in any of this or are
+
+613
+00:28:04,080 --> 00:28:07,049
+interested in it only for tremendous
+
+614
+00:28:07,049 --> 00:28:10,190
+performance and I think you would waste
+
+615
+00:28:10,190 --> 00:28:12,539
+you throw away a lot of the performance
+
+616
+00:28:12,539 --> 00:28:14,279
+I'm guessing you throw away a lot of the
+
+617
+00:28:14,279 --> 00:28:16,620
+performance win if you had to send the
+
+618
+00:28:16,620 --> 00:28:22,259
+requests through the kernel okay another
+
+619
+00:28:22,259 --> 00:28:31,650
+question that the the question notes
+
+620
+00:28:31,650 --> 00:28:34,410
+TCP software's TCP supports in order
+
+621
+00:28:34,410 --> 00:28:36,870
+delivery duplicate detection and a lot
+
+622
+00:28:36,870 --> 00:28:38,970
+of other excellent properties which you
+
+623
+00:28:38,970 --> 00:28:41,790
+actually need and so it would actually
+
+624
+00:28:41,790 --> 00:28:44,070
+be extremely awkward if this setup
+
+625
+00:28:44,070 --> 00:28:48,540
+sacrificed reliable delivery or in order
+
+626
+00:28:48,540 --> 00:28:50,700
+delivery and so the answer the question
+
+627
+00:28:50,700 --> 00:28:53,010
+is actually these are DMA NICs run their
+
+628
+00:28:53,010 --> 00:28:56,460
+own reliable sequenced protocol that's
+
+629
+00:28:56,460 --> 00:28:59,640
+like TCP although not TCP between the
+
+630
+00:28:59,640 --> 00:29:02,790
+necks and so when you ask your already
+
+631
+00:29:02,790 --> 00:29:04,770
+am a neck to do a read or write it'll
+
+632
+00:29:04,770 --> 00:29:08,010
+keep you transmitting until if the you
+
+633
+00:29:08,010 --> 00:29:09,480
+know if the request is lost and keep
+
+634
+00:29:09,480 --> 00:29:10,530
+reassurance meaning till it gets a
+
+635
+00:29:10,530 --> 00:29:12,810
+response and it actually tells the
+
+636
+00:29:12,810 --> 00:29:15,540
+originating software did the request
+
+637
+00:29:15,540 --> 00:29:17,130
+succeed or not so you get an
+
+638
+00:29:17,130 --> 00:29:20,220
+acknowledgment back finally so yeah you
+
+639
+00:29:20,220 --> 00:29:22,490
+know in fact have to sacrifice
+
+640
+00:29:22,490 --> 00:29:25,710
+most of TCP is good properties now this
+
+641
+00:29:25,710 --> 00:29:28,530
+stuff only works over a local network I
+
+642
+00:29:28,530 --> 00:29:32,010
+don't believe our DMA would be
+
+643
+00:29:32,010 --> 00:29:34,560
+satisfactory like between distant data
+
+644
+00:29:34,560 --> 00:29:38,940
+centers so there's all tuned up for very
+
+645
+00:29:38,940 --> 00:29:45,320
+low speed of light access okay a
+
+646
+00:29:45,320 --> 00:29:47,970
+particular piece of jargon that the
+
+647
+00:29:47,970 --> 00:29:56,150
+paper uses is one-sided our DMA and
+
+648
+00:29:56,150 --> 00:29:57,870
+that's basically what I've just
+
+649
+00:29:57,870 --> 00:30:01,560
+mentioned when application uses our DMA
+
+650
+00:30:01,560 --> 00:30:02,700
+to read or write the memory of another
+
+651
+00:30:02,700 --> 00:30:06,680
+that's one site our DMA now in fact farm
+
+652
+00:30:06,680 --> 00:30:13,230
+uses our DMA to send messages in an RPC
+
+653
+00:30:13,230 --> 00:30:15,870
+like protocol so in fact sometimes farm
+
+654
+00:30:15,870 --> 00:30:18,300
+directly reads with one sided our DMA
+
+655
+00:30:18,300 --> 00:30:20,610
+but sometimes what farm is using our DMA
+
+656
+00:30:20,610 --> 00:30:23,820
+for is to append a message to an
+
+657
+00:30:23,820 --> 00:30:26,340
+incoming message queue inside the target
+
+658
+00:30:26,340 --> 00:30:27,810
+so sometimes what the what the
+
+659
+00:30:27,810 --> 00:30:31,590
+well actually always with writes what
+
+660
+00:30:31,590 --> 00:30:33,450
+farm is actually doing is using our DMA
+
+661
+00:30:33,450 --> 00:30:38,040
+to write to append a new message to an
+
+662
+00:30:38,040 --> 00:30:40,470
+incoming queue in the target which the
+
+663
+00:30:40,470 --> 00:30:42,180
+target will pull since there's nobody
+
+664
+00:30:42,180 --> 00:30:45,179
+interrupts here the way target
+
+665
+00:30:45,179 --> 00:30:47,639
+the way the destination of a message
+
+666
+00:30:47,639 --> 00:30:49,529
+like this knows I got the messages that
+
+667
+00:30:49,529 --> 00:30:52,289
+periodically checks one of these keys
+
+668
+00:30:52,289 --> 00:30:53,609
+queues and memory to see how have I
+
+669
+00:30:53,609 --> 00:30:55,639
+gotten a recent message from anyone
+
+670
+00:30:55,639 --> 00:30:58,080
+okay so once I did already MA is just to
+
+671
+00:30:58,080 --> 00:31:00,149
+read or write but using our DMA to send
+
+672
+00:31:00,149 --> 00:31:02,219
+a message or append either to a message
+
+673
+00:31:02,219 --> 00:31:03,419
+queue or to a log
+
+674
+00:31:03,419 --> 00:31:06,389
+sometimes farm appends messages or log
+
+675
+00:31:06,389 --> 00:31:09,059
+entries to a log and another server also
+
+676
+00:31:09,059 --> 00:31:11,429
+uses our DMA and you know this memory
+
+677
+00:31:11,429 --> 00:31:15,049
+that's being written into is all
+
+678
+00:31:15,049 --> 00:31:17,249
+non-volatile so all of it the message
+
+679
+00:31:17,249 --> 00:31:20,190
+queues it's all written to disk if
+
+680
+00:31:20,190 --> 00:31:24,749
+there's a power failure the performance
+
+681
+00:31:24,749 --> 00:31:29,940
+of this is the figure 2 shows that you
+
+682
+00:31:29,940 --> 00:31:34,169
+can get 10 million small our DMA reads
+
+683
+00:31:34,169 --> 00:31:37,580
+and writes per second which is fantastic
+
+684
+00:31:37,580 --> 00:31:40,739
+far far faster than you can send
+
+685
+00:31:40,739 --> 00:31:43,979
+messages like our pcs using TCP and the
+
+686
+00:31:43,979 --> 00:31:46,139
+latency of using our DMA to do a simple
+
+687
+00:31:46,139 --> 00:31:48,979
+read or write is about 5 microseconds so
+
+688
+00:31:48,979 --> 00:31:54,029
+again this is you know very very short 5
+
+689
+00:31:54,029 --> 00:31:56,669
+microseconds is it's slower than
+
+690
+00:31:56,669 --> 00:31:59,789
+accessing your own local memory but it's
+
+691
+00:31:59,789 --> 00:32:01,379
+faster than sort of anything else people
+
+692
+00:32:01,379 --> 00:32:05,629
+do in networks ok so this is sort of a
+
+693
+00:32:05,629 --> 00:32:07,950
+promise there's this fabulous our DMA
+
+694
+00:32:07,950 --> 00:32:10,080
+technology that came out a while ago
+
+695
+00:32:10,080 --> 00:32:11,909
+that at the farm people wanted to
+
+696
+00:32:11,909 --> 00:32:15,599
+exploit you know the coolest possible
+
+697
+00:32:15,599 --> 00:32:17,219
+thing that you could imagine doing with
+
+698
+00:32:17,219 --> 00:32:20,820
+this is using our DMA one sign it
+
+699
+00:32:20,820 --> 00:32:23,489
+already am a reason rights to directly
+
+700
+00:32:23,489 --> 00:32:26,190
+do all the reason writes a records
+
+701
+00:32:26,190 --> 00:32:28,559
+stored in database servers memory so
+
+702
+00:32:28,559 --> 00:32:29,789
+wouldn't be fantastic if we could just
+
+703
+00:32:29,789 --> 00:32:32,639
+never talk to the database server CPU or
+
+704
+00:32:32,639 --> 00:32:34,889
+software but just get at the data that
+
+705
+00:32:34,889 --> 00:32:37,109
+we need you know in five microseconds a
+
+706
+00:32:37,109 --> 00:32:40,739
+pop using direct one-sided our DMA
+
+707
+00:32:40,739 --> 00:32:43,259
+Reiser writes so in a sense this paper
+
+708
+00:32:43,259 --> 00:32:45,749
+is about you know you you start there
+
+709
+00:32:45,749 --> 00:32:49,019
+what do you have to do to actually build
+
+710
+00:32:49,019 --> 00:32:53,009
+something useful so an interesting
+
+711
+00:32:53,009 --> 00:32:56,239
+question by the way is could you in fact
+
+712
+00:32:56,239 --> 00:32:58,410
+implement transactions
+
+713
+00:32:58,410 --> 00:33:01,620
+using one-sided RDMA that is you know
+
+714
+00:33:01,620 --> 00:33:03,540
+anything we wanted to read or write data
+
+715
+00:33:03,540 --> 00:33:07,020
+in server the only use already may and
+
+716
+00:33:07,020 --> 00:33:10,110
+never actually send messages that have
+
+717
+00:33:10,110 --> 00:33:13,760
+to be interpreted by the server software
+
+718
+00:33:13,760 --> 00:33:16,830
+it's worth thinking about
+
+719
+00:33:16,830 --> 00:33:19,950
+in a sense farm is answering that
+
+720
+00:33:19,950 --> 00:33:22,650
+question with a no because that's not
+
+721
+00:33:22,650 --> 00:33:25,950
+really how farm works but but it is
+
+722
+00:33:25,950 --> 00:33:28,110
+absolutely worth thinking how come
+
+723
+00:33:28,110 --> 00:33:31,770
+pure one-sided RDMA couldn't be made to
+
+724
+00:33:31,770 --> 00:33:37,620
+work alright so the challenges to using
+
+725
+00:33:37,620 --> 00:33:42,480
+our DMA in a transactional system that
+
+726
+00:33:42,480 --> 00:33:46,890
+has replication and sharding so that
+
+727
+00:33:46,890 --> 00:33:48,960
+that's the challenge we have is how to
+
+728
+00:33:48,960 --> 00:33:50,460
+combine already made with transactions
+
+729
+00:33:50,460 --> 00:33:52,740
+charting and replication because you
+
+730
+00:33:52,740 --> 00:33:54,360
+need to have sharding and transactions
+
+731
+00:33:54,360 --> 00:33:56,940
+replication to have a seriously useful
+
+732
+00:33:56,940 --> 00:33:59,760
+database system it turns out that all
+
+733
+00:33:59,760 --> 00:34:02,250
+the protocols we've seen so far for
+
+734
+00:34:02,250 --> 00:34:04,320
+doing transactions replication require
+
+735
+00:34:04,320 --> 00:34:06,810
+active participation by the server
+
+736
+00:34:06,810 --> 00:34:11,668
+software that is the server has to be in
+
+737
+00:34:11,668 --> 00:34:13,110
+all the protocols we've seen so far the
+
+738
+00:34:13,110 --> 00:34:15,150
+server's actively involved in helping
+
+739
+00:34:15,150 --> 00:34:17,370
+the clients get at read or write the
+
+740
+00:34:17,370 --> 00:34:21,270
+data so for example in the two-phase
+
+741
+00:34:21,270 --> 00:34:23,969
+commit schemes we've seen the server has
+
+742
+00:34:23,969 --> 00:34:25,800
+to do things like decide whether a
+
+743
+00:34:25,800 --> 00:34:27,960
+record is locked and if it's not walk
+
+744
+00:34:27,960 --> 00:34:31,530
+set the lock on it right it's not clear
+
+745
+00:34:31,530 --> 00:34:35,580
+how you could do that with our DMA the
+
+746
+00:34:35,580 --> 00:34:37,350
+server has to do things like in spanner
+
+747
+00:34:37,350 --> 00:34:39,060
+you know there's all these versions it
+
+748
+00:34:39,060 --> 00:34:40,469
+was the server that was thinking about
+
+749
+00:34:40,469 --> 00:34:43,139
+how to find the latest version similarly
+
+750
+00:34:43,139 --> 00:34:45,360
+if we have transactions in two-phase
+
+751
+00:34:45,360 --> 00:34:45,900
+commit
+
+752
+00:34:45,900 --> 00:34:48,000
+data on the server it's not just data
+
+753
+00:34:48,000 --> 00:34:50,370
+there's committed data there's data
+
+754
+00:34:50,370 --> 00:34:52,500
+that's been written but hasn't committed
+
+755
+00:34:52,500 --> 00:34:54,929
+yet and again traditionally it's the
+
+756
+00:34:54,929 --> 00:34:58,520
+server that sorts out whether data
+
+757
+00:34:58,520 --> 00:35:00,810
+recently updated data is committed yet
+
+758
+00:35:00,810 --> 00:35:01,950
+and that's to sort of protect the
+
+759
+00:35:01,950 --> 00:35:03,900
+clients from you know prevent them from
+
+760
+00:35:03,900 --> 00:35:06,840
+seeing data that's locked or not yet
+
+761
+00:35:06,840 --> 00:35:08,850
+known to be committed and what that
+
+762
+00:35:08,850 --> 00:35:10,590
+means is that without some clever
+
+763
+00:35:10,590 --> 00:35:12,150
+thought
+
+764
+00:35:12,150 --> 00:35:15,420
+RDMA or one-sided pure use of our DME
+
+765
+00:35:15,420 --> 00:35:18,550
+one-sided RDMA doesn't seem to be
+
+766
+00:35:18,550 --> 00:35:21,069
+immediately compatible with transactions
+
+767
+00:35:21,069 --> 00:35:26,410
+and replication and indeed farm while
+
+768
+00:35:26,410 --> 00:35:29,319
+farm does use one-sided it reads to get
+
+769
+00:35:29,319 --> 00:35:32,020
+out directly at data in the database it
+
+770
+00:35:32,020 --> 00:35:34,990
+is not not able to use one-sided rights
+
+771
+00:35:34,990 --> 00:35:43,300
+to modify the data okay so this leads us
+
+772
+00:35:43,300 --> 00:35:46,690
+to optimistic concurrency control it
+
+773
+00:35:46,690 --> 00:35:54,220
+turns out that the main trick in a sense
+
+774
+00:35:54,220 --> 00:35:59,410
+that farm uses to allow it both use RDMA
+
+775
+00:35:59,410 --> 00:36:02,160
+and get transactions is by using
+
+776
+00:36:02,160 --> 00:36:05,859
+optimistic concurrency control so if you
+
+777
+00:36:05,859 --> 00:36:12,599
+remember I mentioned earlier that
+
+778
+00:36:12,599 --> 00:36:14,770
+concurrency control schemes are kind of
+
+779
+00:36:14,770 --> 00:36:18,809
+divided into two broad categories
+
+780
+00:36:18,960 --> 00:36:23,680
+pessimistic and optimistic pessimistic
+
+781
+00:36:23,680 --> 00:36:28,359
+schemes use locks and the idea is that
+
+782
+00:36:28,359 --> 00:36:30,130
+if you have a transaction that's gonna
+
+783
+00:36:30,130 --> 00:36:32,410
+read or write some data before you can
+
+784
+00:36:32,410 --> 00:36:34,059
+read or write the data or look at it at
+
+785
+00:36:34,059 --> 00:36:36,730
+all it must acquire a lock and it must
+
+786
+00:36:36,730 --> 00:36:41,230
+wait for the lock and so you read about
+
+787
+00:36:41,230 --> 00:36:45,339
+two-phase locking for example in that
+
+788
+00:36:45,339 --> 00:36:48,400
+reading from 633 so before you use data
+
+789
+00:36:48,400 --> 00:36:50,859
+you have to lock it and you hold the
+
+790
+00:36:50,859 --> 00:36:52,559
+lock for the entire duration of the
+
+791
+00:36:52,559 --> 00:36:54,730
+transaction and only if the transaction
+
+792
+00:36:54,730 --> 00:36:56,530
+commits or aborts do you release the
+
+793
+00:36:56,530 --> 00:37:01,240
+lock and if there's conflicts because
+
+794
+00:37:01,240 --> 00:37:05,380
+two transactions want to write the same
+
+795
+00:37:05,380 --> 00:37:06,760
+data at the same time or one wants to
+
+796
+00:37:06,760 --> 00:37:08,140
+read and one that monster right they
+
+797
+00:37:08,140 --> 00:37:10,390
+can't do it at the same time one of them
+
+798
+00:37:10,390 --> 00:37:12,220
+has to block or all but one of the
+
+799
+00:37:12,220 --> 00:37:13,630
+transactions that went to you some data
+
+800
+00:37:13,630 --> 00:37:15,430
+missed a block wait for the lock to be
+
+801
+00:37:15,430 --> 00:37:17,920
+released um and of course this locking
+
+802
+00:37:17,920 --> 00:37:20,109
+scheme is the fact that the data has to
+
+803
+00:37:20,109 --> 00:37:21,910
+be locked and that somebody has to keep
+
+804
+00:37:21,910 --> 00:37:23,890
+track of who owns the lock and when the
+
+805
+00:37:23,890 --> 00:37:27,000
+lock is released etcetera
+
+806
+00:37:27,619 --> 00:37:30,619
+this is one thing that makes our DMA
+
+807
+00:37:30,619 --> 00:37:33,329
+it's not clear how you can do rights or
+
+808
+00:37:33,329 --> 00:37:35,609
+even reads using our DMA in a locking
+
+809
+00:37:35,609 --> 00:37:37,500
+scheme because somebody has to enforce
+
+810
+00:37:37,500 --> 00:37:40,289
+the locks I'm being a little tentative
+
+811
+00:37:40,289 --> 00:37:42,359
+about this because I suspect that with
+
+812
+00:37:42,359 --> 00:37:45,410
+more clever our DMA NICs that could
+
+813
+00:37:45,410 --> 00:37:49,460
+support a wider range of operations like
+
+814
+00:37:49,460 --> 00:37:51,359
+atomic test and set
+
+815
+00:37:51,359 --> 00:37:54,029
+you might someday be able to do a
+
+816
+00:37:54,029 --> 00:37:58,490
+locking scheme with pure one-sided RDMA
+
+817
+00:37:58,490 --> 00:38:02,849
+but farm doesn't do it okay so what farm
+
+818
+00:38:02,849 --> 00:38:04,799
+actually uses as an optimistic scheme
+
+819
+00:38:04,799 --> 00:38:08,190
+and here in an optimistic scheme you can
+
+820
+00:38:08,190 --> 00:38:12,720
+use at least you can read without
+
+821
+00:38:12,720 --> 00:38:18,660
+locking you just read the data you don't
+
+822
+00:38:18,660 --> 00:38:20,460
+know yet whether you are allowed to read
+
+823
+00:38:20,460 --> 00:38:21,809
+the data or whether somebody else is in
+
+824
+00:38:21,809 --> 00:38:23,460
+the model middle of modifying it or
+
+825
+00:38:23,460 --> 00:38:25,500
+anything you just read the data and a
+
+826
+00:38:25,500 --> 00:38:27,059
+transaction it uses what it whatever it
+
+827
+00:38:27,059 --> 00:38:30,809
+happens to be and you also don't
+
+828
+00:38:30,809 --> 00:38:33,420
+directly write the data in optimistic
+
+829
+00:38:33,420 --> 00:38:35,940
+schemes instead you buffered so you
+
+830
+00:38:35,940 --> 00:38:38,099
+buffer writes locally and in the client
+
+831
+00:38:38,099 --> 00:38:41,539
+until the transaction finally ends and
+
+832
+00:38:41,539 --> 00:38:44,250
+then when the transaction finally
+
+833
+00:38:44,250 --> 00:38:46,200
+finishes and you want to try to commit
+
+834
+00:38:46,200 --> 00:38:50,549
+it there's a validate what's called a
+
+835
+00:38:50,549 --> 00:38:56,359
+validation stage in which the
+
+836
+00:38:56,359 --> 00:38:58,559
+transaction processing system tries to
+
+837
+00:38:58,559 --> 00:39:00,839
+figure out whether the actual reason
+
+838
+00:39:00,839 --> 00:39:02,759
+rights you did were consistent with
+
+839
+00:39:02,759 --> 00:39:04,799
+serializability that is they try to
+
+840
+00:39:04,799 --> 00:39:06,390
+figure out oh was somebody writing the
+
+841
+00:39:06,390 --> 00:39:07,799
+data while I was reading it and if they
+
+842
+00:39:07,799 --> 00:39:08,970
+were boy
+
+843
+00:39:08,970 --> 00:39:10,680
+we can't commit this transaction because
+
+844
+00:39:10,680 --> 00:39:13,640
+it computed with garbage instead of
+
+845
+00:39:13,640 --> 00:39:18,450
+consistent read values and so if the
+
+846
+00:39:18,450 --> 00:39:21,900
+validation succeeds then you commit and
+
+847
+00:39:21,900 --> 00:39:24,150
+if the validation doesn't succeed if you
+
+848
+00:39:24,150 --> 00:39:25,529
+detect somebody else was messing with
+
+849
+00:39:25,529 --> 00:39:26,910
+the data while you were trying to use it
+
+850
+00:39:26,910 --> 00:39:29,099
+at abort so that means that if there's
+
+851
+00:39:29,099 --> 00:39:33,630
+conflicts if you're reading or writing
+
+852
+00:39:33,630 --> 00:39:35,880
+data and some other transactions also
+
+853
+00:39:35,880 --> 00:39:38,780
+modifying at the same time
+
+854
+00:39:38,780 --> 00:39:41,130
+optimistic schemes abort at that point
+
+855
+00:39:41,130 --> 00:39:43,290
+because the computation is already
+
+856
+00:39:43,290 --> 00:39:45,809
+incorrect at the commit point that is
+
+857
+00:39:45,809 --> 00:39:47,880
+you already read the damage data you
+
+858
+00:39:47,880 --> 00:39:49,980
+weren't supposed to read so there's no
+
+859
+00:39:49,980 --> 00:39:52,290
+way to for example block you know until
+
+860
+00:39:52,290 --> 00:39:53,339
+things are okay
+
+861
+00:39:53,339 --> 00:39:56,130
+instead the transactions already kind of
+
+862
+00:39:56,130 --> 00:39:57,960
+poisoned and just has to abort and
+
+863
+00:39:57,960 --> 00:40:03,750
+possibly be try okay so farm uses
+
+864
+00:40:03,750 --> 00:40:05,760
+optimistic because he wants to be able
+
+865
+00:40:05,760 --> 00:40:08,309
+to use one-sided RDMA to just read
+
+866
+00:40:08,309 --> 00:40:12,990
+whatever's there very quickly so this
+
+867
+00:40:12,990 --> 00:40:16,470
+this design was really forced by use of
+
+868
+00:40:16,470 --> 00:40:19,589
+our DMA this is often abbreviated OCC
+
+869
+00:40:19,589 --> 00:40:26,400
+for optimistic concurrency control all
+
+870
+00:40:26,400 --> 00:40:27,660
+right and then the interesting thing an
+
+871
+00:40:27,660 --> 00:40:28,890
+optimistic concurrency control protocols
+
+872
+00:40:28,890 --> 00:40:31,770
+is how validation works how do you
+
+873
+00:40:31,770 --> 00:40:33,569
+actually detect that somebody else was
+
+874
+00:40:33,569 --> 00:40:35,010
+writing the data while you were trying
+
+875
+00:40:35,010 --> 00:40:38,099
+to use it and that's actually mainly
+
+876
+00:40:38,099 --> 00:40:39,540
+gonna be what I talked about in the rest
+
+877
+00:40:39,540 --> 00:40:42,420
+of this lecture and just again though
+
+878
+00:40:42,420 --> 00:40:44,339
+just to retire this back to the top
+
+879
+00:40:44,339 --> 00:40:47,190
+level of the design what this is doing
+
+880
+00:40:47,190 --> 00:40:49,910
+for farm is that the reads can use
+
+881
+00:40:49,910 --> 00:40:56,099
+one-sided RDMA because and therefore be
+
+882
+00:40:56,099 --> 00:40:59,250
+extremely fast because we're gonna check
+
+883
+00:40:59,250 --> 00:41:07,650
+later whether the reads were okay all
+
+884
+00:41:07,650 --> 00:41:10,770
+right farms a research prototype it
+
+885
+00:41:10,770 --> 00:41:16,589
+doesn't support things like sequel it
+
+886
+00:41:16,589 --> 00:41:20,670
+supports a fairly simple API for
+
+887
+00:41:20,670 --> 00:41:23,849
+transactions this is the API just to
+
+888
+00:41:23,849 --> 00:41:26,460
+give you a tease for what a transaction
+
+889
+00:41:26,460 --> 00:41:29,099
+code might actually look like if you
+
+890
+00:41:29,099 --> 00:41:31,170
+have a transaction it's gotta to clear
+
+891
+00:41:31,170 --> 00:41:32,520
+the start of the transaction because we
+
+892
+00:41:32,520 --> 00:41:34,829
+need to say oh this particular set of
+
+893
+00:41:34,829 --> 00:41:36,690
+Reason rights needs to occur as a
+
+894
+00:41:36,690 --> 00:41:40,530
+complete transaction the code declares a
+
+895
+00:41:40,530 --> 00:41:43,170
+new transaction by calling TX create
+
+896
+00:41:43,170 --> 00:41:45,140
+this is all laid out by the way in the
+
+897
+00:41:45,140 --> 00:41:47,640
+paper I think from 2014 a slightly
+
+898
+00:41:47,640 --> 00:41:51,080
+earlier paper by the same authors
+
+899
+00:41:51,080 --> 00:41:53,120
+you create a new transaction and then
+
+900
+00:41:53,120 --> 00:41:55,760
+you explicitly read those functions to
+
+901
+00:41:55,760 --> 00:42:02,360
+read objects and you have to supply an
+
+902
+00:42:02,360 --> 00:42:06,380
+object identifier an OID indicating what
+
+903
+00:42:06,380 --> 00:42:08,420
+object you want to read then you get
+
+904
+00:42:08,420 --> 00:42:10,070
+back some object and you can modify the
+
+905
+00:42:10,070 --> 00:42:12,200
+object in local memory and we didn't
+
+906
+00:42:12,200 --> 00:42:14,900
+write it you have a copy of it that
+
+907
+00:42:14,900 --> 00:42:16,790
+you've read from the server the TX read
+
+908
+00:42:16,790 --> 00:42:18,350
+back from the server so you know you
+
+909
+00:42:18,350 --> 00:42:22,450
+might increment some field in the object
+
+910
+00:42:22,450 --> 00:42:26,420
+and then when you want to update an
+
+911
+00:42:26,420 --> 00:42:30,980
+object you call this TX right and again
+
+912
+00:42:30,980 --> 00:42:34,730
+you give it the object ID and the new
+
+913
+00:42:34,730 --> 00:42:37,070
+object contents and finally when you're
+
+914
+00:42:37,070 --> 00:42:39,590
+through with all of this you've got to
+
+915
+00:42:39,590 --> 00:42:41,090
+tell the assistant to commit this
+
+916
+00:42:41,090 --> 00:42:44,000
+transaction actually do validation and
+
+917
+00:42:44,000 --> 00:42:46,310
+if it succeeds cause the rights to
+
+918
+00:42:46,310 --> 00:42:48,500
+really take effect and be visible and
+
+919
+00:42:48,500 --> 00:42:53,000
+you call this commit routine the
+
+920
+00:42:53,000 --> 00:42:54,290
+community team runs a whole bunch of
+
+921
+00:42:54,290 --> 00:42:56,350
+stuff in figure 4 which we'll talk about
+
+922
+00:42:56,350 --> 00:42:59,270
+and it returns this okay value and it's
+
+923
+00:42:59,270 --> 00:43:02,330
+required to tell the application oh did
+
+924
+00:43:02,330 --> 00:43:04,490
+the commit succeed or was it aborted so
+
+925
+00:43:04,490 --> 00:43:07,370
+we need the return this okay return
+
+926
+00:43:07,370 --> 00:43:09,830
+valued you know correctly indicate by
+
+927
+00:43:09,830 --> 00:43:13,220
+the transaction succeeded okay there's
+
+928
+00:43:13,220 --> 00:43:16,310
+some questions one is question since OCC
+
+929
+00:43:16,310 --> 00:43:20,210
+aborts if there's contention question is
+
+930
+00:43:20,210 --> 00:43:23,180
+whether retries involve exponential
+
+931
+00:43:23,180 --> 00:43:25,850
+back-off because otherwise it seems like
+
+932
+00:43:25,850 --> 00:43:29,060
+if you just instantly be tried and that
+
+933
+00:43:29,060 --> 00:43:32,990
+there were a lot of transactions all
+
+934
+00:43:32,990 --> 00:43:34,400
+trying to update the same value at the
+
+935
+00:43:34,400 --> 00:43:36,050
+same time they'd all aboard they'd all
+
+936
+00:43:36,050 --> 00:43:39,470
+retry and waste a lot of time and I
+
+937
+00:43:39,470 --> 00:43:40,700
+don't know the answer to that question I
+
+938
+00:43:40,700 --> 00:43:42,230
+don't remember seeing them mentioning
+
+939
+00:43:42,230 --> 00:43:44,240
+exponential back-off in the paper but it
+
+940
+00:43:44,240 --> 00:43:46,900
+would make a huge amount of sense to
+
+941
+00:43:46,900 --> 00:43:49,550
+delay between retries and to increase
+
+942
+00:43:49,550 --> 00:43:52,940
+the delay to give somebody a chance of
+
+943
+00:43:52,940 --> 00:43:56,260
+succeeding this is much like the
+
+944
+00:43:56,260 --> 00:43:59,490
+randomization of the raft collects
+
+945
+00:43:59,490 --> 00:44:04,080
+Tanner's another question is the farm
+
+946
+00:44:04,080 --> 00:44:05,970
+API closer in spirit to a no sequel
+
+947
+00:44:05,970 --> 00:44:09,030
+database yeah you know that's one way of
+
+948
+00:44:09,030 --> 00:44:12,300
+viewing it it really that it doesn't
+
+949
+00:44:12,300 --> 00:44:15,869
+have any of the fancy query stuff like
+
+950
+00:44:15,869 --> 00:44:19,200
+joins for example that sequel has it's
+
+951
+00:44:19,200 --> 00:44:20,490
+really a very low-level kind of
+
+952
+00:44:20,490 --> 00:44:25,050
+readwrite interface plus the transaction
+
+953
+00:44:25,050 --> 00:44:27,119
+support so you you can sort of view it
+
+954
+00:44:27,119 --> 00:44:30,600
+as a no sequel database maybe with with
+
+955
+00:44:30,600 --> 00:44:36,570
+transactions all right this is what a
+
+956
+00:44:36,570 --> 00:44:40,410
+transaction looks like and these are all
+
+957
+00:44:40,410 --> 00:44:41,880
+these are library calls created
+
+958
+00:44:41,880 --> 00:44:44,460
+read/write commit commit as a sort of
+
+959
+00:44:44,460 --> 00:44:46,500
+complex write recall that actually runs
+
+960
+00:44:46,500 --> 00:44:49,710
+the transaction coordinator code first
+
+961
+00:44:49,710 --> 00:44:52,200
+what a rare variant of two-phase commit
+
+962
+00:44:52,200 --> 00:44:56,460
+this described in figure four just
+
+963
+00:44:56,460 --> 00:44:59,100
+repeat that the while the recall goes
+
+964
+00:44:59,100 --> 00:45:00,420
+off and actually reads the relevant
+
+965
+00:45:00,420 --> 00:45:04,109
+server the right call just locally
+
+966
+00:45:04,109 --> 00:45:08,100
+buffers then the new the modified object
+
+967
+00:45:08,100 --> 00:45:10,560
+and it's only in commit that the objects
+
+968
+00:45:10,560 --> 00:45:14,280
+are sent to the servers these object IDs
+
+969
+00:45:14,280 --> 00:45:17,790
+are actually compound identifiers for
+
+970
+00:45:17,790 --> 00:45:19,710
+objects and they contain two parts one
+
+971
+00:45:19,710 --> 00:45:25,530
+is the identify a region which is that
+
+972
+00:45:25,530 --> 00:45:27,359
+all the memory of all the servers is
+
+973
+00:45:27,359 --> 00:45:29,460
+split up into these regions and the
+
+974
+00:45:29,460 --> 00:45:31,580
+configuration manager sort of tracks
+
+975
+00:45:31,580 --> 00:45:34,619
+which servers replicate which region
+
+976
+00:45:34,619 --> 00:45:36,630
+number so there's a reason number in
+
+977
+00:45:36,630 --> 00:45:40,980
+here and then and then you you know you
+
+978
+00:45:40,980 --> 00:45:42,750
+client can look up in a table the
+
+979
+00:45:42,750 --> 00:45:44,609
+current primary and backups for a given
+
+980
+00:45:44,609 --> 00:45:46,020
+region number and then there's an
+
+981
+00:45:46,020 --> 00:45:47,940
+address such as the straight memory
+
+982
+00:45:47,940 --> 00:45:53,510
+address within that region and so the
+
+983
+00:45:53,510 --> 00:45:55,470
+client uses the reason number to pick
+
+984
+00:45:55,470 --> 00:45:57,390
+the primary in the backup to talk to and
+
+985
+00:45:57,390 --> 00:46:00,000
+then it hands the address to the our DMA
+
+986
+00:46:00,000 --> 00:46:03,060
+NIC and tells it look please read at
+
+987
+00:46:03,060 --> 00:46:05,310
+this address in order to get fetch this
+
+988
+00:46:05,310 --> 00:46:07,760
+object
+
+989
+00:46:11,700 --> 00:46:14,920
+alright another piece of detail we have
+
+990
+00:46:14,920 --> 00:46:17,920
+to get out of the way is to look at the
+
+991
+00:46:17,920 --> 00:46:25,630
+server memory layout I'm in any one
+
+992
+00:46:25,630 --> 00:46:29,770
+server there's a bunch of stuff in
+
+993
+00:46:29,770 --> 00:46:33,040
+memory so one part is that the server
+
+994
+00:46:33,040 --> 00:46:37,630
+has in its memory its if it's it's
+
+995
+00:46:37,630 --> 00:46:39,160
+replicating one or more regions it has
+
+996
+00:46:39,160 --> 00:46:41,860
+the actual regions and or what a reason
+
+997
+00:46:41,860 --> 00:46:43,000
+contains is a whole bunch of these
+
+998
+00:46:43,000 --> 00:46:47,140
+objects and each object there's a lot of
+
+999
+00:46:47,140 --> 00:46:52,720
+objects objects sitting in memory each
+
+1000
+00:46:52,720 --> 00:46:58,810
+object has in it a header which contains
+
+1001
+00:46:58,810 --> 00:47:00,760
+the version number so these are
+
+1002
+00:47:00,760 --> 00:47:03,070
+versioned objects but each object only
+
+1003
+00:47:03,070 --> 00:47:07,290
+has one version at a time so this is
+
+1004
+00:47:07,290 --> 00:47:13,630
+version number and in the high bit let
+
+1005
+00:47:13,630 --> 00:47:15,790
+me try again here and the high bit of
+
+1006
+00:47:15,790 --> 00:47:17,680
+each version number is a lock flag so in
+
+1007
+00:47:17,680 --> 00:47:19,000
+the header of an object there's a lock
+
+1008
+00:47:19,000 --> 00:47:21,940
+flag and the high bit and then a version
+
+1009
+00:47:21,940 --> 00:47:26,290
+number in a little bit and then the
+
+1010
+00:47:26,290 --> 00:47:29,800
+actual data of the object so each object
+
+1011
+00:47:29,800 --> 00:47:31,900
+has the same servers memory it's the
+
+1012
+00:47:31,900 --> 00:47:33,640
+same layout a lock bit in the high bit
+
+1013
+00:47:33,640 --> 00:47:37,120
+and the current version number a little
+
+1014
+00:47:37,120 --> 00:47:39,000
+bit and every time the system writes
+
+1015
+00:47:39,000 --> 00:47:41,500
+modifies an object it increases the
+
+1016
+00:47:41,500 --> 00:47:42,790
+version number and let's see how the
+
+1017
+00:47:42,790 --> 00:47:44,820
+lock bits are used in a couple minutes
+
+1018
+00:47:44,820 --> 00:47:47,710
+in addition in the server's memory there
+
+1019
+00:47:47,710 --> 00:47:52,590
+are pairs of cue pairs of message queues
+
+1020
+00:47:52,590 --> 00:47:58,060
+and logs one for every other computer in
+
+1021
+00:47:58,060 --> 00:48:03,400
+the system so that means that you know
+
+1022
+00:48:03,400 --> 00:48:09,040
+if there's four other servers in the
+
+1023
+00:48:09,040 --> 00:48:11,440
+system that are running or if there's
+
+1024
+00:48:11,440 --> 00:48:12,720
+four servers that are running
+
+1025
+00:48:12,720 --> 00:48:15,130
+transactions there's going to be four
+
+1026
+00:48:15,130 --> 00:48:18,640
+logs sitting in memory that can be
+
+1027
+00:48:18,640 --> 00:48:21,640
+appended to with our DMA one for each of
+
+1028
+00:48:21,640 --> 00:48:23,220
+the other servers and that means that
+
+1029
+00:48:23,220 --> 00:48:25,780
+one for each of the other computers can
+
+1030
+00:48:25,780 --> 00:48:27,130
+run transactions so that means that the
+
+1031
+00:48:27,130 --> 00:48:31,330
+transaction code running on you know so
+
+1032
+00:48:31,330 --> 00:48:33,310
+number of them you know it's the
+
+1033
+00:48:33,310 --> 00:48:36,160
+transaction code running on computer to
+
+1034
+00:48:36,160 --> 00:48:39,160
+when it wants to talk to this server and
+
+1035
+00:48:39,160 --> 00:48:42,280
+append to its log which as well see it's
+
+1036
+00:48:42,280 --> 00:48:45,280
+actually going to append to server twos
+
+1037
+00:48:45,280 --> 00:48:47,470
+log in this servers memory so there's a
+
+1038
+00:48:47,470 --> 00:48:49,930
+total N squared of these queues floating
+
+1039
+00:48:49,930 --> 00:48:54,000
+around in in in each servers memory and
+
+1040
+00:48:54,000 --> 00:48:56,440
+it certainly seems like there's actually
+
+1041
+00:48:56,440 --> 00:48:59,100
+one set of logs which are meant to be I
+
+1042
+00:48:59,100 --> 00:49:03,330
+would non-volatile and then also
+
+1043
+00:49:03,330 --> 00:49:06,940
+possibly a separate set of message
+
+1044
+00:49:06,940 --> 00:49:09,070
+queues which are used just for more RPC
+
+1045
+00:49:09,070 --> 00:49:12,610
+like communication again one in each
+
+1046
+00:49:12,610 --> 00:49:14,320
+server one queue message incoming
+
+1047
+00:49:14,320 --> 00:49:16,480
+message cube per other server written
+
+1048
+00:49:16,480 --> 00:49:28,240
+with our DMA writes all right actually
+
+1049
+00:49:28,240 --> 00:49:31,480
+the next thing to talk about is a year
+
+1050
+00:49:31,480 --> 00:49:33,040
+four in the paper
+
+1051
+00:49:33,040 --> 00:49:39,150
+this is feet four and this explains the
+
+1052
+00:49:39,150 --> 00:49:46,480
+occ commit protocol that farm uses and
+
+1053
+00:49:46,480 --> 00:49:48,370
+I'm gonna go through mostly steps one by
+
+1054
+00:49:48,370 --> 00:49:51,190
+one and actually to to begin with I'm
+
+1055
+00:49:51,190 --> 00:49:52,600
+gonna focus only on the concurrency
+
+1056
+00:49:52,600 --> 00:49:55,420
+control part of this it turns out these
+
+1057
+00:49:55,420 --> 00:49:58,740
+steps also do replication as well as
+
+1058
+00:49:58,740 --> 00:50:01,840
+implement serializable transactions but
+
+1059
+00:50:01,840 --> 00:50:04,600
+we'll talk about the replication for
+
+1060
+00:50:04,600 --> 00:50:07,990
+fault tolerance a little bit later okay
+
+1061
+00:50:07,990 --> 00:50:08,980
+so the first thing that happens is the
+
+1062
+00:50:08,980 --> 00:50:11,440
+execute phase and this is the TX reads
+
+1063
+00:50:11,440 --> 00:50:13,750
+and TX writes the reason writes that the
+
+1064
+00:50:13,750 --> 00:50:17,050
+client transaction is doing and so each
+
+1065
+00:50:17,050 --> 00:50:19,210
+of these arrows here what this means is
+
+1066
+00:50:19,210 --> 00:50:21,190
+that the transaction runs on computer C
+
+1067
+00:50:21,190 --> 00:50:22,270
+and when
+
+1068
+00:50:22,270 --> 00:50:26,320
+needs to read something it uses
+
+1069
+00:50:26,320 --> 00:50:29,200
+one-sided RDMA we to simply read it out
+
+1070
+00:50:29,200 --> 00:50:31,990
+of the relevant primary servers memory
+
+1071
+00:50:31,990 --> 00:50:34,980
+so what we got here was a primary backup
+
+1072
+00:50:34,980 --> 00:50:37,450
+primary backup primary backup for three
+
+1073
+00:50:37,450 --> 00:50:39,010
+different shards and we're imagining
+
+1074
+00:50:39,010 --> 00:50:42,370
+that our transaction read something from
+
+1075
+00:50:42,370 --> 00:50:44,470
+one object from each of these shards
+
+1076
+00:50:44,470 --> 00:50:47,740
+using one-sided RDMA reason that means
+
+1077
+00:50:47,740 --> 00:50:50,920
+these blindingly fast five microseconds
+
+1078
+00:50:50,920 --> 00:50:54,670
+each okay so the client reads everything
+
+1079
+00:50:54,670 --> 00:50:56,350
+it needs to read for the transaction
+
+1080
+00:50:56,350 --> 00:50:58,360
+also anything that's going to write it
+
+1081
+00:50:58,360 --> 00:51:01,510
+first reads and it has to do it do this
+
+1082
+00:51:01,510 --> 00:51:04,330
+read has to first read because it needs
+
+1083
+00:51:04,330 --> 00:51:05,980
+to get the version number
+
+1084
+00:51:05,980 --> 00:51:08,830
+the initial version number all right so
+
+1085
+00:51:08,830 --> 00:51:11,860
+that's the execute phase then when the
+
+1086
+00:51:11,860 --> 00:51:14,290
+transaction calls TX commits to indicate
+
+1087
+00:51:14,290 --> 00:51:18,640
+that it's totally done the library on
+
+1088
+00:51:18,640 --> 00:51:21,220
+the you know the TX commit call on on
+
+1089
+00:51:21,220 --> 00:51:22,750
+the client acts as a transaction
+
+1090
+00:51:22,750 --> 00:51:26,410
+coordinator and runs this whole protocol
+
+1091
+00:51:26,410 --> 00:51:28,770
+which is a kind of elaborate version of
+
+1092
+00:51:28,770 --> 00:51:35,910
+two-phase commit the first phase and
+
+1093
+00:51:35,910 --> 00:51:38,620
+that's described in terms of rounds of
+
+1094
+00:51:38,620 --> 00:51:40,060
+messages so the transaction coordinator
+
+1095
+00:51:40,060 --> 00:51:41,740
+sends a bunch of LOC messages and wait
+
+1096
+00:51:41,740 --> 00:51:43,660
+for them to reply and then validate
+
+1097
+00:51:43,660 --> 00:51:45,340
+messages and waste for the all the
+
+1098
+00:51:45,340 --> 00:51:48,250
+replies so the first phase in the commit
+
+1099
+00:51:48,250 --> 00:51:51,580
+protocol is the lock fees in this phase
+
+1100
+00:51:51,580 --> 00:51:55,060
+what the client is sending is it sends
+
+1101
+00:51:55,060 --> 00:52:00,130
+to each primary the identity of the
+
+1102
+00:52:00,130 --> 00:52:02,410
+object in for each object for clients
+
+1103
+00:52:02,410 --> 00:52:03,850
+written and needs to send that updated
+
+1104
+00:52:03,850 --> 00:52:06,610
+object to the relevant primary so it
+
+1105
+00:52:06,610 --> 00:52:09,040
+sends the updated objects the primary
+
+1106
+00:52:09,040 --> 00:52:15,160
+and as an as a new log entry in the
+
+1107
+00:52:15,160 --> 00:52:18,220
+primaries log you know for this client
+
+1108
+00:52:18,220 --> 00:52:20,380
+so the client really abusing already
+
+1109
+00:52:20,380 --> 00:52:22,660
+made to append to the primaries log and
+
+1110
+00:52:22,660 --> 00:52:27,220
+what it's appending is the object ID of
+
+1111
+00:52:27,220 --> 00:52:28,720
+the writ of the object wants to write
+
+1112
+00:52:28,720 --> 00:52:30,820
+the version number that the client
+
+1113
+00:52:30,820 --> 00:52:33,840
+initially read when it read the object
+
+1114
+00:52:33,840 --> 00:52:36,270
+and the new value
+
+1115
+00:52:36,270 --> 00:52:38,430
+so it appends the object of yours number
+
+1116
+00:52:38,430 --> 00:52:42,270
+and new value to the primary logon for
+
+1117
+00:52:42,270 --> 00:52:43,440
+the primary beach of the charge that
+
+1118
+00:52:43,440 --> 00:52:48,960
+it's written an object in so these I
+
+1119
+00:52:48,960 --> 00:52:51,170
+guess what's going on here is that the
+
+1120
+00:52:51,170 --> 00:52:53,460
+this transaction wrote two different
+
+1121
+00:52:53,460 --> 00:52:55,320
+objects one on primary one and the other
+
+1122
+00:52:55,320 --> 00:52:57,630
+on primary to know when this is done
+
+1123
+00:52:57,630 --> 00:52:59,640
+when the transaction coordinator gets
+
+1124
+00:52:59,640 --> 00:53:05,280
+back the well alright so now the these
+
+1125
+00:53:05,280 --> 00:53:07,050
+new log records are sitting in the logs
+
+1126
+00:53:07,050 --> 00:53:09,420
+of the primaries the primary though has
+
+1127
+00:53:09,420 --> 00:53:11,640
+to actually actively process these log
+
+1128
+00:53:11,640 --> 00:53:14,370
+entries because it needs to check and
+
+1129
+00:53:14,370 --> 00:53:15,960
+they sort of do a number of checks
+
+1130
+00:53:15,960 --> 00:53:18,560
+involved with validation to see if the
+
+1131
+00:53:18,560 --> 00:53:20,910
+if this primary is part of the
+
+1132
+00:53:20,910 --> 00:53:23,160
+transaction can be allowed to commit so
+
+1133
+00:53:23,160 --> 00:53:25,770
+at this point we have to wait for each
+
+1134
+00:53:25,770 --> 00:53:30,480
+primary to to poll the this clients log
+
+1135
+00:53:30,480 --> 00:53:32,190
+in the primaries memory see that there's
+
+1136
+00:53:32,190 --> 00:53:34,320
+a new log entry and process that new log
+
+1137
+00:53:34,320 --> 00:53:39,210
+entry and then send a yes-or-no vote to
+
+1138
+00:53:39,210 --> 00:53:40,710
+say whether it is or is not willing to
+
+1139
+00:53:40,710 --> 00:53:43,740
+do its part of the transaction all right
+
+1140
+00:53:43,740 --> 00:53:46,280
+so what does the primary do when it's
+
+1141
+00:53:46,280 --> 00:53:51,540
+polling loop sees that an incoming lock
+
+1142
+00:53:51,540 --> 00:53:56,430
+log entry from a client first of all if
+
+1143
+00:53:56,430 --> 00:53:58,500
+that object with the object ID is
+
+1144
+00:53:58,500 --> 00:54:02,040
+currently blocked then the primary
+
+1145
+00:54:02,040 --> 00:54:05,280
+rejects this lock message and sends back
+
+1146
+00:54:05,280 --> 00:54:07,500
+a message to the client using RDMA
+
+1147
+00:54:07,500 --> 00:54:09,600
+saying no that this transaction cannot
+
+1148
+00:54:09,600 --> 00:54:11,790
+be allowed to proceed I'm voting no and
+
+1149
+00:54:11,790 --> 00:54:13,470
+two-phase commit and that will cause the
+
+1150
+00:54:13,470 --> 00:54:14,940
+transaction coordinator to abort the
+
+1151
+00:54:14,940 --> 00:54:18,290
+transaction and the other is not locked
+
+1152
+00:54:18,290 --> 00:54:21,030
+then the next thing the primary does is
+
+1153
+00:54:21,030 --> 00:54:22,770
+check the version numbers it checks to
+
+1154
+00:54:22,770 --> 00:54:24,150
+make sure that the version number that
+
+1155
+00:54:24,150 --> 00:54:26,190
+the client sent it that is the version
+
+1156
+00:54:26,190 --> 00:54:28,430
+number of the client originally read is
+
+1157
+00:54:28,430 --> 00:54:31,830
+unchanged and if the version numbers
+
+1158
+00:54:31,830 --> 00:54:34,290
+changed that means that between when our
+
+1159
+00:54:34,290 --> 00:54:35,850
+transaction read and when it wrote
+
+1160
+00:54:35,850 --> 00:54:38,760
+somebody else wrote the object if the
+
+1161
+00:54:38,760 --> 00:54:39,900
+version numbers changed and so the
+
+1162
+00:54:39,900 --> 00:54:41,790
+version numbers changed again the
+
+1163
+00:54:41,790 --> 00:54:44,340
+primary will respond no and forbid the
+
+1164
+00:54:44,340 --> 00:54:47,040
+transaction from continuing but if the
+
+1165
+00:54:47,040 --> 00:54:48,240
+version number is the same in the lock
+
+1166
+00:54:48,240 --> 00:54:50,840
+that's not set
+
+1167
+00:54:51,080 --> 00:54:57,980
+and the primary will set the lock and
+
+1168
+00:54:57,980 --> 00:55:00,480
+return a positive response back to the
+
+1169
+00:55:00,480 --> 00:55:06,090
+client now because the primary's
+
+1170
+00:55:06,090 --> 00:55:08,160
+multi-threaded running on multiple CPUs
+
+1171
+00:55:08,160 --> 00:55:10,880
+and there may be other transactions
+
+1172
+00:55:10,880 --> 00:55:13,800
+there may be other CPUs reading other
+
+1173
+00:55:13,800 --> 00:55:16,290
+incoming log cues from other clients at
+
+1174
+00:55:16,290 --> 00:55:18,900
+the same time on the same primary there
+
+1175
+00:55:18,900 --> 00:55:20,250
+may be races between different
+
+1176
+00:55:20,250 --> 00:55:23,490
+transactions or lock the clock record
+
+1177
+00:55:23,490 --> 00:55:26,480
+processing from different transactions
+
+1178
+00:55:26,480 --> 00:55:29,640
+trying to modify the same object so the
+
+1179
+00:55:29,640 --> 00:55:31,590
+primary actually uses an atomic
+
+1180
+00:55:31,590 --> 00:55:33,600
+instruction a compare and swap
+
+1181
+00:55:33,600 --> 00:55:39,840
+instruction in order to both check check
+
+1182
+00:55:39,840 --> 00:55:42,030
+the version number and lock and set the
+
+1183
+00:55:42,030 --> 00:55:44,820
+lock a bit on that version number as an
+
+1184
+00:55:44,820 --> 00:55:46,920
+atomic operation and this is the reason
+
+1185
+00:55:46,920 --> 00:55:48,450
+why the lock of it has to be in the high
+
+1186
+00:55:48,450 --> 00:55:49,770
+bits of the version number so that a
+
+1187
+00:55:49,770 --> 00:55:55,140
+single instruction can do a compare and
+
+1188
+00:55:55,140 --> 00:55:57,000
+swap on the version number and the lock
+
+1189
+00:55:57,000 --> 00:56:02,180
+bit okay now one thing to note is that
+
+1190
+00:56:02,180 --> 00:56:05,160
+if the objects already locked
+
+1191
+00:56:05,160 --> 00:56:07,500
+there's no blocking there's no waiting
+
+1192
+00:56:07,500 --> 00:56:09,000
+for the lock to be released the primary
+
+1193
+00:56:09,000 --> 00:56:12,210
+simply sends back a know if some other
+
+1194
+00:56:12,210 --> 00:56:15,060
+transaction has it locked alright any
+
+1195
+00:56:15,060 --> 00:56:18,390
+questions about the lock fees of of
+
+1196
+00:56:18,390 --> 00:56:23,760
+Committee all right back in the trend
+
+1197
+00:56:23,760 --> 00:56:25,230
+head in the client which is acting his
+
+1198
+00:56:25,230 --> 00:56:26,520
+transaction coordinator it waits for
+
+1199
+00:56:26,520 --> 00:56:28,950
+responses from all the primaries from
+
+1200
+00:56:28,950 --> 00:56:31,950
+the primaries of the shard so for every
+
+1201
+00:56:31,950 --> 00:56:34,740
+object that the transaction modified if
+
+1202
+00:56:34,740 --> 00:56:37,050
+any of them say no if they need them
+
+1203
+00:56:37,050 --> 00:56:38,190
+reject the transaction then the
+
+1204
+00:56:38,190 --> 00:56:39,840
+transaction coordinator aborts the whole
+
+1205
+00:56:39,840 --> 00:56:42,180
+transaction and actually sends out
+
+1206
+00:56:42,180 --> 00:56:43,920
+messages to all the primaries saying I
+
+1207
+00:56:43,920 --> 00:56:46,590
+changed my mind I don't want to commit
+
+1208
+00:56:46,590 --> 00:56:48,990
+this transaction after all but if they
+
+1209
+00:56:48,990 --> 00:56:50,550
+all answered yes of all the primaries
+
+1210
+00:56:50,550 --> 00:56:54,600
+answer yes then the transaction
+
+1211
+00:56:54,600 --> 00:56:56,820
+coordinator thinks that decides that the
+
+1212
+00:56:56,820 --> 00:57:00,000
+transaction can actually commit but the
+
+1213
+00:57:00,000 --> 00:57:01,410
+primaries of course don't know whether
+
+1214
+00:57:01,410 --> 00:57:02,820
+they all voted yes
+
+1215
+00:57:02,820 --> 00:57:05,550
+or not so the transaction coordinator
+
+1216
+00:57:05,550 --> 00:57:07,980
+has to notify every ball the primary so
+
+1217
+00:57:07,980 --> 00:57:10,560
+yes deed everybody voted yes so please
+
+1218
+00:57:10,560 --> 00:57:14,660
+do actually commit this and the way the
+
+1219
+00:57:14,660 --> 00:57:17,400
+client does this is by appending another
+
+1220
+00:57:17,400 --> 00:57:20,640
+record to the logs of the primaries for
+
+1221
+00:57:20,640 --> 00:57:23,070
+each modified object this time it's a
+
+1222
+00:57:23,070 --> 00:57:26,450
+commit backup record that it's a pending
+
+1223
+00:57:26,450 --> 00:57:30,360
+and the this time the transaction
+
+1224
+00:57:30,360 --> 00:57:33,720
+coordinator I'm sorry I did commit
+
+1225
+00:57:33,720 --> 00:57:35,910
+primary I'm skipping over valide didn't
+
+1226
+00:57:35,910 --> 00:57:37,170
+commit backup for now I'll talk about
+
+1227
+00:57:37,170 --> 00:57:39,630
+those later so just ignore those for the
+
+1228
+00:57:39,630 --> 00:57:42,030
+moment the transaction coordinator goes
+
+1229
+00:57:42,030 --> 00:57:44,250
+on to commit primary sends pens that
+
+1230
+00:57:44,250 --> 00:57:47,340
+commit primary to each primaries log and
+
+1231
+00:57:47,340 --> 00:57:49,230
+the transaction coordinator only has to
+
+1232
+00:57:49,230 --> 00:57:51,710
+wait for the hardware RDMA
+
+1233
+00:57:51,710 --> 00:57:54,270
+acknowledgments it doesn't have to wait
+
+1234
+00:57:54,270 --> 00:57:58,440
+for the primary just actually process
+
+1235
+00:57:58,440 --> 00:58:01,050
+the log record the transaction
+
+1236
+00:58:01,050 --> 00:58:02,910
+coordinator it turns out as soon as it
+
+1237
+00:58:02,910 --> 00:58:04,560
+gets a single acknowledgment from any of
+
+1238
+00:58:04,560 --> 00:58:08,760
+the primaries it can return yes the okay
+
+1239
+00:58:08,760 --> 00:58:10,590
+equals true to the transactions
+
+1240
+00:58:10,590 --> 00:58:12,950
+signifying that the transaction six
+
+1241
+00:58:12,950 --> 00:58:16,050
+succeeded and then there's another stage
+
+1242
+00:58:16,050 --> 00:58:20,100
+later on where the once the transaction
+
+1243
+00:58:20,100 --> 00:58:21,900
+coordinator knows that every primary
+
+1244
+00:58:21,900 --> 00:58:24,360
+knows that the transaction coordinated
+
+1245
+00:58:24,360 --> 00:58:29,430
+committed you can tell all the primaries
+
+1246
+00:58:29,430 --> 00:58:30,630
+that they can discard all the log
+
+1247
+00:58:30,630 --> 00:58:35,250
+entries for this transaction okay now
+
+1248
+00:58:35,250 --> 00:58:37,800
+there's one last thing that has to
+
+1249
+00:58:37,800 --> 00:58:40,080
+happen the primaries which are looking
+
+1250
+00:58:40,080 --> 00:58:42,410
+at the logs their polling the Long's
+
+1251
+00:58:42,410 --> 00:58:44,370
+they'll notice that there's a commit
+
+1252
+00:58:44,370 --> 00:58:46,830
+primary record at some point and then on
+
+1253
+00:58:46,830 --> 00:58:49,050
+the primary that receives the commit
+
+1254
+00:58:49,050 --> 00:58:53,100
+primary log entry will it knows that it
+
+1255
+00:58:53,100 --> 00:58:58,020
+had locked that object previously and
+
+1256
+00:58:58,020 --> 00:58:59,430
+that the object must still be locked so
+
+1257
+00:58:59,430 --> 00:59:01,710
+what the primary will do is update the
+
+1258
+00:59:01,710 --> 00:59:03,420
+object in its memory with the new
+
+1259
+00:59:03,420 --> 00:59:05,430
+contents that were previously sent in
+
+1260
+00:59:05,430 --> 00:59:07,500
+the lock message I'm increment the
+
+1261
+00:59:07,500 --> 00:59:09,030
+version number associated with that
+
+1262
+00:59:09,030 --> 00:59:11,130
+object and finally clear the lock bit on
+
+1263
+00:59:11,130 --> 00:59:13,860
+that object and what that means is that
+
+1264
+00:59:13,860 --> 00:59:16,190
+as soon as a primary
+
+1265
+00:59:16,190 --> 00:59:18,710
+receives and processes a commit primary
+
+1266
+00:59:18,710 --> 00:59:21,740
+log message it may since it clears the
+
+1267
+00:59:21,740 --> 00:59:24,349
+lock a bit and updates the data it may
+
+1268
+00:59:24,349 --> 00:59:27,079
+well expose this new data to other
+
+1269
+00:59:27,079 --> 00:59:28,700
+transactions other transactions after
+
+1270
+00:59:28,700 --> 00:59:30,920
+this point are free to use it are free
+
+1271
+00:59:30,920 --> 00:59:34,099
+to use the object with its new value and
+
+1272
+00:59:34,099 --> 00:59:40,720
+new version number all right I'm gonna
+
+1273
+00:59:40,720 --> 00:59:44,300
+do an example any questions about the
+
+1274
+00:59:44,300 --> 00:59:46,520
+machinery before I start thinking about
+
+1275
+00:59:46,520 --> 00:59:51,880
+an example feel free to ask questions
+
+1276
+00:59:51,880 --> 00:59:55,520
+any time alright so how about an example
+
+1277
+00:59:55,520 --> 00:59:59,150
+let's suppose we have two transactions
+
+1278
+00:59:59,150 --> 01:00:02,089
+transaction one and transaction two and
+
+1279
+01:00:02,089 --> 01:00:03,349
+they're both trying to do the same thing
+
+1280
+01:00:03,349 --> 01:00:09,800
+they both just wanna increment X X is
+
+1281
+01:00:09,800 --> 01:00:12,380
+the object sitting off in some servers
+
+1282
+01:00:12,380 --> 01:00:18,050
+memory so so both we got two
+
+1283
+01:00:18,050 --> 01:00:19,460
+transactions running running through
+
+1284
+01:00:19,460 --> 01:00:21,050
+this before we look into what actually
+
+1285
+01:00:21,050 --> 01:00:22,940
+happens we should remind ourselves what
+
+1286
+01:00:22,940 --> 01:00:26,420
+the valid possibilities are for the
+
+1287
+01:00:26,420 --> 01:00:30,619
+outcomes so and that's all about
+
+1288
+01:00:30,619 --> 01:00:32,300
+serializability farm guaranteed
+
+1289
+01:00:32,300 --> 01:00:33,859
+serialize ability so that means that
+
+1290
+01:00:33,859 --> 01:00:35,690
+whatever farm actually does it has to be
+
+1291
+01:00:35,690 --> 01:00:37,940
+equivalent to some one at a time
+
+1292
+01:00:37,940 --> 01:00:40,220
+execution of these two transactions so
+
+1293
+01:00:40,220 --> 01:00:41,960
+we're allowed to see was the results you
+
+1294
+01:00:41,960 --> 01:00:44,660
+would see if t1 ran and then strictly
+
+1295
+01:00:44,660 --> 01:00:47,390
+afterwards t2 ran or we can see the
+
+1296
+01:00:47,390 --> 01:00:50,270
+results that could ensue if t2 ran and
+
+1297
+01:00:50,270 --> 01:00:52,280
+then t1 run those are the only
+
+1298
+01:00:52,280 --> 01:00:57,230
+possibilities now in fact farm is
+
+1299
+01:00:57,230 --> 01:01:00,230
+entitled to abort a transaction so we
+
+1300
+01:01:00,230 --> 01:01:01,579
+also have to consider the possibility
+
+1301
+01:01:01,579 --> 01:01:03,500
+that one of the two transactions aborted
+
+1302
+01:01:03,500 --> 01:01:06,410
+or indeed that they both aborted I since
+
+1303
+01:01:06,410 --> 01:01:08,359
+they're doing both doing the same thing
+
+1304
+01:01:08,359 --> 01:01:09,980
+there's a certain amount of symmetry
+
+1305
+01:01:09,980 --> 01:01:15,079
+here so one possibility is that they
+
+1306
+01:01:15,079 --> 01:01:18,410
+both committed and that means two
+
+1307
+01:01:18,410 --> 01:01:20,599
+increments happen so one legal
+
+1308
+01:01:20,599 --> 01:01:24,940
+possibilities that X is equal to 2 and
+
+1309
+01:01:25,359 --> 01:01:28,710
+both then the TX
+
+1310
+01:01:28,710 --> 01:01:30,390
+it has to agree with whether things a
+
+1311
+01:01:30,390 --> 01:01:35,490
+bit or aborted or committed so that both
+
+1312
+01:01:35,490 --> 01:01:40,170
+transactions need to CTX commit returned
+
+1313
+01:01:40,170 --> 01:01:44,820
+true in this case another possibility is
+
+1314
+01:01:44,820 --> 01:01:46,950
+that only one of them transactions
+
+1315
+01:01:46,950 --> 01:01:48,930
+committed and the other aborted and then
+
+1316
+01:01:48,930 --> 01:01:52,830
+we want to see only one true and the
+
+1317
+01:01:52,830 --> 01:01:56,820
+other false and another possibilities
+
+1318
+01:01:56,820 --> 01:01:58,619
+maybe they both aborted we don't think
+
+1319
+01:01:58,619 --> 01:02:00,900
+this could necessarily happen but it's
+
+1320
+01:02:00,900 --> 01:02:03,720
+actually legal so that X isn't changed
+
+1321
+01:02:03,720 --> 01:02:09,109
+and we want both to get false back from
+
+1322
+01:02:09,650 --> 01:02:14,550
+TX commit so we better better not see
+
+1323
+01:02:14,550 --> 01:02:18,859
+anything other than these three options
+
+1324
+01:02:21,230 --> 01:02:24,060
+all right so of course what happens
+
+1325
+01:02:24,060 --> 01:02:29,089
+depends on the timing so I'm going to
+
+1326
+01:02:31,550 --> 01:02:33,420
+integrate out various different ways
+
+1327
+01:02:33,420 --> 01:02:35,849
+that the commit protocol could in early
+
+1328
+01:02:35,849 --> 01:02:39,349
+even for convenience I have a handy
+
+1329
+01:02:39,349 --> 01:02:41,760
+reminder of what the actual commit
+
+1330
+01:02:41,760 --> 01:02:46,320
+protocol is here so one possibility is
+
+1331
+01:02:46,320 --> 01:02:51,930
+that they run exactly in lockstep they
+
+1332
+01:02:51,930 --> 01:02:55,470
+both send all their messages at the same
+
+1333
+01:02:55,470 --> 01:02:57,810
+time they both read at the same time I'm
+
+1334
+01:02:57,810 --> 01:02:59,339
+going to assume that X starts out as
+
+1335
+01:02:59,339 --> 01:03:00,810
+zero if they both read at the same time
+
+1336
+01:03:00,810 --> 01:03:03,119
+that we're going to see zero I assume
+
+1337
+01:03:03,119 --> 01:03:05,040
+they both sent out lakh messages at the
+
+1338
+01:03:05,040 --> 01:03:07,430
+same time
+
+1339
+01:03:08,660 --> 01:03:10,069
+and indeed they accompany their log
+
+1340
+01:03:10,069 --> 01:03:11,720
+messages with the value one since
+
+1341
+01:03:11,720 --> 01:03:13,640
+they're adding 1 to it and that if they
+
+1342
+01:03:13,640 --> 01:03:16,309
+commit if they walk messages say yes
+
+1343
+01:03:16,309 --> 01:03:19,670
+then they would if they did both commit
+
+1344
+01:03:19,670 --> 01:03:25,579
+at the same time so if if this is the
+
+1345
+01:03:25,579 --> 01:03:30,549
+scenario what's going to happen and why
+
+1346
+01:03:31,690 --> 01:03:33,750
+you
+
+1347
+01:03:34,650 --> 01:03:37,870
+they like to raise their hand and hazard
+
+1348
+01:03:37,870 --> 01:03:39,960
+a guess
+
+1349
+01:03:48,420 --> 01:03:50,350
+well that's really good field to be
+
+1350
+01:03:50,350 --> 01:03:52,480
+since that's a one-sided read can't
+
+1351
+01:03:52,480 --> 01:03:55,630
+possibly fail they're both gonna send in
+
+1352
+01:03:55,630 --> 01:03:59,920
+fact identical walk messages to whatever
+
+1353
+01:03:59,920 --> 01:04:04,270
+primary holds object X and I both send
+
+1354
+01:04:04,270 --> 01:04:06,130
+the same version number but a version
+
+1355
+01:04:06,130 --> 01:04:08,620
+number they read and the same value so
+
+1356
+01:04:08,620 --> 01:04:10,860
+the primaries gonna see to log meant to
+
+1357
+01:04:10,860 --> 01:04:14,800
+log messages in two different incoming
+
+1358
+01:04:14,800 --> 01:04:16,930
+logs assuming these are running on
+
+1359
+01:04:16,930 --> 01:04:23,680
+different clients and exactly what
+
+1360
+01:04:23,680 --> 01:04:25,660
+happens now is slightly left up to our
+
+1361
+01:04:25,660 --> 01:04:28,390
+imagination by the paper but I think the
+
+1362
+01:04:28,390 --> 01:04:29,920
+two incoming log messages could be
+
+1363
+01:04:29,920 --> 01:04:31,960
+processed in parallel on different cores
+
+1364
+01:04:31,960 --> 01:04:35,410
+on the primary but the critical
+
+1365
+01:04:35,410 --> 01:04:37,630
+instruction of the primary is the atomic
+
+1366
+01:04:37,630 --> 01:04:41,550
+test and set or compare and swap exactly
+
+1367
+01:04:41,550 --> 01:04:44,200
+somebody's volunteer the answer that one
+
+1368
+01:04:44,200 --> 01:04:46,570
+of them will get to the compare and swap
+
+1369
+01:04:46,570 --> 01:04:51,790
+instruction first and whichever core I
+
+1370
+01:04:51,790 --> 01:04:53,800
+guess the compare and swap instruction
+
+1371
+01:04:53,800 --> 01:04:58,470
+first it'll set the lock bit on that
+
+1372
+01:04:58,470 --> 01:05:00,640
+objects version and will observe the
+
+1373
+01:05:00,640 --> 01:05:03,130
+lock a bit wasn't previously set which
+
+1374
+01:05:03,130 --> 01:05:04,990
+everyone executes the atomic
+
+1375
+01:05:04,990 --> 01:05:06,880
+compare-and-swap second will observe the
+
+1376
+01:05:06,880 --> 01:05:08,890
+lock that's already set I mean he's the
+
+1377
+01:05:08,890 --> 01:05:11,020
+one of the two will return yes and the
+
+1378
+01:05:11,020 --> 01:05:13,900
+other two will fail the lock observe the
+
+1379
+01:05:13,900 --> 01:05:17,320
+lock is already set immature no and you
+
+1380
+01:05:17,320 --> 01:05:19,450
+know it for symmetry I'm just going to
+
+1381
+01:05:19,450 --> 01:05:24,070
+imagine that transaction to the primary
+
+1382
+01:05:24,070 --> 01:05:25,900
+sends back a no so the transaction to
+
+1383
+01:05:25,900 --> 01:05:29,520
+use client code will abort transaction 1
+
+1384
+01:05:29,520 --> 01:05:32,110
+I've got the lock got a yes back and it
+
+1385
+01:05:32,110 --> 01:05:35,200
+will actually commit when it come
+
+1386
+01:05:35,200 --> 01:05:38,109
+it's when the primary actually gets the
+
+1387
+01:05:38,109 --> 01:05:40,450
+commit message it'll install the updated
+
+1388
+01:05:40,450 --> 01:05:41,109
+object
+
+1389
+01:05:41,109 --> 01:05:43,750
+you know increments to to clear the lock
+
+1390
+01:05:43,750 --> 01:05:46,119
+bit increment the version and return
+
+1391
+01:05:46,119 --> 01:05:51,670
+true this is gonna say true because the
+
+1392
+01:05:51,670 --> 01:05:55,750
+other primary sent back I know that
+
+1393
+01:05:55,750 --> 01:05:57,490
+means that TX commits gonna return false
+
+1394
+01:05:57,490 --> 01:06:00,760
+here and the final value would be x
+
+1395
+01:06:00,760 --> 01:06:03,280
+equals one that was one of our allowed
+
+1396
+01:06:03,280 --> 01:06:06,400
+outcomes but of course it's not the only
+
+1397
+01:06:06,400 --> 01:06:12,070
+in are leaving any questions about how
+
+1398
+01:06:12,070 --> 01:06:16,060
+this played out or wide executed the way
+
+1399
+01:06:16,060 --> 01:06:18,300
+it did
+
+1400
+01:06:19,890 --> 01:06:21,760
+okay so there's other possible
+
+1401
+01:06:21,760 --> 01:06:25,930
+interleavings so how about how about
+
+1402
+01:06:25,930 --> 01:06:30,880
+this one let's imagine that transaction
+
+1403
+01:06:30,880 --> 01:06:33,780
+2 does the beat first
+
+1404
+01:06:33,780 --> 01:06:37,630
+she doesn't really matter what the reads
+
+1405
+01:06:37,630 --> 01:06:39,430
+are concurrent or not then transaction
+
+1406
+01:06:39,430 --> 01:06:41,080
+one doesn't read and then transaction
+
+1407
+01:06:41,080 --> 01:06:43,090
+went a little bit faster and it gets its
+
+1408
+01:06:43,090 --> 01:06:47,350
+lock message in and a reply and gets a
+
+1409
+01:06:47,350 --> 01:06:50,610
+commit back and then afterwards
+
+1410
+01:06:50,610 --> 01:06:55,560
+transaction two gets going again and
+
+1411
+01:06:55,560 --> 01:06:58,060
+sends a lock message in if it could
+
+1412
+01:06:58,060 --> 01:07:03,630
+commit so what happens this time
+
+1413
+01:07:16,690 --> 01:07:20,900
+well is this law commissioner is gonna
+
+1414
+01:07:20,900 --> 01:07:22,670
+be succeed because there's no reason to
+
+1415
+01:07:22,670 --> 01:07:24,530
+believe there's a lock bit is set
+
+1416
+01:07:24,530 --> 01:07:26,780
+because the second lock message hasn't
+
+1417
+01:07:26,780 --> 01:07:28,970
+even been sent message we'll set the
+
+1418
+01:07:28,970 --> 01:07:31,160
+lock the commit message this commit
+
+1419
+01:07:31,160 --> 01:07:32,359
+primary message should actually clear
+
+1420
+01:07:32,359 --> 01:07:35,630
+the lock a bit so the lock bit will be
+
+1421
+01:07:35,630 --> 01:07:39,920
+clear by the time t2 census inserts its
+
+1422
+01:07:39,920 --> 01:07:49,609
+lock entry in primaries log so this the
+
+1423
+01:07:49,609 --> 01:07:51,380
+primary won't see the lock a bit set at
+
+1424
+01:07:51,380 --> 01:07:54,020
+this point yeah so somebody's
+
+1425
+01:07:54,020 --> 01:07:57,829
+volunteered that what this primary will
+
+1426
+01:07:57,829 --> 01:08:00,140
+see is that the version number so the
+
+1427
+01:08:00,140 --> 01:08:01,940
+the lock message contains the version
+
+1428
+01:08:01,940 --> 01:08:03,380
+number the transaction to originally
+
+1429
+01:08:03,380 --> 01:08:05,960
+read and so the primary is gonna see
+
+1430
+01:08:05,960 --> 01:08:08,660
+wait a minute this since commit primary
+
+1431
+01:08:08,660 --> 01:08:11,079
+increments of version number the the
+
+1432
+01:08:11,079 --> 01:08:12,980
+primary is gonna see that the version
+
+1433
+01:08:12,980 --> 01:08:14,300
+number is wrong there's numbers now
+
+1434
+01:08:14,300 --> 01:08:16,100
+higher on the real object and so it's
+
+1435
+01:08:16,100 --> 01:08:20,149
+actually gonna send back a a no response
+
+1436
+01:08:20,149 --> 01:08:24,350
+to the coordinator and the coordinator
+
+1437
+01:08:24,350 --> 01:08:26,600
+is gonna abort this transaction and
+
+1438
+01:08:26,600 --> 01:08:29,420
+again we're gonna get x equals 1 one of
+
+1439
+01:08:29,420 --> 01:08:31,040
+the transactions return true the other
+
+1440
+01:08:31,040 --> 01:08:35,988
+returned false which is the same final
+
+1441
+01:08:35,988 --> 01:08:40,279
+outcome as before and it is allowed any
+
+1442
+01:08:40,279 --> 01:08:44,259
+questions about how this played out a
+
+1443
+01:08:44,259 --> 01:08:47,299
+slightly different scenario would be as
+
+1444
+01:08:47,299 --> 01:08:51,380
+if and actually okay the slightly
+
+1445
+01:08:51,380 --> 01:08:52,609
+different scenario I was gonna think of
+
+1446
+01:08:52,609 --> 01:08:54,880
+think of was one in which the commit
+
+1447
+01:08:54,880 --> 01:08:57,770
+message was stole it happened after this
+
+1448
+01:08:57,770 --> 01:08:59,870
+lock this is essentially the same as the
+
+1449
+01:08:59,870 --> 01:09:04,310
+first scenario in which this transaction
+
+1450
+01:09:04,310 --> 01:09:05,750
+got the lock set in this transaction
+
+1451
+01:09:05,750 --> 01:09:10,660
+observed lock okay
+
+1452
+01:09:10,660 --> 01:09:18,488
+everyone one last scenario let's suppose
+
+1453
+01:09:18,488 --> 01:09:21,939
+we see this
+
+1454
+01:09:32,180 --> 01:09:34,050
+what's going to happen this time
+
+1455
+01:09:34,050 --> 01:09:37,149
+[Music]
+
+1456
+01:09:47,689 --> 01:09:51,870
+yeah somebody has a right answer at the
+
+1457
+01:09:51,870 --> 01:09:53,310
+of course the first transaction will go
+
+1458
+01:09:53,310 --> 01:09:54,810
+through because there's no contention in
+
+1459
+01:09:54,810 --> 01:09:56,340
+the first transaction the second
+
+1460
+01:09:56,340 --> 01:09:58,530
+transaction when it goes to read X will
+
+1461
+01:09:58,530 --> 01:10:02,100
+actually see the new version number as
+
+1462
+01:10:02,100 --> 01:10:04,830
+incremented by the commit primary
+
+1463
+01:10:04,830 --> 01:10:07,710
+processing on the primary so it'll see
+
+1464
+01:10:07,710 --> 01:10:09,750
+the new version number the lock that
+
+1465
+01:10:09,750 --> 01:10:11,760
+won't be set and so then when it goes to
+
+1466
+01:10:11,760 --> 01:10:16,550
+send its lock log entry to the primary
+
+1467
+01:10:16,550 --> 01:10:19,140
+lock lock that locked processing code in
+
+1468
+01:10:19,140 --> 01:10:21,390
+the primary Co the locks not set and the
+
+1469
+01:10:21,390 --> 01:10:23,340
+version is the same hasn't this is the
+
+1470
+01:10:23,340 --> 01:10:24,810
+latest version and it all I want to
+
+1471
+01:10:24,810 --> 01:10:26,460
+commit and so for this the outcome we're
+
+1472
+01:10:26,460 --> 01:10:29,970
+gonna see is x equals 2 because this
+
+1473
+01:10:29,970 --> 01:10:31,290
+read not only read the new version um
+
+1474
+01:10:31,290 --> 01:10:32,580
+but actually read the new value which
+
+1475
+01:10:32,580 --> 01:10:40,490
+was one so this is incorrect here and
+
+1476
+01:10:40,490 --> 01:10:47,370
+both calls to TX commit will be true yes
+
+1477
+01:10:47,370 --> 01:10:51,080
+that's right succeed it with x equals 2
+
+1478
+01:10:51,080 --> 01:10:53,430
+all right so you know this happened to
+
+1479
+01:10:53,430 --> 01:10:56,970
+work out in these cases the intuition
+
+1480
+01:10:56,970 --> 01:10:59,730
+behind why optimistic concurrency
+
+1481
+01:10:59,730 --> 01:11:03,180
+control provides serializability why it
+
+1482
+01:11:03,180 --> 01:11:06,840
+why it basically checks that the
+
+1483
+01:11:06,840 --> 01:11:09,810
+execution that did happen is the same as
+
+1484
+01:11:09,810 --> 01:11:13,830
+a one at a time execution essentially
+
+1485
+01:11:13,830 --> 01:11:15,690
+the intuition is that if there was no
+
+1486
+01:11:15,690 --> 01:11:17,880
+conflicting transaction then the version
+
+1487
+01:11:17,880 --> 01:11:19,110
+numbers and the lock bits won't have
+
+1488
+01:11:19,110 --> 01:11:20,610
+changed if nobody else is messing with
+
+1489
+01:11:20,610 --> 01:11:23,760
+these objects you know I'll see the same
+
+1490
+01:11:23,760 --> 01:11:25,020
+version numbers at the end of the
+
+1491
+01:11:25,020 --> 01:11:27,690
+transaction as we did when we first read
+
+1492
+01:11:27,690 --> 01:11:30,420
+the object whereas if there is a
+
+1493
+01:11:30,420 --> 01:11:32,190
+conflicting transaction between when we
+
+1494
+01:11:32,190 --> 01:11:33,750
+read the object and when we try to
+
+1495
+01:11:33,750 --> 01:11:37,780
+commit a change and that conflicting
+
+1496
+01:11:37,780 --> 01:11:42,070
+modified something then if it actually
+
+1497
+01:11:42,070 --> 01:11:43,810
+started to commit we will see a new
+
+1498
+01:11:43,810 --> 01:11:47,320
+version number or a lock a bit set so
+
+1499
+01:11:47,320 --> 01:11:48,850
+the comparison of the version numbers
+
+1500
+01:11:48,850 --> 01:11:49,870
+and lock bits between when you first
+
+1501
+01:11:49,870 --> 01:11:51,190
+read the object and when you finally
+
+1502
+01:11:51,190 --> 01:11:53,830
+commit it kind of tells you whether some
+
+1503
+01:11:53,830 --> 01:11:56,370
+other commits to the objects snuck in
+
+1504
+01:11:56,370 --> 01:12:02,500
+while you were using them all right and
+
+1505
+01:12:02,500 --> 01:12:03,940
+you know the cool thing to remember here
+
+1506
+01:12:03,940 --> 01:12:08,400
+is that this allowed us to do the reads
+
+1507
+01:12:08,400 --> 01:12:11,140
+the use of this optimistic schema which
+
+1508
+01:12:11,140 --> 01:12:13,300
+we don't actually check the locks only
+
+1509
+01:12:13,300 --> 01:12:15,310
+when we first use the data allowed us to
+
+1510
+01:12:15,310 --> 01:12:17,290
+use this extremely fast one sided
+
+1511
+01:12:17,290 --> 01:12:20,470
+already ma reads to read the data and
+
+1512
+01:12:20,470 --> 01:12:24,790
+get high performance ok so the way I've
+
+1513
+01:12:24,790 --> 01:12:28,210
+explained it so far without validate and
+
+1514
+01:12:28,210 --> 01:12:29,980
+without commit back up is the way the
+
+1515
+01:12:29,980 --> 01:12:34,600
+system works but as I see validate is
+
+1516
+01:12:34,600 --> 01:12:38,260
+sort of an optimization for just reading
+
+1517
+01:12:38,260 --> 01:12:41,560
+an object but not writing it and commit
+
+1518
+01:12:41,560 --> 01:12:43,750
+back up as part of the scheme for fault
+
+1519
+01:12:43,750 --> 01:12:46,180
+tolerance I think I'm gonna a few
+
+1520
+01:12:46,180 --> 01:12:47,230
+minutes we have left I want to talk
+
+1521
+01:12:47,230 --> 01:12:52,900
+about validate so the validate stage is
+
+1522
+01:12:52,900 --> 01:12:56,200
+it's an optimization for to treat
+
+1523
+01:12:56,200 --> 01:12:57,610
+objects that we're only read by the
+
+1524
+01:12:57,610 --> 01:12:59,530
+transaction and I'm not written and it's
+
+1525
+01:12:59,530 --> 01:13:00,880
+going to be particularly interesting if
+
+1526
+01:13:00,880 --> 01:13:03,040
+it's a straight read-only transaction
+
+1527
+01:13:03,040 --> 01:13:05,920
+that modified nothing and you know the
+
+1528
+01:13:05,920 --> 01:13:08,740
+optimization is that it's going to be
+
+1529
+01:13:08,740 --> 01:13:11,290
+that the transaction coordinator can
+
+1530
+01:13:11,290 --> 01:13:13,000
+execute the validate with a one-sided
+
+1531
+01:13:13,000 --> 01:13:15,460
+read that's extremely fast rather than
+
+1532
+01:13:15,460 --> 01:13:17,380
+having to put something on a log and
+
+1533
+01:13:17,380 --> 01:13:20,140
+wait for the primary to see our log
+
+1534
+01:13:20,140 --> 01:13:22,860
+entry and think about it so this
+
+1535
+01:13:22,860 --> 01:13:24,700
+validates one-sided B is going to be
+
+1536
+01:13:24,700 --> 01:13:26,740
+much much faster it's gonna essentially
+
+1537
+01:13:26,740 --> 01:13:28,990
+replace lock for objects that would only
+
+1538
+01:13:28,990 --> 01:13:32,100
+read it's gonna be much faster
+
+1539
+01:13:35,210 --> 01:13:36,830
+basically what's going on here is that
+
+1540
+01:13:36,830 --> 01:13:41,900
+the what what the validate does is the
+
+1541
+01:13:41,900 --> 01:13:44,870
+transaction coordinator refetch is the
+
+1542
+01:13:44,870 --> 01:13:46,610
+object header so you know it would have
+
+1543
+01:13:46,610 --> 01:13:49,040
+read an object say this object in the
+
+1544
+01:13:49,040 --> 01:13:51,380
+execute phase when it's committing it
+
+1545
+01:13:51,380 --> 01:13:54,140
+instead of sending a lock message it be
+
+1546
+01:13:54,140 --> 01:13:56,900
+fetches the object hit header and checks
+
+1547
+01:13:56,900 --> 01:13:59,660
+whether the version number now is the
+
+1548
+01:13:59,660 --> 01:14:01,940
+same as the version number when it first
+
+1549
+01:14:01,940 --> 01:14:03,860
+read the object and it also checks if
+
+1550
+01:14:03,860 --> 01:14:10,070
+the lock of it is clear so so that's how
+
+1551
+01:14:10,070 --> 01:14:10,670
+it works
+
+1552
+01:14:10,670 --> 01:14:12,110
+so instead of setting a lock message
+
+1553
+01:14:12,110 --> 01:14:13,640
+send this validate message should be
+
+1554
+01:14:13,640 --> 01:14:17,990
+much faster for a read-only operation so
+
+1555
+01:14:17,990 --> 01:14:21,310
+let me put up another transaction
+
+1556
+01:14:21,310 --> 01:14:23,660
+example and run through it how it works
+
+1557
+01:14:23,660 --> 01:14:26,480
+let's suppose x and y are initially 0 we
+
+1558
+01:14:26,480 --> 01:14:32,630
+have two transactions t1 if X is equal
+
+1559
+01:14:32,630 --> 01:14:40,060
+to zero set y equal one and T two says
+
+1560
+01:14:40,060 --> 01:14:43,870
+if Y is zero
+
+1561
+01:14:44,670 --> 01:14:47,679
+said x equals one but this is a
+
+1562
+01:14:47,679 --> 01:14:51,579
+absolutely classic test for strong
+
+1563
+01:14:51,579 --> 01:14:56,800
+consistency if the execution is
+
+1564
+01:14:56,800 --> 01:15:00,820
+serializable it's going to be either t1
+
+1565
+01:15:00,820 --> 01:15:05,139
+then t2 or t2 and t1 it's got to get to
+
+1566
+01:15:05,139 --> 01:15:07,030
+see any you know corrected
+
+1567
+01:15:07,030 --> 01:15:08,710
+implementation has to get the same
+
+1568
+01:15:08,710 --> 01:15:10,900
+results it's running them one at a time
+
+1569
+01:15:10,900 --> 01:15:13,719
+if you run T 1 and then t2 you're gonna
+
+1570
+01:15:13,719 --> 01:15:18,909
+get y equals 1 and x equals 0 because
+
+1571
+01:15:18,909 --> 01:15:21,280
+the second if statement Y is already 1
+
+1572
+01:15:21,280 --> 01:15:22,329
+the second if statement won't do
+
+1573
+01:15:22,329 --> 01:15:26,469
+anything and symmetrically this will
+
+1574
+01:15:26,469 --> 01:15:31,050
+give you x equals 1 and y equals 0 and
+
+1575
+01:15:31,050 --> 01:15:33,519
+it turns out that if you if they both
+
+1576
+01:15:33,519 --> 01:15:36,489
+abort you can get x equals 0 y equals 0
+
+1577
+01:15:36,489 --> 01:15:38,409
+but what you are absolutely not allowed
+
+1578
+01:15:38,409 --> 01:15:45,010
+to get is x equals 1 y equals 1 that's
+
+1579
+01:15:45,010 --> 01:15:47,340
+not allowed
+
+1580
+01:15:48,269 --> 01:15:53,920
+ok so we're looking for how I'm going to
+
+1581
+01:15:53,920 --> 01:15:56,409
+use this as a test see what happens with
+
+1582
+01:15:56,409 --> 01:15:58,619
+validate and again we're gonna suppose
+
+1583
+01:15:58,619 --> 01:16:04,989
+these two transactions execute most so
+
+1584
+01:16:04,989 --> 01:16:06,909
+obvious cases they execute it absolutely
+
+1585
+01:16:06,909 --> 01:16:11,530
+at the same time and it eat that's the
+
+1586
+01:16:11,530 --> 01:16:17,260
+that's the hardest case okay so as we
+
+1587
+01:16:17,260 --> 01:16:21,659
+have read of X meet Y
+
+1588
+01:16:27,719 --> 01:16:29,250
+why because we wrote it and lock why
+
+1589
+01:16:29,250 --> 01:16:35,250
+here I sort of lock X here but since now
+
+1590
+01:16:35,250 --> 01:16:37,440
+we're using this read-only a validation
+
+1591
+01:16:37,440 --> 01:16:39,000
+optimization that means this one has to
+
+1592
+01:16:39,000 --> 01:16:41,580
+validate why this one has to validate X
+
+1593
+01:16:41,580 --> 01:16:43,560
+you know it's a red X but didn't write
+
+1594
+01:16:43,560 --> 01:16:45,090
+it so it's going to validate it much
+
+1595
+01:16:45,090 --> 01:16:47,010
+quicker and maybe it's going to commit
+
+1596
+01:16:47,010 --> 01:16:50,370
+and maybe it's and so the question is if
+
+1597
+01:16:50,370 --> 01:16:53,160
+we use this validate as I described it
+
+1598
+01:16:53,160 --> 01:16:54,719
+that just checks the version number and
+
+1599
+01:16:54,719 --> 01:16:56,610
+lock but haven't the version number
+
+1600
+01:16:56,610 --> 01:16:58,610
+hasn't changed in the lock but isn't set
+
+1601
+01:16:58,610 --> 01:17:03,560
+will we get a a correct answer
+
+1602
+01:17:22,599 --> 01:17:25,780
+and no actually both the validation is
+
+1603
+01:17:25,780 --> 01:17:29,469
+gonna fail for both because when these
+
+1604
+01:17:29,469 --> 01:17:31,599
+LOC messages were processed by the
+
+1605
+01:17:31,599 --> 01:17:33,489
+relevant primaries they cause the LOC a
+
+1606
+01:17:33,489 --> 01:17:36,909
+bit just to be set initially presumably
+
+1607
+01:17:36,909 --> 01:17:38,710
+the the reason okay did a cleared lock
+
+1608
+01:17:38,710 --> 01:17:42,489
+bin but when we come to validate even
+
+1609
+01:17:42,489 --> 01:17:44,949
+though the client is doing the one-sided
+
+1610
+01:17:44,949 --> 01:17:48,820
+read of the object header for X&Y it's
+
+1611
+01:17:48,820 --> 01:17:50,860
+gonna see the lock bit that was set by
+
+1612
+01:17:50,860 --> 01:17:54,900
+the processing of these lock requests
+
+1613
+01:17:55,320 --> 01:17:57,309
+and so they're both gonna see the lock
+
+1614
+01:17:57,309 --> 01:17:59,800
+bits set on the object that they merely
+
+1615
+01:17:59,800 --> 01:18:04,530
+read and they're both going to abort and
+
+1616
+01:18:04,530 --> 01:18:08,289
+neither X nor Y will be modified and so
+
+1617
+01:18:08,289 --> 01:18:10,110
+that was one of the legal outcomes
+
+1618
+01:18:10,110 --> 01:18:12,429
+that's right somebody somebody notice
+
+1619
+01:18:12,429 --> 01:18:16,469
+this indeed both validates will fail
+
+1620
+01:18:16,469 --> 01:18:19,570
+another of course sometimes that a
+
+1621
+01:18:19,570 --> 01:18:21,519
+transaction can go through and here's a
+
+1622
+01:18:21,519 --> 01:18:27,519
+scenario in which it does work out
+
+1623
+01:18:27,519 --> 01:18:30,039
+this was transaction one is a little
+
+1624
+01:18:30,039 --> 01:18:33,840
+faster validates
+
+1625
+01:18:43,830 --> 01:18:45,670
+all right so what's going to happen a
+
+1626
+01:18:45,670 --> 01:18:50,680
+transaction one is a little bit faster
+
+1627
+01:18:50,680 --> 01:19:05,080
+so this time it's validates gonna
+
+1628
+01:19:05,080 --> 01:19:07,120
+succeed because nothing has happened to
+
+1629
+01:19:07,120 --> 01:19:09,640
+X between when transaction 1 read it and
+
+1630
+01:19:09,640 --> 01:19:12,670
+when it validated so presumably the lock
+
+1631
+01:19:12,670 --> 01:19:14,140
+also went through without any trouble
+
+1632
+01:19:14,140 --> 01:19:15,790
+because nobody's modified Y here either
+
+1633
+01:19:15,790 --> 01:19:18,900
+so the primary answered yes for this the
+
+1634
+01:19:18,900 --> 01:19:21,520
+one-sided read revealed an unchanged
+
+1635
+01:19:21,520 --> 01:19:24,520
+version number and lock bit here and so
+
+1636
+01:19:24,520 --> 01:19:26,890
+transaction one can commit and it will
+
+1637
+01:19:26,890 --> 01:19:29,590
+have incremented Y but by this point if
+
+1638
+01:19:29,590 --> 01:19:32,440
+this is the order when the primary
+
+1639
+01:19:32,440 --> 01:19:37,360
+process is this actually when the
+
+1640
+01:19:37,360 --> 01:19:38,740
+primary process is lock of X this will
+
+1641
+01:19:38,740 --> 01:19:40,000
+also go through with no problem because
+
+1642
+01:19:40,000 --> 01:19:43,840
+nobody's modified X when the primary for
+
+1643
+01:19:43,840 --> 01:19:47,580
+Y processes the validate for Y though
+
+1644
+01:19:47,580 --> 01:19:51,460
+it's I'm sorry when the client running
+
+1645
+01:19:51,460 --> 01:19:54,910
+transaction two refetch is the version
+
+1646
+01:19:54,910 --> 01:19:57,400
+number unlocked it for y it's either
+
+1647
+01:19:57,400 --> 01:19:59,830
+gonna see this really depends on whether
+
+1648
+01:19:59,830 --> 01:20:02,050
+the committee's happen if the commit
+
+1649
+01:20:02,050 --> 01:20:03,820
+hasn't happened yet this valid a will
+
+1650
+01:20:03,820 --> 01:20:05,320
+see that the lock bit is set because it
+
+1651
+01:20:05,320 --> 01:20:07,150
+was set back here if the commit has
+
+1652
+01:20:07,150 --> 01:20:09,640
+happened already then the lock bit of
+
+1653
+01:20:09,640 --> 01:20:11,460
+will be clear but this validate
+
+1654
+01:20:11,460 --> 01:20:13,270
+one-sided reader will see a different
+
+1655
+01:20:13,270 --> 01:20:17,020
+version number than was originally seen
+
+1656
+01:20:17,020 --> 01:20:18,910
+and it needs somebody it's just this
+
+1657
+01:20:18,910 --> 01:20:20,890
+answer so one will commit so that
+
+1658
+01:20:20,890 --> 01:20:23,280
+transaction one will commit and
+
+1659
+01:20:23,280 --> 01:20:25,410
+transaction to will abort
+
+1660
+01:20:25,410 --> 01:20:27,460
+and although I don't have time to talk
+
+1661
+01:20:27,460 --> 01:20:29,410
+about it here if there's a straight
+
+1662
+01:20:29,410 --> 01:20:31,300
+read-only transaction then there doesn't
+
+1663
+01:20:31,300 --> 01:20:33,400
+need to be a locking phase and there
+
+1664
+01:20:33,400 --> 01:20:35,290
+doesn't need to be a commit phase pure
+
+1665
+01:20:35,290 --> 01:20:36,880
+read-only transactions can be done with
+
+1666
+01:20:36,880 --> 01:20:39,670
+just just reading blind reads for the
+
+1667
+01:20:39,670 --> 01:20:40,150
+reads
+
+1668
+01:20:40,150 --> 01:20:42,360
+sorry one-sided RDMA reads for the reads
+
+1669
+01:20:42,360 --> 01:20:44,350
+one-sided already me reads for the
+
+1670
+01:20:44,350 --> 01:20:46,240
+validates and so they're extremely fast
+
+1671
+01:20:46,240 --> 01:20:48,700
+read-only transactions are and don't
+
+1672
+01:20:48,700 --> 01:20:52,300
+require any work any attention by the
+
+1673
+01:20:52,300 --> 01:20:54,060
+server
+
+1674
+01:20:54,060 --> 01:20:58,080
+so and this is at the heart you know
+
+1675
+01:20:58,080 --> 01:21:00,360
+trends these reads and indeed though
+
+1676
+01:21:00,360 --> 01:21:04,070
+everything about farm is very
+
+1677
+01:21:04,070 --> 01:21:06,450
+streamlined - partially due to our DMA
+
+1678
+01:21:06,450 --> 01:21:09,630
+and it uses OCC because it's basically
+
+1679
+01:21:09,630 --> 01:21:12,630
+forced to in order to be able to do
+
+1680
+01:21:12,630 --> 01:21:15,720
+reads without checking locks there are a
+
+1681
+01:21:15,720 --> 01:21:17,370
+few brown downsides though it turns out
+
+1682
+01:21:17,370 --> 01:21:18,930
+optimistic concurrency control really
+
+1683
+01:21:18,930 --> 01:21:20,790
+works best if there's relatively few
+
+1684
+01:21:20,790 --> 01:21:23,070
+conflicts if there's conflicts all the
+
+1685
+01:21:23,070 --> 01:21:26,190
+time then transactions will have to
+
+1686
+01:21:26,190 --> 01:21:27,570
+board and there's a you know a bunch of
+
+1687
+01:21:27,570 --> 01:21:29,340
+other restrictions I already mentioned
+
+1688
+01:21:29,340 --> 01:21:31,950
+like on farm like the data must all fit
+
+1689
+01:21:31,950 --> 01:21:33,990
+in the RAM and all the computers must
+
+1690
+01:21:33,990 --> 01:21:35,190
+mean that the same data center
+
+1691
+01:21:35,190 --> 01:21:39,000
+nevertheless this was viewed at the time
+
+1692
+01:21:39,000 --> 01:21:41,670
+and still as just a very surprisingly
+
+1693
+01:21:41,670 --> 01:21:45,000
+high-speed implementation of distributed
+
+1694
+01:21:45,000 --> 01:21:48,060
+transactions like just much faster than
+
+1695
+01:21:48,060 --> 01:21:52,860
+any system in sort of in production use
+
+1696
+01:21:52,860 --> 01:21:54,630
+and it's true that Hardware involves a
+
+1697
+01:21:54,630 --> 01:21:56,310
+little bit exotic and really depends on
+
+1698
+01:21:56,310 --> 01:21:58,020
+this non-volatile Ram scheme and it
+
+1699
+01:21:58,020 --> 01:22:01,650
+depends on these special RDMA NICs and
+
+1700
+01:22:01,650 --> 01:22:04,460
+those are not particularly pervasive now
+
+1701
+01:22:04,460 --> 01:22:08,190
+but you do but you can get them and with
+
+1702
+01:22:08,190 --> 01:22:09,540
+performance like this it seems likely
+
+1703
+01:22:09,540 --> 01:22:11,970
+that they'll both in viewing and already
+
+1704
+01:22:11,970 --> 01:22:14,520
+me will eventually be pretty pervasive
+
+1705
+01:22:14,520 --> 01:22:16,860
+in data centers so that people can play
+
+1706
+01:22:16,860 --> 01:22:19,710
+these kind of games and that's all I
+
+1707
+01:22:19,710 --> 01:22:23,580
+have to say about farm happy to take any
+
+1708
+01:22:23,580 --> 01:22:26,270
+questions if anybody has some and if not
+
+1709
+01:22:26,270 --> 01:22:29,400
+I'll see you next week with a spark
+
+1710
+01:22:29,400 --> 01:22:31,320
+which is you may be happy to know
+
+1711
+01:22:31,320 --> 01:22:33,800
+absolutely not about transactions I
+
+1712
+01:22:33,800 --> 01:22:35,620
+heard everyone bye-bye
+
+1713
+01:22:35,620 --> 01:22:38,500
+[Music]
+

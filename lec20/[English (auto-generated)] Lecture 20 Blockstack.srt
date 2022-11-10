@@ -1,0 +1,7180 @@
+1
+00:00:01,460 --> 00:00:03,520
+you
+
+2
+00:00:11,000 --> 00:00:15,750
+alright let's get started today I want
+
+3
+00:00:15,750 --> 00:00:16,410
+to talk about
+
+4
+00:00:16,410 --> 00:00:19,860
+stack and the reason we're looking at
+
+5
+00:00:19,860 --> 00:00:22,320
+this paper is that it touches on three
+
+6
+00:00:22,320 --> 00:00:25,009
+questions that I find quite interesting
+
+7
+00:00:25,009 --> 00:00:27,689
+one is maybe at the lowest level how to
+
+8
+00:00:27,689 --> 00:00:30,240
+build a naming system or really a public
+
+9
+00:00:30,240 --> 00:00:32,549
+key infrastructure that maps from names
+
+10
+00:00:32,549 --> 00:00:35,970
+to public keys and this is like a very
+
+11
+00:00:35,970 --> 00:00:38,070
+important question nobody has ever
+
+12
+00:00:38,070 --> 00:00:39,840
+really figured out a convincing way to
+
+13
+00:00:39,840 --> 00:00:43,830
+build a general-purpose global public
+
+14
+00:00:43,830 --> 00:00:46,170
+key infrastructure or PKI so any
+
+15
+00:00:46,170 --> 00:00:49,770
+progress in this area with the is
+
+16
+00:00:49,770 --> 00:00:52,290
+interesting another reason I'm
+
+17
+00:00:52,290 --> 00:00:54,719
+interested in block stack is that it's a
+
+18
+00:00:54,719 --> 00:00:57,559
+non cryptocurrency use of a blockchain
+
+19
+00:00:57,559 --> 00:00:59,370
+you know so it's just an interesting
+
+20
+00:00:59,370 --> 00:01:02,730
+question whether block chains are useful
+
+21
+00:01:02,730 --> 00:01:04,739
+for anything other than than financial
+
+22
+00:01:04,739 --> 00:01:07,350
+stuff and finally and you know maybe
+
+23
+00:01:07,350 --> 00:01:11,210
+most interestingly block sects really a
+
+24
+00:01:11,210 --> 00:01:13,170
+proposal for a very different
+
+25
+00:01:13,170 --> 00:01:16,259
+architecture for how Internet services
+
+26
+00:01:16,259 --> 00:01:18,600
+or really web sites how websites
+
+27
+00:01:18,600 --> 00:01:20,250
+ought to be constructed very different
+
+28
+00:01:20,250 --> 00:01:21,599
+from the way they're constructed now is
+
+29
+00:01:21,599 --> 00:01:24,899
+quite different properties and you know
+
+30
+00:01:24,899 --> 00:01:27,300
+the idea is that maybe the the kind of
+
+31
+00:01:27,300 --> 00:01:28,470
+approach brock sack
+
+32
+00:01:28,470 --> 00:01:32,130
+takes might yield websites that are are
+
+33
+00:01:32,130 --> 00:01:34,289
+better you know in some ways than
+
+34
+00:01:34,289 --> 00:01:37,920
+current web sites now blocks likes a
+
+35
+00:01:37,920 --> 00:01:40,679
+real system there's a company that's
+
+36
+00:01:40,679 --> 00:01:43,619
+developing it that's in use by some
+
+37
+00:01:43,619 --> 00:01:46,670
+applications i'm just have some users
+
+38
+00:01:46,670 --> 00:01:49,860
+however it's really you know you should
+
+39
+00:01:49,860 --> 00:01:52,380
+view it as moral work-in-progress then
+
+40
+00:01:52,380 --> 00:01:54,630
+kind of this is the final answer they've
+
+41
+00:01:54,630 --> 00:01:56,390
+been developing it and making it better
+
+42
+00:01:56,390 --> 00:01:59,759
+over some years now i don't think it's
+
+43
+00:01:59,759 --> 00:02:01,860
+really to the point where very many
+
+44
+00:02:01,860 --> 00:02:04,170
+people would decide to abandon the way
+
+45
+00:02:04,170 --> 00:02:05,700
+they build websites now and switch to
+
+46
+00:02:05,700 --> 00:02:08,489
+block stack but it's very important that
+
+47
+00:02:08,489 --> 00:02:11,670
+somebody out there is exploring how
+
+48
+00:02:11,670 --> 00:02:14,690
+things could be different and better and
+
+49
+00:02:14,690 --> 00:02:16,709
+block stack is one of a number of
+
+50
+00:02:16,709 --> 00:02:19,170
+different projects that are trying to
+
+51
+00:02:19,170 --> 00:02:20,610
+push in a different direction for the
+
+52
+00:02:20,610 --> 00:02:23,940
+overall architecture of web sites all
+
+53
+00:02:23,940 --> 00:02:26,880
+right so the the pitch from block stack
+
+54
+00:02:26,880 --> 00:02:29,520
+is that people ought to be building
+
+55
+00:02:29,520 --> 00:02:30,360
+decent
+
+56
+00:02:30,360 --> 00:02:33,640
+applications so what does decentralize
+
+57
+00:02:33,640 --> 00:02:35,950
+mean sort of an idea that's been in the
+
+58
+00:02:35,950 --> 00:02:40,420
+air for a couple years now I think maybe
+
+59
+00:02:40,420 --> 00:02:41,560
+the best summary is that it's
+
+60
+00:02:41,560 --> 00:02:43,300
+applications that are built in a way
+
+61
+00:02:43,300 --> 00:02:46,360
+that moves ownership of data out of
+
+62
+00:02:46,360 --> 00:02:48,910
+centrally controlled websites you know
+
+63
+00:02:48,910 --> 00:02:51,790
+like ordinary web servers and one way or
+
+64
+00:02:51,790 --> 00:02:53,200
+another puts control of users
+
+65
+00:02:53,200 --> 00:02:56,410
+information more into the users own
+
+66
+00:02:56,410 --> 00:03:01,030
+hands so that it's sort of realistic to
+
+67
+00:03:01,030 --> 00:03:02,620
+say that users actually own their own
+
+68
+00:03:02,620 --> 00:03:05,739
+data instead of you know Facebook or
+
+69
+00:03:05,739 --> 00:03:09,730
+Gmail or whoever sort of essentially
+
+70
+00:03:09,730 --> 00:03:15,010
+owning their data for them the success
+
+71
+00:03:15,010 --> 00:03:16,900
+and the interesting properties of
+
+72
+00:03:16,900 --> 00:03:18,640
+Bitcoin have been a lot of what's driven
+
+73
+00:03:18,640 --> 00:03:20,800
+the recent activity in this area it's
+
+74
+00:03:20,800 --> 00:03:22,600
+kind of an old idea dates back at least
+
+75
+00:03:22,600 --> 00:03:25,600
+appeared appear on schemes like Nutella
+
+76
+00:03:25,600 --> 00:03:28,450
+and Napster from around 20 years ago and
+
+77
+00:03:28,450 --> 00:03:32,069
+further back than that but Bitcoin
+
+78
+00:03:32,069 --> 00:03:34,810
+really prompted people to think hard
+
+79
+00:03:34,810 --> 00:03:38,049
+about this and to sort of have a bit
+
+80
+00:03:38,049 --> 00:03:40,959
+more faith that these kinds of ideas
+
+81
+00:03:40,959 --> 00:03:45,430
+could be realized all right so I want to
+
+82
+00:03:45,430 --> 00:03:48,790
+kind of outline first what a sort of
+
+83
+00:03:48,790 --> 00:03:51,640
+centralized typical you know current web
+
+84
+00:03:51,640 --> 00:03:54,360
+site looks like talk a bit about why
+
+85
+00:03:54,360 --> 00:03:56,739
+some people aren't really pleased with
+
+86
+00:03:56,739 --> 00:04:00,310
+the way current websites work and then
+
+87
+00:04:00,310 --> 00:04:02,950
+outline how things might work under a
+
+88
+00:04:02,950 --> 00:04:05,890
+decentralized scheme like block stack so
+
+89
+00:04:05,890 --> 00:04:13,180
+this is really current websites the view
+
+90
+00:04:13,180 --> 00:04:14,950
+is you got a much users sitting in front
+
+91
+00:04:14,950 --> 00:04:20,410
+of browsers and there's a internet they
+
+92
+00:04:20,410 --> 00:04:22,930
+all talk to the internet you have some
+
+93
+00:04:22,930 --> 00:04:24,940
+website out there you know maybe it's
+
+94
+00:04:24,940 --> 00:04:28,840
+say Gmail or something and Gmail has a
+
+95
+00:04:28,840 --> 00:04:34,060
+bunch of web servers that are owned by
+
+96
+00:04:34,060 --> 00:04:37,300
+Gmail right owned by whatever the web
+
+97
+00:04:37,300 --> 00:04:40,630
+services and sitting behind the web
+
+98
+00:04:40,630 --> 00:04:43,110
+servers is some kind of database
+
+99
+00:04:43,110 --> 00:04:45,740
+it's kind of familiar picture for us
+
+100
+00:04:45,740 --> 00:04:48,420
+through these individual users this
+
+101
+00:04:48,420 --> 00:04:51,720
+database holds the users data like if
+
+102
+00:04:51,720 --> 00:04:54,570
+you use Gmail you know your you know
+
+103
+00:04:54,570 --> 00:04:57,540
+user ones Gmail is sitting in Gmail's
+
+104
+00:04:57,540 --> 00:05:00,150
+database somewhere you know this is a
+
+105
+00:05:00,150 --> 00:05:01,740
+database server the Gmail owns and
+
+106
+00:05:01,740 --> 00:05:04,320
+that's control over the kind of logic
+
+107
+00:05:04,320 --> 00:05:10,080
+for how Gmail operates essentially sits
+
+108
+00:05:10,080 --> 00:05:13,380
+in the web servers that own bio are
+
+109
+00:05:13,380 --> 00:05:15,390
+owned by Gmail and sort of talk to the
+
+110
+00:05:15,390 --> 00:05:17,790
+database to get out of your data alright
+
+111
+00:05:17,790 --> 00:05:18,810
+so there's like totally nothing
+
+112
+00:05:18,810 --> 00:05:22,830
+surprising here and you know this is the
+
+113
+00:05:22,830 --> 00:05:24,450
+way almost every website works this is
+
+114
+00:05:24,450 --> 00:05:26,490
+often some JavaScript or something and
+
+115
+00:05:26,490 --> 00:05:28,710
+sitting in the users browsers but all
+
+116
+00:05:28,710 --> 00:05:30,930
+the kind of critical stuff is sitting in
+
+117
+00:05:30,930 --> 00:05:33,240
+web servers or some kind of servers that
+
+118
+00:05:33,240 --> 00:05:36,240
+the website yawns you know so four
+
+119
+00:05:36,240 --> 00:05:37,530
+different websites the day on the
+
+120
+00:05:37,530 --> 00:05:39,030
+database is gonna be things like blog
+
+121
+00:05:39,030 --> 00:05:42,150
+posts or mail or you know comments you
+
+122
+00:05:42,150 --> 00:05:44,340
+post on other people's reddit or
+
+123
+00:05:44,340 --> 00:05:46,320
+something or maybe it's your photos your
+
+124
+00:05:46,320 --> 00:05:48,810
+calendar my is your medical records or
+
+125
+00:05:48,810 --> 00:05:50,400
+something there's a lot of data that's
+
+126
+00:05:50,400 --> 00:05:53,360
+out there at various different websites
+
+127
+00:05:53,360 --> 00:05:56,100
+that is in some sense you know the users
+
+128
+00:05:56,100 --> 00:05:57,660
+data like it's really the users Gmail
+
+129
+00:05:57,660 --> 00:06:01,200
+but gosh it's Gmail or that has control
+
+130
+00:06:01,200 --> 00:06:05,280
+over it or reddit that has control over
+
+131
+00:06:05,280 --> 00:06:07,440
+the users comments and other people's
+
+132
+00:06:07,440 --> 00:06:07,950
+articles
+
+133
+00:06:07,950 --> 00:06:10,710
+now this setups been SuperDuper
+
+134
+00:06:10,710 --> 00:06:12,840
+successful it's actually and one of the
+
+135
+00:06:12,840 --> 00:06:14,460
+reasons to sit it's extremely easy to
+
+136
+00:06:14,460 --> 00:06:17,730
+program you know all the logic hears and
+
+137
+00:06:17,730 --> 00:06:19,440
+running and servers controlled by Gmail
+
+138
+00:06:19,440 --> 00:06:22,260
+they can talk to these databases trough
+
+139
+00:06:22,260 --> 00:06:23,940
+in things like sequel databases that
+
+140
+00:06:23,940 --> 00:06:26,580
+very flexible query interfaces there's
+
+141
+00:06:26,580 --> 00:06:28,560
+like no restrictions on what data can be
+
+142
+00:06:28,560 --> 00:06:32,700
+accessed like you know so supposing this
+
+143
+00:06:32,700 --> 00:06:36,270
+is a eBay that's running here you know
+
+144
+00:06:36,270 --> 00:06:38,600
+the users bids are sitting in eBay's
+
+145
+00:06:38,600 --> 00:06:41,130
+database server now the bids are quite
+
+146
+00:06:41,130 --> 00:06:42,330
+private right if I'm bidding on
+
+147
+00:06:42,330 --> 00:06:43,590
+something I don't want other users to
+
+148
+00:06:43,590 --> 00:06:45,270
+see it but there's no restrictions on
+
+149
+00:06:45,270 --> 00:06:47,430
+what eBay's web servers can look at they
+
+150
+00:06:47,430 --> 00:06:51,090
+can all look at the bids in the in their
+
+151
+00:06:51,090 --> 00:06:52,170
+own database they can look at other
+
+152
+00:06:52,170 --> 00:06:53,580
+people's bids find the highest bid
+
+153
+00:06:53,580 --> 00:06:55,260
+there's really no restrictions so it's
+
+154
+00:06:55,260 --> 00:06:57,369
+very very convenient
+
+155
+00:06:57,369 --> 00:07:00,129
+for web developers and is very
+
+156
+00:07:00,129 --> 00:07:01,359
+successful and so from that point of
+
+157
+00:07:01,359 --> 00:07:03,009
+view we should be you know skeptical
+
+158
+00:07:03,009 --> 00:07:05,139
+that anything else could possibly be
+
+159
+00:07:05,139 --> 00:07:07,809
+this successful or overtake it but the
+
+160
+00:07:07,809 --> 00:07:09,339
+reason why you might not think this
+
+161
+00:07:09,339 --> 00:07:12,549
+current setup is perfect well there's a
+
+162
+00:07:12,549 --> 00:07:14,949
+bunch of reasons that users might be
+
+163
+00:07:14,949 --> 00:07:19,029
+dissatisfied one is that if I store my
+
+164
+00:07:19,029 --> 00:07:20,769
+mail in Gmail I really have to use
+
+165
+00:07:20,769 --> 00:07:22,479
+Gmail's interface to get at it
+
+166
+00:07:22,479 --> 00:07:23,649
+you know maybe they provide some other
+
+167
+00:07:23,649 --> 00:07:24,939
+ways of getting at it but I generally
+
+168
+00:07:24,939 --> 00:07:26,919
+don't have a lot of freedom like Gmail
+
+169
+00:07:26,919 --> 00:07:29,439
+sets the rules for how I get at my own
+
+170
+00:07:29,439 --> 00:07:31,659
+email right so I might be a little bit
+
+171
+00:07:31,659 --> 00:07:34,029
+irritated it's my email but you know I
+
+172
+00:07:34,029 --> 00:07:35,889
+don't get to choose what interface I use
+
+173
+00:07:35,889 --> 00:07:38,619
+I can't just use any software Lee pretty
+
+174
+00:07:38,619 --> 00:07:40,119
+much has to be software that Gmail
+
+175
+00:07:40,119 --> 00:07:44,609
+provides or Gmail supports for
+
+176
+00:07:44,609 --> 00:07:48,369
+situations like maybe Facebook where
+
+177
+00:07:48,369 --> 00:07:50,229
+other people might sometimes see my data
+
+178
+00:07:50,229 --> 00:07:51,849
+is really the website that gets to set
+
+179
+00:07:51,849 --> 00:07:54,099
+the rules for who gets access to my data
+
+180
+00:07:54,099 --> 00:07:56,469
+or how if at all I can control that
+
+181
+00:07:56,469 --> 00:07:59,679
+access and websites often are bit murky
+
+182
+00:07:59,679 --> 00:08:01,329
+about their promises about how they
+
+183
+00:08:01,329 --> 00:08:03,759
+enforce this stuff and again if it's the
+
+184
+00:08:03,759 --> 00:08:05,799
+users data like if it's my photos or my
+
+185
+00:08:05,799 --> 00:08:08,199
+posts or something it's really kind of
+
+186
+00:08:08,199 --> 00:08:10,299
+not that great that I don't have too
+
+187
+00:08:10,299 --> 00:08:12,549
+much control over what the website can
+
+188
+00:08:12,549 --> 00:08:15,339
+do with it another thing that people
+
+189
+00:08:15,339 --> 00:08:17,529
+complain about with the current set up
+
+190
+00:08:17,529 --> 00:08:19,749
+is that the website can sniff on my
+
+191
+00:08:19,749 --> 00:08:21,399
+stuff like Gmail wants to look through
+
+192
+00:08:21,399 --> 00:08:23,469
+my mail they might have good reasons for
+
+193
+00:08:23,469 --> 00:08:24,849
+maybe they were training their spam
+
+194
+00:08:24,849 --> 00:08:26,739
+generators so that's okay but you know
+
+195
+00:08:26,739 --> 00:08:28,599
+maybe looking at my email to think about
+
+196
+00:08:28,599 --> 00:08:31,179
+showing me advertisements or to you know
+
+197
+00:08:31,179 --> 00:08:33,279
+tell their advertising customers what
+
+198
+00:08:33,279 --> 00:08:36,539
+people are interested in these days
+
+199
+00:08:36,539 --> 00:08:41,159
+worse the there's a chance that some of
+
+200
+00:08:41,159 --> 00:08:43,208
+the employees who work at the web site
+
+201
+00:08:43,208 --> 00:08:45,730
+are corrupt and maybe snooping on
+
+202
+00:08:45,730 --> 00:08:48,459
+people's data for personal reasons so
+
+203
+00:08:48,459 --> 00:08:50,350
+that maybe the company maybe the company
+
+204
+00:08:50,350 --> 00:08:51,850
+that runs the website is perfectly
+
+205
+00:08:51,850 --> 00:08:54,189
+aboveboard but can't necessarily sit
+
+206
+00:08:54,189 --> 00:08:56,800
+claim that it's not always true that all
+
+207
+00:08:56,800 --> 00:09:00,399
+the employees are or following all the
+
+208
+00:09:00,399 --> 00:09:05,690
+rules anyway so people have a lot
+
+209
+00:09:05,690 --> 00:09:09,830
+kind of you know or some people have
+
+210
+00:09:09,830 --> 00:09:11,810
+reservations about the way the current
+
+211
+00:09:11,810 --> 00:09:16,040
+system works at a kind of more design
+
+212
+00:09:16,040 --> 00:09:19,700
+technical level one way to view what's
+
+213
+00:09:19,700 --> 00:09:22,040
+going on here is that the main interface
+
+214
+00:09:22,040 --> 00:09:27,370
+here is between the entire website and
+
+215
+00:09:27,370 --> 00:09:31,280
+the browser's so there's it's HTML
+
+216
+00:09:31,280 --> 00:09:32,540
+that's flowing back and forth between
+
+217
+00:09:32,540 --> 00:09:38,360
+here typically the websites and the
+
+218
+00:09:38,360 --> 00:09:40,280
+database are sort of integrated on this
+
+219
+00:09:40,280 --> 00:09:42,080
+side of the interface and all the
+
+220
+00:09:42,080 --> 00:09:43,760
+browser really gets to see often is this
+
+221
+00:09:43,760 --> 00:09:46,790
+HTML kind of final packaged form of the
+
+222
+00:09:46,790 --> 00:09:49,760
+data and you know it's a very user
+
+223
+00:09:49,760 --> 00:09:52,760
+interface oriented representation hTML
+
+224
+00:09:52,760 --> 00:09:55,940
+is and sort of Nod has nothing to say
+
+225
+00:09:55,940 --> 00:10:00,140
+about you know Dave the data itself or
+
+226
+00:10:00,140 --> 00:10:03,500
+how the data is controlled and the much
+
+227
+00:10:03,500 --> 00:10:04,820
+more interesting interface and where
+
+228
+00:10:04,820 --> 00:10:06,560
+this you know a whole discussion is kind
+
+229
+00:10:06,560 --> 00:10:09,140
+of going is that this is a much more
+
+230
+00:10:09,140 --> 00:10:11,450
+interesting interface because it's much
+
+231
+00:10:11,450 --> 00:10:13,670
+closer to the data but in the standard
+
+232
+00:10:13,670 --> 00:10:15,770
+setup there's no real boundary there
+
+233
+00:10:15,770 --> 00:10:17,930
+though this is sort of the internal
+
+234
+00:10:17,930 --> 00:10:19,790
+business how this works is the internal
+
+235
+00:10:19,790 --> 00:10:23,960
+business of the website all right so
+
+236
+00:10:23,960 --> 00:10:27,950
+that's the existing plan the plan the
+
+237
+00:10:27,950 --> 00:10:30,080
+kind of plan that block stack is
+
+238
+00:10:30,080 --> 00:10:33,440
+proposing and so there's a number of
+
+239
+00:10:33,440 --> 00:10:36,530
+kind of ideas for how decentralized apps
+
+240
+00:10:36,530 --> 00:10:40,360
+might work this is kind of one of them
+
+241
+00:10:40,360 --> 00:10:42,710
+so I'm not gonna call it block stack yet
+
+242
+00:10:42,710 --> 00:10:46,550
+because it's it's kind of much a very
+
+243
+00:10:46,550 --> 00:10:49,280
+simplified version we'll just say it's a
+
+244
+00:10:49,280 --> 00:10:54,830
+decentralized architecture and here the
+
+245
+00:10:54,830 --> 00:10:56,180
+game is that you know we still have a
+
+246
+00:10:56,180 --> 00:10:58,370
+bunch of users and users run you know
+
+247
+00:10:58,370 --> 00:11:02,350
+iPads or browsers or something
+
+248
+00:11:04,180 --> 00:11:07,260
+but we're gonna in this new
+
+249
+00:11:07,260 --> 00:11:09,520
+decentralized scheme we're gonna put all
+
+250
+00:11:09,520 --> 00:11:14,649
+of the app code is gonna run in the
+
+251
+00:11:14,649 --> 00:11:16,660
+client machines in the users machines
+
+252
+00:11:16,660 --> 00:11:18,399
+and so this is much more like a sort of
+
+253
+00:11:18,399 --> 00:11:20,410
+traditional or it's like you know
+
+254
+00:11:20,410 --> 00:11:22,570
+downloading an app from the app store on
+
+255
+00:11:22,570 --> 00:11:28,300
+an iPad or buying sort of old-style PC
+
+256
+00:11:28,300 --> 00:11:30,040
+hardware like buying a copy of Microsoft
+
+257
+00:11:30,040 --> 00:11:31,959
+Word this just runs on your laptop just
+
+258
+00:11:31,959 --> 00:11:34,000
+buy some software you run on your laptop
+
+259
+00:11:34,000 --> 00:11:38,560
+so no longer running the application
+
+260
+00:11:38,560 --> 00:11:42,580
+code in web servers well you know if all
+
+261
+00:11:42,580 --> 00:11:43,839
+you want to do is use data on your
+
+262
+00:11:43,839 --> 00:11:45,490
+laptop your own data on your own laptop
+
+263
+00:11:45,490 --> 00:11:49,149
+and then we're done but what's really
+
+264
+00:11:49,149 --> 00:11:50,620
+interesting about you know web-based
+
+265
+00:11:50,620 --> 00:11:52,420
+what about internet based applications
+
+266
+00:11:52,420 --> 00:11:54,670
+is that you can store your data in the
+
+267
+00:11:54,670 --> 00:11:56,350
+cloud and that means you can if you have
+
+268
+00:11:56,350 --> 00:11:58,330
+multiple devices which most people do
+
+269
+00:11:58,330 --> 00:12:00,730
+you can get at your data from any of
+
+270
+00:12:00,730 --> 00:12:02,320
+your devices from your maybe your iPhone
+
+271
+00:12:02,320 --> 00:12:05,320
+as well as your laptop and if you've
+
+272
+00:12:05,320 --> 00:12:07,899
+stored data in the cloud somehow that
+
+273
+00:12:07,899 --> 00:12:09,400
+means you can share data with other
+
+274
+00:12:09,400 --> 00:12:11,680
+people and build multi-user applications
+
+275
+00:12:11,680 --> 00:12:15,370
+like you know eBay maybe your reddit or
+
+276
+00:12:15,370 --> 00:12:18,730
+who knows what shared calendars so the
+
+277
+00:12:18,730 --> 00:12:23,380
+other half of the decentralized vision
+
+278
+00:12:23,380 --> 00:12:25,120
+is that there's going to be a storage
+
+279
+00:12:25,120 --> 00:12:29,250
+system some sort of cloud storage system
+
+280
+00:12:29,250 --> 00:12:35,589
+out there by which we mean I mean some
+
+281
+00:12:35,589 --> 00:12:37,390
+sort of service that you can buy maybe
+
+282
+00:12:37,390 --> 00:12:39,520
+you know from Amazon AWS or
+
+283
+00:12:39,520 --> 00:12:41,860
+who-knows-where which was just store
+
+284
+00:12:41,860 --> 00:12:43,510
+data for you you can stick data in it
+
+285
+00:12:43,510 --> 00:12:45,940
+it's your data they store for you back
+
+286
+00:12:45,940 --> 00:12:46,920
+it up
+
+287
+00:12:46,920 --> 00:12:48,940
+dumi hopefully some sort of access
+
+288
+00:12:48,940 --> 00:12:50,470
+control so whether people can't get at
+
+289
+00:12:50,470 --> 00:12:51,610
+it and then you can retrieve it later
+
+290
+00:12:51,610 --> 00:12:56,380
+from any of your devices and so now if
+
+291
+00:12:56,380 --> 00:12:58,709
+we're building some sort of you know for
+
+292
+00:12:58,709 --> 00:13:01,630
+single user applications like you know I
+
+293
+00:13:01,630 --> 00:13:03,760
+just need to edit some documents but I
+
+294
+00:13:03,760 --> 00:13:05,500
+want to keep them in the cloud you know
+
+295
+00:13:05,500 --> 00:13:07,839
+maybe user one is buying storage from
+
+296
+00:13:07,839 --> 00:13:10,750
+this storage server maybe it's Amazon
+
+297
+00:13:10,750 --> 00:13:13,680
+and user two is buying storage from
+
+298
+00:13:13,680 --> 00:13:17,530
+maybe Google's cloud storage system
+
+299
+00:13:17,530 --> 00:13:19,330
+for my own data I just talked to my own
+
+300
+00:13:19,330 --> 00:13:21,370
+my application code talks across the
+
+301
+00:13:21,370 --> 00:13:24,130
+internet to the service storage service
+
+302
+00:13:24,130 --> 00:13:26,500
+that I buy storage from presumably pay
+
+303
+00:13:26,500 --> 00:13:29,200
+for it myself and user to talk similarly
+
+304
+00:13:29,200 --> 00:13:32,550
+to their storage service but if we run
+
+305
+00:13:32,550 --> 00:13:38,140
+applications that are built to allow
+
+306
+00:13:38,140 --> 00:13:40,660
+users to share data then there's the
+
+307
+00:13:40,660 --> 00:13:42,730
+possibility that if I know how to talk
+
+308
+00:13:42,730 --> 00:13:44,560
+to you to storage service I can run an
+
+309
+00:13:44,560 --> 00:13:47,950
+application that reads data that they
+
+310
+00:13:47,950 --> 00:13:50,020
+allow me to read as well so you know if
+
+311
+00:13:50,020 --> 00:13:51,160
+you wanted to build some sort of a
+
+312
+00:13:51,160 --> 00:13:53,710
+Facebook like thing on this the
+
+313
+00:13:53,710 --> 00:13:55,030
+application would know who my friends
+
+314
+00:13:55,030 --> 00:13:59,080
+are and reach out to my friends storage
+
+315
+00:13:59,080 --> 00:14:01,090
+looking for updates or photos or who
+
+316
+00:14:01,090 --> 00:14:03,190
+knows what that my friends have stored
+
+317
+00:14:03,190 --> 00:14:06,730
+in their own storage so that means I
+
+318
+00:14:06,730 --> 00:14:10,000
+instead of contacting with Facebook's
+
+319
+00:14:10,000 --> 00:14:11,890
+website instead in his new model I would
+
+320
+00:14:11,890 --> 00:14:15,100
+download an app from Facebook and run it
+
+321
+00:14:15,100 --> 00:14:17,610
+and that app would sort of know how to
+
+322
+00:14:17,610 --> 00:14:20,500
+find my friends and look at the data
+
+323
+00:14:20,500 --> 00:14:24,280
+that they are storing and you know if my
+
+324
+00:14:24,280 --> 00:14:26,980
+friend uploads a photo to their storage
+
+325
+00:14:26,980 --> 00:14:28,690
+it's really still it's their storage
+
+326
+00:14:28,690 --> 00:14:30,630
+they're paying for it it's their photo
+
+327
+00:14:30,630 --> 00:14:33,460
+they can use it with Facebook or they
+
+328
+00:14:33,460 --> 00:14:35,080
+could use it with other applications too
+
+329
+00:14:35,080 --> 00:14:36,700
+because the applications are really
+
+330
+00:14:36,700 --> 00:14:39,670
+quite separate now from the from the
+
+331
+00:14:39,670 --> 00:14:42,640
+data instead of being combined in the
+
+332
+00:14:42,640 --> 00:14:47,670
+existing architecture all right so now
+
+333
+00:14:47,670 --> 00:14:52,450
+sort of a technical level the this is
+
+334
+00:14:52,450 --> 00:14:54,940
+now the storage interface is now the
+
+335
+00:14:54,940 --> 00:14:57,190
+main interface so now we have some sort
+
+336
+00:14:57,190 --> 00:14:58,780
+of put get or readwrite or who knows
+
+337
+00:14:58,780 --> 00:15:00,340
+what interface as the main interface
+
+338
+00:15:00,340 --> 00:15:02,910
+it's no longer HTML it's really a
+
+339
+00:15:02,910 --> 00:15:04,810
+primary interface we were worried about
+
+340
+00:15:04,810 --> 00:15:06,640
+it's the storage style interface which
+
+341
+00:15:06,640 --> 00:15:08,740
+is a much nicer interface to write
+
+342
+00:15:08,740 --> 00:15:13,710
+applications to then HTML it's
+
+343
+00:15:14,610 --> 00:15:16,480
+furthermore as I mentioned there's a
+
+344
+00:15:16,480 --> 00:15:18,280
+much in this architecture where users
+
+345
+00:15:18,280 --> 00:15:20,380
+really own and pay for an organizing on
+
+346
+00:15:20,380 --> 00:15:22,390
+storage there's a much clearer notion of
+
+347
+00:15:22,390 --> 00:15:24,580
+data being actually owned by the user
+
+348
+00:15:24,580 --> 00:15:27,010
+and controlled by the user much like you
+
+349
+00:15:27,010 --> 00:15:28,810
+own the data on your laptop or in your
+
+350
+00:15:28,810 --> 00:15:29,850
+Athena
+
+351
+00:15:29,850 --> 00:15:32,310
+as you ones account here in the storage
+
+352
+00:15:32,310 --> 00:15:36,450
+service of course there's a number of
+
+353
+00:15:36,450 --> 00:15:38,730
+but you know now we're very interested
+
+354
+00:15:38,730 --> 00:15:40,860
+in the design of the storage system
+
+355
+00:15:40,860 --> 00:15:42,450
+because now this is instead of being
+
+356
+00:15:42,450 --> 00:15:44,490
+sort of hidden away inside websites this
+
+357
+00:15:44,490 --> 00:15:46,560
+is now the primary interface in the
+
+358
+00:15:46,560 --> 00:15:48,060
+system so we care a lot about how it's
+
+359
+00:15:48,060 --> 00:15:50,310
+designed so first of all it's quite
+
+360
+00:15:50,310 --> 00:15:52,650
+critical that it be a Internet service
+
+361
+00:15:52,650 --> 00:15:54,570
+out in the cloud so we can get at it get
+
+362
+00:15:54,570 --> 00:15:57,870
+our data from from any of our devices it
+
+363
+00:15:57,870 --> 00:15:59,370
+really needs to be general-purpose that
+
+364
+00:15:59,370 --> 00:16:03,090
+all the application codes here so we
+
+365
+00:16:03,090 --> 00:16:04,350
+don't now in this architecture really
+
+366
+00:16:04,350 --> 00:16:06,150
+get to have applications specific code
+
+367
+00:16:06,150 --> 00:16:10,110
+at all on the server side because the
+
+368
+00:16:10,110 --> 00:16:12,120
+sort of servers aren't don't really have
+
+369
+00:16:12,120 --> 00:16:12,990
+anything directly to do with
+
+370
+00:16:12,990 --> 00:16:14,280
+applications so we needed a
+
+371
+00:16:14,280 --> 00:16:15,870
+general-purpose interface that's
+
+372
+00:16:15,870 --> 00:16:17,880
+powerful enough for to let us do
+
+373
+00:16:17,880 --> 00:16:21,690
+whatever we need which is a little bit
+
+374
+00:16:21,690 --> 00:16:25,890
+difficult to design we now have the
+
+375
+00:16:25,890 --> 00:16:28,260
+storage has to be paid for and now
+
+376
+00:16:28,260 --> 00:16:30,210
+really the most obvious person to pay
+
+377
+00:16:30,210 --> 00:16:32,460
+for it is the user themselves now maybe
+
+378
+00:16:32,460 --> 00:16:33,990
+they're willing to do that maybe they're
+
+379
+00:16:33,990 --> 00:16:36,330
+not we'd really like to have this
+
+380
+00:16:36,330 --> 00:16:37,890
+sharing but we also want to have private
+
+381
+00:16:37,890 --> 00:16:39,600
+data and maybe we only want to share our
+
+382
+00:16:39,600 --> 00:16:42,210
+data with certain other people so we
+
+383
+00:16:42,210 --> 00:16:43,500
+need some reason so the storage
+
+384
+00:16:43,500 --> 00:16:45,780
+interface in the storage system one way
+
+385
+00:16:45,780 --> 00:16:47,870
+or another needs reasonably powerful
+
+386
+00:16:47,870 --> 00:16:51,840
+sharing and permission access control
+
+387
+00:16:51,840 --> 00:16:56,430
+systems a more subtle issue is that I
+
+388
+00:16:56,430 --> 00:16:59,970
+may run multiple apps some of which I
+
+389
+00:16:59,970 --> 00:17:02,130
+don't trust right if I just download
+
+390
+00:17:02,130 --> 00:17:04,949
+some multi-user game from the internet
+
+391
+00:17:04,949 --> 00:17:07,199
+you know maybe I don't want it to be
+
+392
+00:17:07,199 --> 00:17:08,670
+able to look at my email while I'm
+
+393
+00:17:08,670 --> 00:17:10,530
+playing that game so that means that as
+
+394
+00:17:10,530 --> 00:17:13,619
+well as having a notion of sort of this
+
+395
+00:17:13,619 --> 00:17:16,050
+user with this users permission we may
+
+396
+00:17:16,050 --> 00:17:18,180
+want to have kind of subsidiary
+
+397
+00:17:18,180 --> 00:17:20,490
+permissions where we can talk about not
+
+398
+00:17:20,490 --> 00:17:22,619
+just this user as a whole but this user
+
+399
+00:17:22,619 --> 00:17:24,869
+when running an application to has
+
+400
+00:17:24,869 --> 00:17:27,660
+certain permissions maybe just game
+
+401
+00:17:27,660 --> 00:17:30,000
+files this user when running application
+
+402
+00:17:30,000 --> 00:17:33,000
+one is allowed to get at the users email
+
+403
+00:17:33,000 --> 00:17:35,240
+as well
+
+404
+00:17:35,910 --> 00:17:38,370
+alright then interestingly in their
+
+405
+00:17:38,370 --> 00:17:40,290
+notices that this storage interface it
+
+406
+00:17:40,290 --> 00:17:42,090
+says not as much of a stretch as it
+
+407
+00:17:42,090 --> 00:17:44,640
+might have seen say 10 or 20 years ago
+
+408
+00:17:44,640 --> 00:17:47,030
+because there's a number of storage
+
+409
+00:17:47,030 --> 00:17:49,140
+services out there that are not unlike
+
+410
+00:17:49,140 --> 00:17:52,530
+this like Amazon s3 very widely used and
+
+411
+00:17:52,530 --> 00:17:54,360
+while it's missing some of the things we
+
+412
+00:17:54,360 --> 00:17:57,000
+would need here it's definitely a public
+
+413
+00:17:57,000 --> 00:17:59,610
+storage system you can buy storage you
+
+414
+00:17:59,610 --> 00:18:01,110
+can let other people use your storage
+
+415
+00:18:01,110 --> 00:18:02,520
+you know doesn't have all that access
+
+416
+00:18:02,520 --> 00:18:05,460
+control we'd like but it's not too far
+
+417
+00:18:05,460 --> 00:18:06,840
+from what's needed here and indeed
+
+418
+00:18:06,840 --> 00:18:08,880
+today's papers observes that they can
+
+419
+00:18:08,880 --> 00:18:11,460
+layer their storage system on top of one
+
+420
+00:18:11,460 --> 00:18:12,690
+of a number of different existing
+
+421
+00:18:12,690 --> 00:18:14,880
+storage systems Dropbox is also it's
+
+422
+00:18:14,880 --> 00:18:16,740
+another kind of candidate for something
+
+423
+00:18:16,740 --> 00:18:20,610
+it's like this and therefore this is not
+
+424
+00:18:20,610 --> 00:18:22,740
+as sort of pie in the sky as it might
+
+425
+00:18:22,740 --> 00:18:25,680
+seem ok so what would the point of this
+
+426
+00:18:25,680 --> 00:18:27,300
+kind of architecture be why would
+
+427
+00:18:27,300 --> 00:18:31,110
+anybody care the people who might care
+
+428
+00:18:31,110 --> 00:18:33,390
+are the users this this might give users
+
+429
+00:18:33,390 --> 00:18:36,540
+more more control of their data it may
+
+430
+00:18:36,540 --> 00:18:38,190
+make it easier for users to switch
+
+431
+00:18:38,190 --> 00:18:39,810
+applications like if I've uploaded a
+
+432
+00:18:39,810 --> 00:18:42,140
+bunch of photos and I'm using one photo
+
+433
+00:18:42,140 --> 00:18:44,810
+organization app or photo editing app
+
+434
+00:18:44,810 --> 00:18:47,220
+since my photos are totally separate
+
+435
+00:18:47,220 --> 00:18:48,750
+from me from the app I could switch
+
+436
+00:18:48,750 --> 00:18:50,640
+photo apps and maybe still use all my
+
+437
+00:18:50,640 --> 00:18:52,350
+same old set of photos that I already
+
+438
+00:18:52,350 --> 00:18:56,250
+have stored it may be easier in this
+
+439
+00:18:56,250 --> 00:18:57,900
+architecture to have applications that
+
+440
+00:18:57,900 --> 00:19:00,330
+look at multiple kinds of data you know
+
+441
+00:19:00,330 --> 00:19:02,460
+maybe it'd be nice that my email system
+
+442
+00:19:02,460 --> 00:19:04,680
+be able to look at my calendar and the
+
+443
+00:19:04,680 --> 00:19:06,360
+other way around may be nice to be able
+
+444
+00:19:06,360 --> 00:19:08,400
+to write backup software they could
+
+445
+00:19:08,400 --> 00:19:10,110
+backup all of my data no matter what it
+
+446
+00:19:10,110 --> 00:19:10,550
+was
+
+447
+00:19:10,550 --> 00:19:12,930
+periodically maybe I'd like to have a
+
+448
+00:19:12,930 --> 00:19:14,970
+sort of general-purpose file browser
+
+449
+00:19:14,970 --> 00:19:17,040
+which would allow me to look at all of
+
+450
+00:19:17,040 --> 00:19:19,680
+my data and none of this is possible or
+
+451
+00:19:19,680 --> 00:19:21,480
+convenient and the current architecture
+
+452
+00:19:21,480 --> 00:19:24,480
+but it's all seems like within reach now
+
+453
+00:19:24,480 --> 00:19:27,000
+that we've kind of concentrated all the
+
+454
+00:19:27,000 --> 00:19:29,430
+users data into storage that that they
+
+455
+00:19:29,430 --> 00:19:32,670
+own and finally there may well be
+
+456
+00:19:32,670 --> 00:19:34,680
+advantages since in terms of privacy and
+
+457
+00:19:34,680 --> 00:19:35,340
+snooping
+
+458
+00:19:35,340 --> 00:19:37,830
+instead of entrusting my data to a web
+
+459
+00:19:37,830 --> 00:19:39,210
+service that who knows what it's doing
+
+460
+00:19:39,210 --> 00:19:42,090
+with it if we play our cards right we
+
+461
+00:19:42,090 --> 00:19:44,580
+can use encryption these applications
+
+462
+00:19:44,580 --> 00:19:46,500
+can encrypt the data before it leaves my
+
+463
+00:19:46,500 --> 00:19:48,600
+client machine so that the only thing
+
+464
+00:19:48,600 --> 00:19:49,690
+it's a restored here's
+
+465
+00:19:49,690 --> 00:19:53,200
+to data and you know when I read it back
+
+466
+00:19:53,200 --> 00:19:54,610
+I'll be back encrypted data and then
+
+467
+00:19:54,610 --> 00:19:56,530
+decrypt it locally on my own machine so
+
+468
+00:19:56,530 --> 00:20:00,100
+Kent storage service never sees private
+
+469
+00:20:00,100 --> 00:20:04,660
+data in the clear anyway so those are
+
+470
+00:20:04,660 --> 00:20:07,090
+all be sort of you know tantalizing
+
+471
+00:20:07,090 --> 00:20:09,940
+possibilities why you might like why
+
+472
+00:20:09,940 --> 00:20:15,760
+users might like this architecture all
+
+473
+00:20:15,760 --> 00:20:20,620
+right so you you know the if you dig
+
+474
+00:20:20,620 --> 00:20:22,000
+down to the nitty-gritty of what these
+
+475
+00:20:22,000 --> 00:20:27,600
+applications actually have to do they
+
+476
+00:20:27,600 --> 00:20:29,740
+you know you would need to work out a
+
+477
+00:20:29,740 --> 00:20:31,750
+whole lot of details like there needs to
+
+478
+00:20:31,750 --> 00:20:33,970
+be you know if my application is going
+
+479
+00:20:33,970 --> 00:20:35,740
+to be looking at your data there need to
+
+480
+00:20:35,740 --> 00:20:37,960
+be sort of conventions for how data
+
+481
+00:20:37,960 --> 00:20:41,410
+store here for example you know if I'm
+
+482
+00:20:41,410 --> 00:20:44,800
+gonna look at your recent posts you made
+
+483
+00:20:44,800 --> 00:20:46,510
+for our social networking application
+
+484
+00:20:46,510 --> 00:20:48,160
+you have to have stored them in your
+
+485
+00:20:48,160 --> 00:20:50,680
+storage under a key or a name that my
+
+486
+00:20:50,680 --> 00:20:53,290
+application knows to try to look look
+
+487
+00:20:53,290 --> 00:20:55,330
+for and you have to use a format that we
+
+488
+00:20:55,330 --> 00:20:56,820
+all understand so you know there's some
+
+489
+00:20:56,820 --> 00:20:59,200
+if we want to do sharing there's some
+
+490
+00:20:59,200 --> 00:21:02,200
+kind of standardization obstacles that
+
+491
+00:21:02,200 --> 00:21:03,430
+have to be overcome that don't really
+
+492
+00:21:03,430 --> 00:21:05,740
+exist for big websites because they can
+
+493
+00:21:05,740 --> 00:21:08,430
+just store their data however they like
+
+494
+00:21:08,430 --> 00:21:10,480
+okay so there's a question does this
+
+495
+00:21:10,480 --> 00:21:12,640
+adversely affect application performance
+
+496
+00:21:12,640 --> 00:21:17,290
+absolutely this is likely to be pretty
+
+497
+00:21:17,290 --> 00:21:19,150
+bad for performance because in the old
+
+498
+00:21:19,150 --> 00:21:21,610
+scheme the old scheme can be the
+
+499
+00:21:21,610 --> 00:21:23,200
+existing scheme can be implemented with
+
+500
+00:21:23,200 --> 00:21:24,940
+very high performance you know these
+
+501
+00:21:24,940 --> 00:21:27,190
+most of the web server may be making
+
+502
+00:21:27,190 --> 00:21:28,930
+hundreds of requests the database like
+
+503
+00:21:28,930 --> 00:21:30,490
+when you look at an Amazon web page for
+
+504
+00:21:30,490 --> 00:21:32,200
+example boy are there hundreds or
+
+505
+00:21:32,200 --> 00:21:33,940
+thousands of pieces of information that
+
+506
+00:21:33,940 --> 00:21:35,440
+had to be pulled out of Amazon's
+
+507
+00:21:35,440 --> 00:21:37,660
+databases you know when they're all in
+
+508
+00:21:37,660 --> 00:21:40,810
+the same machine room and those fetters
+
+509
+00:21:40,810 --> 00:21:43,210
+from the database take dozens of
+
+510
+00:21:43,210 --> 00:21:47,620
+microseconds but if one of these
+
+511
+00:21:47,620 --> 00:21:49,240
+applications needs to reach across the
+
+512
+00:21:49,240 --> 00:21:51,520
+internet you know maybe hundreds of
+
+513
+00:21:51,520 --> 00:21:54,370
+miles away to some storage service you
+
+514
+00:21:54,370 --> 00:21:55,720
+know it's now everything's going to take
+
+515
+00:21:55,720 --> 00:21:57,400
+ten or a hundred times as long to fetch
+
+516
+00:21:57,400 --> 00:22:00,250
+individual piece of data so now that's
+
+517
+00:22:00,250 --> 00:22:02,960
+certainly an issue and
+
+518
+00:22:02,960 --> 00:22:06,030
+you know it's the kind of that kind of
+
+519
+00:22:06,030 --> 00:22:08,700
+issue is the kind of thing that clever
+
+520
+00:22:08,700 --> 00:22:12,870
+designers can find ways to deal with so
+
+521
+00:22:12,870 --> 00:22:16,350
+it would certainly be a problem but my
+
+522
+00:22:16,350 --> 00:22:18,090
+guess is on the sort of total list of
+
+523
+00:22:18,090 --> 00:22:19,410
+reasons why this architecture is not
+
+524
+00:22:19,410 --> 00:22:23,929
+going to work there's a number of other
+
+525
+00:22:23,929 --> 00:22:26,850
+sort of equally unhappy puzzles and
+
+526
+00:22:26,850 --> 00:22:29,910
+although it would absolutely change how
+
+527
+00:22:29,910 --> 00:22:31,169
+people write applications because
+
+528
+00:22:31,169 --> 00:22:32,460
+instead of writing applications that
+
+529
+00:22:32,460 --> 00:22:34,740
+assemble lots of they use lots and lots
+
+530
+00:22:34,740 --> 00:22:36,000
+of pieces of data you would have to mean
+
+531
+00:22:36,000 --> 00:22:39,600
+much more parsimonious I think people
+
+532
+00:22:39,600 --> 00:22:50,520
+could work around it all right all right
+
+533
+00:22:50,520 --> 00:22:52,590
+so any any questions about this this
+
+534
+00:22:52,590 --> 00:22:54,600
+overall arrangement which is the sort of
+
+535
+00:22:54,600 --> 00:22:56,340
+arrangement that block stack is shooting
+
+536
+00:22:56,340 --> 00:23:01,710
+for so we should just sort of try to
+
+537
+00:23:01,710 --> 00:23:03,600
+guess even at this level what kind of
+
+538
+00:23:03,600 --> 00:23:09,990
+things might go wrong one reason is that
+
+539
+00:23:09,990 --> 00:23:12,870
+this interface is likely to be less
+
+540
+00:23:12,870 --> 00:23:15,809
+flexible than database interfaces and
+
+541
+00:23:15,809 --> 00:23:17,370
+this actually goes back to the
+
+542
+00:23:17,370 --> 00:23:18,840
+performance a little bit you know
+
+543
+00:23:18,840 --> 00:23:20,370
+weren't probably not going to be well I
+
+544
+00:23:20,370 --> 00:23:23,010
+mean this is sort of subject to design
+
+545
+00:23:23,010 --> 00:23:25,830
+but we're unlikely deals to be
+
+546
+00:23:25,830 --> 00:23:29,340
+supporting super flexible like sequel
+
+547
+00:23:29,340 --> 00:23:31,410
+queries and certainly it's unlikely that
+
+548
+00:23:31,410 --> 00:23:34,620
+we're going to be doing sequel queries
+
+549
+00:23:34,620 --> 00:23:36,450
+across other people's data as well as
+
+550
+00:23:36,450 --> 00:23:39,390
+ours for shared data so that's certainly
+
+551
+00:23:39,390 --> 00:23:40,950
+one potential problem is that this
+
+552
+00:23:40,950 --> 00:23:43,320
+interface may not be very expressive and
+
+553
+00:23:43,320 --> 00:23:44,700
+that's going to be painful for
+
+554
+00:23:44,700 --> 00:23:48,030
+programmers another question is could
+
+555
+00:23:48,030 --> 00:23:49,500
+this give users an amount of traffic
+
+556
+00:23:49,500 --> 00:23:50,850
+they might not handle yeah so that's
+
+557
+00:23:50,850 --> 00:23:55,230
+also a potential problem is that you
+
+558
+00:23:55,230 --> 00:23:57,390
+know if you don't have very powerful
+
+559
+00:23:57,390 --> 00:23:59,760
+queries much of what sequel is doing
+
+560
+00:23:59,760 --> 00:24:01,950
+when you talk to a real sequel database
+
+561
+00:24:01,950 --> 00:24:05,220
+is that it may be looking through cause
+
+562
+00:24:05,220 --> 00:24:06,270
+the database server to look through a
+
+563
+00:24:06,270 --> 00:24:08,610
+lot of data but it just finds the one
+
+564
+00:24:08,610 --> 00:24:10,140
+answer you're looking for maybe the sum
+
+565
+00:24:10,140 --> 00:24:11,700
+of all votes or something it just sends
+
+566
+00:24:11,700 --> 00:24:13,260
+that one little piece of final data back
+
+567
+00:24:13,260 --> 00:24:14,970
+whereas if you don't have a powerful
+
+568
+00:24:14,970 --> 00:24:16,060
+query language you may
+
+569
+00:24:16,060 --> 00:24:18,210
+up having to fetch a lot of stuff and
+
+570
+00:24:18,210 --> 00:24:20,950
+sort of do the filtering or aggregating
+
+571
+00:24:20,950 --> 00:24:23,290
+yourself and that just might be a lot of
+
+572
+00:24:23,290 --> 00:24:27,030
+data to be sending across peoples links
+
+573
+00:24:31,020 --> 00:24:34,450
+yeah so things might be slower things
+
+574
+00:24:34,450 --> 00:24:36,400
+would be slower and it's a question
+
+575
+00:24:36,400 --> 00:24:38,080
+whether they'd be too slow maybe in the
+
+576
+00:24:38,080 --> 00:24:40,900
+future in which you know everybody has
+
+577
+00:24:40,900 --> 00:24:43,090
+broadband internet and we have 5g cell
+
+578
+00:24:43,090 --> 00:24:44,500
+phones and none of this one it's
+
+579
+00:24:44,500 --> 00:24:46,210
+performance stuff will matter or maybe
+
+580
+00:24:46,210 --> 00:24:48,880
+it'll be important I don't know another
+
+581
+00:24:48,880 --> 00:24:50,830
+problem with this setup is that there
+
+582
+00:24:50,830 --> 00:24:55,330
+are some websites like eBay where it's
+
+583
+00:24:55,330 --> 00:24:57,490
+really not the case that all the data is
+
+584
+00:24:57,490 --> 00:25:00,310
+sort of definitely owned by one user so
+
+585
+00:25:00,310 --> 00:25:05,470
+for eBay for example well I have to have
+
+586
+00:25:05,470 --> 00:25:07,180
+two points here one is some data is not
+
+587
+00:25:07,180 --> 00:25:08,920
+owned by all users think about the front
+
+588
+00:25:08,920 --> 00:25:10,780
+page of Reddit right there's you know
+
+589
+00:25:10,780 --> 00:25:12,760
+there's some clever algorithms that
+
+590
+00:25:12,760 --> 00:25:14,410
+reddit is running to pick the order of
+
+591
+00:25:14,410 --> 00:25:15,760
+items in the front page I mean to do
+
+592
+00:25:15,760 --> 00:25:17,860
+with votes and you know who knows what
+
+593
+00:25:17,860 --> 00:25:20,320
+like weird those algorithms run and
+
+594
+00:25:20,320 --> 00:25:21,730
+where do they get the data and maybe
+
+595
+00:25:21,730 --> 00:25:23,260
+where do they store their conclusions
+
+596
+00:25:23,260 --> 00:25:27,550
+about the front page so that's something
+
+597
+00:25:27,550 --> 00:25:29,020
+it doesn't really fit in me you know
+
+598
+00:25:29,020 --> 00:25:31,330
+maybe you could be fit in here but I'd
+
+599
+00:25:31,330 --> 00:25:33,880
+be a little bit hard another kind of
+
+600
+00:25:33,880 --> 00:25:35,590
+website that seems like could be hard
+
+601
+00:25:35,590 --> 00:25:39,490
+here is is a Bay where you want to bid
+
+602
+00:25:39,490 --> 00:25:41,890
+against other people you know eBay tells
+
+603
+00:25:41,890 --> 00:25:43,330
+you whether you're have the current
+
+604
+00:25:43,330 --> 00:25:45,460
+highest bid which requires eBay to look
+
+605
+00:25:45,460 --> 00:25:47,140
+at other people's bids and then when you
+
+606
+00:25:47,140 --> 00:25:49,600
+finally win you know the amount you pay
+
+607
+00:25:49,600 --> 00:25:52,710
+has to do with the second highest bid
+
+608
+00:25:52,710 --> 00:25:55,840
+but those bids are private right you
+
+609
+00:25:55,840 --> 00:25:58,600
+don't want other people to see your bids
+
+610
+00:25:58,600 --> 00:26:00,730
+because then they can just bid one cent
+
+611
+00:26:00,730 --> 00:26:03,100
+higher than you and win at a low cost so
+
+612
+00:26:03,100 --> 00:26:06,460
+you know maybe you two user two is
+
+613
+00:26:06,460 --> 00:26:10,330
+stored a bid here but if my if I'm
+
+614
+00:26:10,330 --> 00:26:12,280
+bidding against user two and we need
+
+615
+00:26:12,280 --> 00:26:13,750
+this application to tell me if I'm the
+
+616
+00:26:13,750 --> 00:26:15,460
+winning bidder that means this
+
+617
+00:26:15,460 --> 00:26:17,170
+application needs in order to answer
+
+618
+00:26:17,170 --> 00:26:19,030
+that question may need probably needs to
+
+619
+00:26:19,030 --> 00:26:23,590
+know user to bid user twos bid which
+
+620
+00:26:23,590 --> 00:26:24,910
+means the users to bid has to be
+
+621
+00:26:24,910 --> 00:26:26,920
+accessible to me but if my application
+
+622
+00:26:26,920 --> 00:26:29,290
+code knows it well it's running on Mike
+
+623
+00:26:29,290 --> 00:26:31,480
+computer and I can change it right as
+
+624
+00:26:31,480 --> 00:26:33,220
+the usual rules for code you run in your
+
+625
+00:26:33,220 --> 00:26:35,020
+own computer and if I change my
+
+626
+00:26:35,020 --> 00:26:36,730
+application code to actually reveal your
+
+627
+00:26:36,730 --> 00:26:38,920
+bid then that's totally cheating from
+
+628
+00:26:38,920 --> 00:26:40,420
+the point of view of what eBay is trying
+
+629
+00:26:40,420 --> 00:26:42,940
+to do and so nobody would trust auction
+
+630
+00:26:42,940 --> 00:26:46,210
+system that allowed that so it's really
+
+631
+00:26:46,210 --> 00:26:48,610
+unclear you know there's probably tricks
+
+632
+00:26:48,610 --> 00:26:50,410
+that could be used but you know if we
+
+633
+00:26:50,410 --> 00:26:52,120
+just use this architecture and
+
+634
+00:26:52,120 --> 00:26:54,400
+straightforward way websites like eBay
+
+635
+00:26:54,400 --> 00:26:57,280
+that need to look at other people's
+
+636
+00:26:57,280 --> 00:26:59,580
+secret data but not review of the data
+
+637
+00:26:59,580 --> 00:27:04,090
+are quite a puzzle as just like and I
+
+638
+00:27:04,090 --> 00:27:05,770
+already mentioned that websites that
+
+639
+00:27:05,770 --> 00:27:08,320
+have to keep their own data like indexes
+
+640
+00:27:08,320 --> 00:27:10,810
+or vote counts or something that's often
+
+641
+00:27:10,810 --> 00:27:12,700
+a puzzle also a puzzle because there's
+
+642
+00:27:12,700 --> 00:27:14,770
+no notion here of you know the website
+
+643
+00:27:14,770 --> 00:27:15,610
+itself
+
+644
+00:27:15,610 --> 00:27:17,170
+there's just application code and
+
+645
+00:27:17,170 --> 00:27:22,180
+generic user owned storage because
+
+646
+00:27:22,180 --> 00:27:23,740
+usually these things so you would
+
+647
+00:27:23,740 --> 00:27:25,240
+probably have to augment this with some
+
+648
+00:27:25,240 --> 00:27:28,000
+crusted servers to run the privacy
+
+649
+00:27:28,000 --> 00:27:30,580
+critical part of eBay or whatever it
+
+650
+00:27:30,580 --> 00:27:31,810
+doesn't really fit into the model that
+
+651
+00:27:31,810 --> 00:27:34,600
+well another thing that's I'm gonna turn
+
+652
+00:27:34,600 --> 00:27:38,590
+out to be bad news here is that if I if
+
+653
+00:27:38,590 --> 00:27:39,790
+I have data that I want to share with
+
+654
+00:27:39,790 --> 00:27:41,650
+some people than others like I want to
+
+655
+00:27:41,650 --> 00:27:43,390
+share data with just six eight to four
+
+656
+00:27:43,390 --> 00:27:47,170
+students but not outsiders you know how
+
+657
+00:27:47,170 --> 00:27:49,710
+is that actually enforced
+
+658
+00:27:49,710 --> 00:27:52,000
+you know we'd really like to use end and
+
+659
+00:27:52,000 --> 00:27:53,770
+encryption so we don't have to trust the
+
+660
+00:27:53,770 --> 00:27:54,970
+storage server because after all that
+
+661
+00:27:54,970 --> 00:27:56,800
+was a big motivation for moving away
+
+662
+00:27:56,800 --> 00:27:59,200
+from the current website architectures
+
+663
+00:27:59,200 --> 00:28:01,270
+we don't want to have to trust these
+
+664
+00:28:01,270 --> 00:28:05,080
+sort of these clouds services so I could
+
+665
+00:28:05,080 --> 00:28:07,720
+encrypt the data so that 682 four
+
+666
+00:28:07,720 --> 00:28:10,420
+students could read it but it's actually
+
+667
+00:28:10,420 --> 00:28:12,940
+quite difficult to do that in any kind
+
+668
+00:28:12,940 --> 00:28:15,070
+of straightforward way you know I could
+
+669
+00:28:15,070 --> 00:28:17,410
+encrypt the data a hundred times you
+
+670
+00:28:17,410 --> 00:28:19,300
+know with once with each of the
+
+671
+00:28:19,300 --> 00:28:22,270
+sixty-two for students keys or maybe I
+
+672
+00:28:22,270 --> 00:28:24,100
+can encrypt the data once with uh some
+
+673
+00:28:24,100 --> 00:28:27,010
+sort of unique key and then encrypt that
+
+674
+00:28:27,010 --> 00:28:29,080
+key with a two for students keys or
+
+675
+00:28:29,080 --> 00:28:32,830
+something but then you run into a
+
+676
+00:28:32,830 --> 00:28:34,300
+question so if somebody drops the course
+
+677
+00:28:34,300 --> 00:28:35,290
+and you don't want them to be able to
+
+678
+00:28:35,290 --> 00:28:36,790
+see the data you know how do you make
+
+679
+00:28:36,790 --> 00:28:38,710
+sure that now they can't see the data so
+
+680
+00:28:38,710 --> 00:28:42,240
+you can use encryption for privacy but
+
+681
+00:28:42,240 --> 00:28:43,980
+once you get into a sort of complex
+
+682
+00:28:43,980 --> 00:28:47,940
+multi user applications with groups of
+
+683
+00:28:47,940 --> 00:28:51,720
+users for example cryptography becomes
+
+684
+00:28:51,720 --> 00:28:54,119
+can be quite difficult to use to solve
+
+685
+00:28:54,119 --> 00:28:59,940
+your privacy problems okay so these are
+
+686
+00:28:59,940 --> 00:29:04,649
+ways in which the system may be awkward
+
+687
+00:29:04,649 --> 00:29:07,590
+to awkward to program and because it may
+
+688
+00:29:07,590 --> 00:29:08,850
+be awkward to program and awkward to
+
+689
+00:29:08,850 --> 00:29:10,259
+program up features that may leak
+
+690
+00:29:10,259 --> 00:29:12,269
+through into the set of application
+
+691
+00:29:12,269 --> 00:29:14,009
+features you can have being limited also
+
+692
+00:29:14,009 --> 00:29:16,499
+which it's not going to make users very
+
+693
+00:29:16,499 --> 00:29:20,940
+happy either all right this is sort of a
+
+694
+00:29:20,940 --> 00:29:24,240
+high-level view of what block stack is
+
+695
+00:29:24,240 --> 00:29:28,529
+kind of working towards so now let's
+
+696
+00:29:28,529 --> 00:29:30,570
+that's may be focused a little more on
+
+697
+00:29:30,570 --> 00:29:37,409
+block stacks specifically where block
+
+698
+00:29:37,409 --> 00:29:39,149
+stack actually originated as a project
+
+699
+00:29:39,149 --> 00:29:43,730
+was as a secure naming scheme and you
+
+700
+00:29:43,730 --> 00:29:47,909
+can still see the the paper we read
+
+701
+00:29:47,909 --> 00:29:50,639
+today has a lot of preoccupation with
+
+702
+00:29:50,639 --> 00:29:52,679
+naming although if you look at their
+
+703
+00:29:52,679 --> 00:29:54,450
+current website and the current stuff
+
+704
+00:29:54,450 --> 00:29:56,309
+they write it's much more about this
+
+705
+00:29:56,309 --> 00:29:57,869
+decentralized architecture and
+
+706
+00:29:57,869 --> 00:30:00,889
+applications and much less about naming
+
+707
+00:30:00,889 --> 00:30:02,940
+but name is still very important for
+
+708
+00:30:02,940 --> 00:30:05,940
+them so the question is what are they
+
+709
+00:30:05,940 --> 00:30:06,960
+you know why are they interested in
+
+710
+00:30:06,960 --> 00:30:08,730
+names and what do they need from a
+
+711
+00:30:08,730 --> 00:30:10,710
+naming system so the kind of names
+
+712
+00:30:10,710 --> 00:30:12,809
+they're talking about in the paper and
+
+713
+00:30:12,809 --> 00:30:15,720
+then block stack in general are user
+
+714
+00:30:15,720 --> 00:30:20,570
+names these are really human users so
+
+715
+00:30:20,570 --> 00:30:23,820
+we're talking about names like you know
+
+716
+00:30:23,820 --> 00:30:27,690
+maybe Robert Morris right that's the
+
+717
+00:30:27,690 --> 00:30:30,919
+kind of name they're talking about
+
+718
+00:30:30,919 --> 00:30:34,139
+because you know in there in there are
+
+719
+00:30:34,139 --> 00:30:35,669
+decentralized architecture they don't
+
+720
+00:30:35,669 --> 00:30:37,619
+you know those kind of players in the
+
+721
+00:30:37,619 --> 00:30:39,809
+game or the users the users of the data
+
+722
+00:30:39,809 --> 00:30:42,269
+the users need to control who can see
+
+723
+00:30:42,269 --> 00:30:44,039
+their data so they need to be able to
+
+724
+00:30:44,039 --> 00:30:47,759
+name other users the specific things
+
+725
+00:30:47,759 --> 00:30:51,179
+they need to solve with naming they need
+
+726
+00:30:51,179 --> 00:30:54,330
+to if I
+
+727
+00:30:54,330 --> 00:30:57,450
+want to look at your data um block stack
+
+728
+00:30:57,450 --> 00:30:59,220
+needs to find where your data is you
+
+729
+00:30:59,220 --> 00:31:00,630
+know you're storing your data on some
+
+730
+00:31:00,630 --> 00:31:02,220
+storage server somewhere I need to know
+
+731
+00:31:02,220 --> 00:31:05,250
+what you know are using Amazon AWS or
+
+732
+00:31:05,250 --> 00:31:07,890
+maybe Microsoft Azure you know and if so
+
+733
+00:31:07,890 --> 00:31:10,309
+which server that Microsoft are
+
+734
+00:31:10,309 --> 00:31:14,340
+destroying your data so block stack
+
+735
+00:31:14,340 --> 00:31:21,600
+needs a way to map names to the location
+
+736
+00:31:21,600 --> 00:31:23,070
+where you store your data so that's one
+
+737
+00:31:23,070 --> 00:31:25,190
+big thing that they're doing with names
+
+738
+00:31:25,190 --> 00:31:28,440
+but they also need to find out if I
+
+739
+00:31:28,440 --> 00:31:30,659
+going to read your data I need to be
+
+740
+00:31:30,659 --> 00:31:31,950
+able to do things like check that it's
+
+741
+00:31:31,950 --> 00:31:34,980
+really your data you know I can't store
+
+742
+00:31:34,980 --> 00:31:36,269
+not the whole point of this is to not
+
+743
+00:31:36,269 --> 00:31:40,679
+have to trust the storage services so in
+
+744
+00:31:40,679 --> 00:31:42,389
+order for me to be able to check it that
+
+745
+00:31:42,389 --> 00:31:45,269
+it's your data we need a way to map the
+
+746
+00:31:45,269 --> 00:31:50,340
+name to the public key and we're gonna
+
+747
+00:31:50,340 --> 00:31:53,789
+assume that when you store data you sign
+
+748
+00:31:53,789 --> 00:31:56,070
+it with your public key first so we need
+
+749
+00:31:56,070 --> 00:31:57,510
+both DeMayo names to where to find the
+
+750
+00:31:57,510 --> 00:31:59,250
+person's data and map names the public
+
+751
+00:31:59,250 --> 00:32:01,080
+key that we used to check that when we
+
+752
+00:32:01,080 --> 00:32:03,240
+retrieve data it's really data that you
+
+753
+00:32:03,240 --> 00:32:05,610
+wrote and not some kind of misleading
+
+754
+00:32:05,610 --> 00:32:07,289
+thing cooked up by the storage service
+
+755
+00:32:07,289 --> 00:32:08,600
+or someone else
+
+756
+00:32:08,600 --> 00:32:10,950
+now this named a public key thing
+
+757
+00:32:10,950 --> 00:32:12,840
+actually is used in other ways too if I
+
+758
+00:32:12,840 --> 00:32:14,610
+want to encrypt data so that only you
+
+759
+00:32:14,610 --> 00:32:17,220
+can read it probably the way I'm gonna
+
+760
+00:32:17,220 --> 00:32:19,320
+do that is to encrypt the data or some
+
+761
+00:32:19,320 --> 00:32:22,889
+other key using your public key so that
+
+762
+00:32:22,889 --> 00:32:25,200
+only your private key can read it so if
+
+763
+00:32:25,200 --> 00:32:27,510
+I want to implement cryptographic ACLs
+
+764
+00:32:27,510 --> 00:32:29,700
+or really almost any permissions key
+
+765
+00:32:29,700 --> 00:32:32,490
+access control scheme I need you have I
+
+766
+00:32:32,490 --> 00:32:34,260
+need to build the name the people who
+
+767
+00:32:34,260 --> 00:32:37,049
+can use the data and so if I'm gonna
+
+768
+00:32:37,049 --> 00:32:42,090
+make access control lists these are
+
+769
+00:32:42,090 --> 00:32:44,309
+usually one way or another
+
+770
+00:32:44,309 --> 00:32:46,409
+driven by names and may be able to name
+
+771
+00:32:46,409 --> 00:32:51,850
+the people who can read my data so
+
+772
+00:32:51,850 --> 00:32:55,240
+this in particular this part that maps
+
+773
+00:32:55,240 --> 00:32:58,570
+names of people to public keys this is
+
+774
+00:32:58,570 --> 00:33:01,000
+usually often called a public key
+
+775
+00:33:01,000 --> 00:33:06,520
+infrastructure or PKI and so what block
+
+776
+00:33:06,520 --> 00:33:08,680
+sac is proposing among other things is a
+
+777
+00:33:08,680 --> 00:33:12,030
+general-purpose sort of public global
+
+778
+00:33:12,030 --> 00:33:15,790
+PKI public key infrastructure to map
+
+779
+00:33:15,790 --> 00:33:19,990
+user names to users public keys and this
+
+780
+00:33:19,990 --> 00:33:23,790
+is actually quite important because
+
+781
+00:33:24,330 --> 00:33:26,500
+people known for a long time decades
+
+782
+00:33:26,500 --> 00:33:30,220
+decades that in order to sort of make
+
+783
+00:33:30,220 --> 00:33:34,300
+big advances in Internet security almost
+
+784
+00:33:34,300 --> 00:33:37,420
+certainly the only way to do that is to
+
+785
+00:33:37,420 --> 00:33:39,520
+have some sort of public key scheme so
+
+786
+00:33:39,520 --> 00:33:43,330
+that people can sign you know data that
+
+787
+00:33:43,330 --> 00:33:46,540
+they produce email and check signatures
+
+788
+00:33:46,540 --> 00:33:49,720
+on email or data that they receive for
+
+789
+00:33:49,720 --> 00:33:54,010
+other people and also encrypt so that to
+
+790
+00:33:54,010 --> 00:33:55,720
+ensure privacy said on the intended
+
+791
+00:33:55,720 --> 00:33:59,350
+reader can be the data so almost any
+
+792
+00:33:59,350 --> 00:34:02,370
+internet wide scheme or large scheme
+
+793
+00:34:02,370 --> 00:34:05,320
+intended to get cryptographic privacy or
+
+794
+00:34:05,320 --> 00:34:07,870
+cryptographic authentication ends up
+
+795
+00:34:07,870 --> 00:34:10,270
+having to involve some sort of public
+
+796
+00:34:10,270 --> 00:34:12,040
+key system public key infrastructure so
+
+797
+00:34:12,040 --> 00:34:14,260
+that I can find out now given the
+
+798
+00:34:14,260 --> 00:34:16,030
+identity the person I want to talk to
+
+799
+00:34:16,030 --> 00:34:20,460
+how do I find their public key and yet
+
+800
+00:34:20,460 --> 00:34:25,659
+there kind of isn't a successful public
+
+801
+00:34:25,659 --> 00:34:26,889
+key infrastructure system out there
+
+802
+00:34:26,889 --> 00:34:28,600
+nobody's really figured out how to build
+
+803
+00:34:28,600 --> 00:34:32,100
+one of these that's actually useful and
+
+804
+00:34:32,100 --> 00:34:34,570
+as a result people have tended not to
+
+805
+00:34:34,570 --> 00:34:38,230
+build or deploy people tended not to
+
+806
+00:34:38,230 --> 00:34:39,659
+deploy
+
+807
+00:34:39,659 --> 00:34:43,810
+systems with cryptographic privacy and
+
+808
+00:34:43,810 --> 00:34:46,480
+authenticity because there's no PKI and
+
+809
+00:34:46,480 --> 00:34:48,280
+maybe because of that people haven't
+
+810
+00:34:48,280 --> 00:34:49,840
+worked on PGI's because it's not clear
+
+811
+00:34:49,840 --> 00:34:53,139
+who would use them but at any rate one
+
+812
+00:34:53,139 --> 00:34:54,280
+of the reasons why block stack is
+
+813
+00:34:54,280 --> 00:34:56,230
+interesting is because they're trying
+
+814
+00:34:56,230 --> 00:34:59,710
+hard to build a global scale public key
+
+815
+00:34:59,710 --> 00:35:02,160
+infrastructure
+
+816
+00:35:02,440 --> 00:35:04,599
+the kind of names remember the paper
+
+817
+00:35:04,599 --> 00:35:06,280
+talks about this Zuko's triangle thing
+
+818
+00:35:06,280 --> 00:35:08,800
+the kinds of names the style of names
+
+819
+00:35:08,800 --> 00:35:12,700
+that the paper's talking about is three
+
+820
+00:35:12,700 --> 00:35:14,530
+these three interesting properties one
+
+821
+00:35:14,530 --> 00:35:17,319
+is their unique and what that really
+
+822
+00:35:17,319 --> 00:35:19,210
+means actually is that the names have
+
+823
+00:35:19,210 --> 00:35:22,420
+global meaning that the name Robert for
+
+824
+00:35:22,420 --> 00:35:23,920
+example has the same meaning did it
+
+825
+00:35:23,920 --> 00:35:25,869
+everyone in the world you know maps to
+
+826
+00:35:25,869 --> 00:35:28,030
+this in the same way the same data
+
+827
+00:35:28,030 --> 00:35:30,400
+location same public key to everyone in
+
+828
+00:35:30,400 --> 00:35:31,150
+the world of course that's a little
+
+829
+00:35:31,150 --> 00:35:32,410
+ridiculous for Robert you know
+
+830
+00:35:32,410 --> 00:35:35,740
+presumably my ID under block stack would
+
+831
+00:35:35,740 --> 00:35:37,210
+be much longer than that you know maybe
+
+832
+00:35:37,210 --> 00:35:39,760
+Robert Morris there's a lot of Robert
+
+833
+00:35:39,760 --> 00:35:41,849
+Morris's maybe I'm Robert Morris number
+
+834
+00:35:41,849 --> 00:35:44,319
+67 is Robert Morris to register with
+
+835
+00:35:44,319 --> 00:35:45,819
+block stack that would probably be
+
+836
+00:35:45,819 --> 00:35:48,040
+closer to what my name would be under
+
+837
+00:35:48,040 --> 00:35:50,290
+block stack anyway that everybody in the
+
+838
+00:35:50,290 --> 00:35:52,270
+world when they see this name and they
+
+839
+00:35:52,270 --> 00:35:53,920
+run it through the PKI gets the same
+
+840
+00:35:53,920 --> 00:35:55,990
+information about it so this really
+
+841
+00:35:55,990 --> 00:36:00,609
+means global might be a better word for
+
+842
+00:36:00,609 --> 00:36:02,680
+this the second property the paper talks
+
+843
+00:36:02,680 --> 00:36:06,750
+about for names are there human readable
+
+844
+00:36:06,750 --> 00:36:08,950
+just like Robert Morris so somebody
+
+845
+00:36:08,950 --> 00:36:09,910
+could look at it and you know make a
+
+846
+00:36:09,910 --> 00:36:13,329
+guess what a name means and maybe people
+
+847
+00:36:13,329 --> 00:36:14,440
+may be able to remember the names
+
+848
+00:36:14,440 --> 00:36:18,690
+because they sort of have human
+
+849
+00:36:18,690 --> 00:36:21,190
+meaningfulness and the final thing
+
+850
+00:36:21,190 --> 00:36:23,380
+they're interested in is that the naming
+
+851
+00:36:23,380 --> 00:36:26,109
+system the allocation of names be
+
+852
+00:36:26,109 --> 00:36:32,560
+decentralized and you know the paper
+
+853
+00:36:32,560 --> 00:36:33,970
+claims on this is the old claim that
+
+854
+00:36:33,970 --> 00:36:40,450
+it's difficult to get all three you know
+
+855
+00:36:40,450 --> 00:36:41,770
+apparently not impossible since the
+
+856
+00:36:41,770 --> 00:36:44,619
+paper does it the sort of intuitive
+
+857
+00:36:44,619 --> 00:36:48,040
+reason why it's hard to get all three is
+
+858
+00:36:48,040 --> 00:36:51,069
+that if you have a supposing you have
+
+859
+00:36:51,069 --> 00:36:53,140
+assistants decentralized there's no one
+
+860
+00:36:53,140 --> 00:36:56,770
+entity you know in charge of allocating
+
+861
+00:36:56,770 --> 00:36:59,589
+names well if you do that then it's very
+
+862
+00:36:59,589 --> 00:37:02,470
+hard to ensure uniqueness that is if you
+
+863
+00:37:02,470 --> 00:37:03,760
+don't have some single entity handing
+
+864
+00:37:03,760 --> 00:37:04,810
+out the names how do you know you don't
+
+865
+00:37:04,810 --> 00:37:06,280
+end up handing out the name same name
+
+866
+00:37:06,280 --> 00:37:08,680
+the multiple people if there's not some
+
+867
+00:37:08,680 --> 00:37:11,530
+central trusted entity and you can
+
+868
+00:37:11,530 --> 00:37:14,859
+actually have decentralized and unique
+
+869
+00:37:14,859 --> 00:37:15,599
+names
+
+870
+00:37:15,599 --> 00:37:18,359
+but now the most obvious ways to do that
+
+871
+00:37:18,359 --> 00:37:21,180
+sacrifice the human readable part so if
+
+872
+00:37:21,180 --> 00:37:23,069
+what you decide your names are are gonna
+
+873
+00:37:23,069 --> 00:37:26,910
+be you know public keys 1000 bit public
+
+874
+00:37:26,910 --> 00:37:29,069
+keys in a public private cryptography
+
+875
+00:37:29,069 --> 00:37:31,440
+system anybody can make up a new
+
+876
+00:37:31,440 --> 00:37:34,369
+public/private key pair they're
+
+877
+00:37:34,369 --> 00:37:37,199
+typically made use random number and
+
+878
+00:37:37,199 --> 00:37:38,789
+emmm number generator so since anyone
+
+879
+00:37:38,789 --> 00:37:41,130
+can make one up and they're generated
+
+880
+00:37:41,130 --> 00:37:43,859
+randomly they're going to be unique but
+
+881
+00:37:43,859 --> 00:37:46,019
+they're not human readable so you know
+
+882
+00:37:46,019 --> 00:37:49,859
+many of the obvious ways trying to get
+
+883
+00:37:49,859 --> 00:37:51,709
+all three of these at the same time
+
+884
+00:37:51,709 --> 00:37:59,969
+don't work so well the way block stack
+
+885
+00:37:59,969 --> 00:38:03,630
+solves these this at a very high level I
+
+886
+00:38:03,630 --> 00:38:04,920
+mean you know they're gonna produce
+
+887
+00:38:04,920 --> 00:38:07,259
+their decentralized system and no
+
+888
+00:38:07,259 --> 00:38:10,019
+central person handing out names the
+
+889
+00:38:10,019 --> 00:38:12,779
+names are human readable and everyone
+
+890
+00:38:12,779 --> 00:38:15,239
+sees the same set of mappings the way
+
+891
+00:38:15,239 --> 00:38:17,099
+they do this at a high level is that
+
+892
+00:38:17,099 --> 00:38:22,410
+they rely on bitcoins ability to produce
+
+893
+00:38:22,410 --> 00:38:26,219
+a single ordered log of transactions
+
+894
+00:38:26,219 --> 00:38:28,709
+that's one way of viewing Bitcoin is
+
+895
+00:38:28,709 --> 00:38:31,380
+that everybody agrees on what the
+
+896
+00:38:31,380 --> 00:38:33,630
+sequence of Bitcoin blocks is and you
+
+897
+00:38:33,630 --> 00:38:35,069
+know maybe you get temporary Forks but
+
+898
+00:38:35,069 --> 00:38:37,890
+Bitcoin rapidly resolves any Forks and
+
+899
+00:38:37,890 --> 00:38:41,729
+causes everyone to agree on what the
+
+900
+00:38:41,729 --> 00:38:44,969
+sequence of blocks is in Bitcoin ok so
+
+901
+00:38:44,969 --> 00:38:47,160
+once we a Bitcoin that's causing
+
+902
+00:38:47,160 --> 00:38:50,209
+agreement on a sequence of transactions
+
+903
+00:38:50,209 --> 00:38:55,769
+we can stick anyone can stick
+
+904
+00:38:55,769 --> 00:38:59,039
+transactions into the Bitcoin log that
+
+905
+00:38:59,039 --> 00:39:01,410
+you know as well as maybe being valid
+
+906
+00:39:01,410 --> 00:39:03,539
+Bitcoin transactions also have hidden
+
+907
+00:39:03,539 --> 00:39:06,599
+away in them name reservation records so
+
+908
+00:39:06,599 --> 00:39:12,479
+now this is it's a sort of naming on
+
+909
+00:39:12,479 --> 00:39:14,490
+Bitcoin
+
+910
+00:39:14,490 --> 00:39:16,550
+you
+
+911
+00:39:17,160 --> 00:39:19,920
+blockchain so you know Bitcoin was
+
+912
+00:39:19,920 --> 00:39:22,799
+already put getting us sort of unique
+
+913
+00:39:22,799 --> 00:39:25,490
+and globally agreed sequence of these
+
+914
+00:39:25,490 --> 00:39:28,920
+transaction blocks and now and anybody
+
+915
+00:39:28,920 --> 00:39:30,240
+can submit a transaction so in that
+
+916
+00:39:30,240 --> 00:39:32,039
+sense it's totally decentralized right
+
+917
+00:39:32,039 --> 00:39:37,799
+so how wouldn't what the way block stack
+
+918
+00:39:37,799 --> 00:39:40,230
+uses this for naming is that if I want
+
+919
+00:39:40,230 --> 00:39:42,329
+to register a name I can pick any name I
+
+920
+00:39:42,329 --> 00:39:45,420
+like say Robert Morris as long as it's
+
+921
+00:39:45,420 --> 00:39:48,359
+not already you in use and I stick in I
+
+922
+00:39:48,359 --> 00:39:54,690
+submit to Bitcoin a transaction you know
+
+923
+00:39:54,690 --> 00:39:55,890
+that happens to be a valid Bitcoin
+
+924
+00:39:55,890 --> 00:39:59,910
+transaction but it's also going to be
+
+925
+00:39:59,910 --> 00:40:01,950
+meaningful to block stack and it's gonna
+
+926
+00:40:01,950 --> 00:40:05,880
+say please reserve please allocate the
+
+927
+00:40:05,880 --> 00:40:10,740
+name RTM and map it to whatever my
+
+928
+00:40:10,740 --> 00:40:12,839
+public key and my information about
+
+929
+00:40:12,839 --> 00:40:14,970
+where to have data not man anyone can
+
+930
+00:40:14,970 --> 00:40:18,630
+submit these and the block stack servers
+
+931
+00:40:18,630 --> 00:40:20,520
+all the blocks tax servers watch the
+
+932
+00:40:20,520 --> 00:40:22,609
+Bitcoin blockchain as it involves and
+
+933
+00:40:22,609 --> 00:40:25,950
+every time they see one of these records
+
+934
+00:40:25,950 --> 00:40:29,039
+that's a block stack transaction as well
+
+935
+00:40:29,039 --> 00:40:31,619
+as a Bitcoin transaction the block stack
+
+936
+00:40:31,619 --> 00:40:34,319
+servers think about adding this mapping
+
+937
+00:40:34,319 --> 00:40:37,470
+to their name database but they have a
+
+938
+00:40:37,470 --> 00:40:42,930
+set of rules for rejecting bad block
+
+939
+00:40:42,930 --> 00:40:44,549
+stack transactions in the Bitcoin
+
+940
+00:40:44,549 --> 00:40:47,220
+blockchain so for example if some bad
+
+941
+00:40:47,220 --> 00:40:51,349
+person after I've allocated RTM
+
+942
+00:40:51,349 --> 00:40:54,059
+themselves try to allocate RTM well they
+
+943
+00:40:54,059 --> 00:40:56,220
+can submit any transaction they like so
+
+944
+00:40:56,220 --> 00:40:59,700
+they can perfectly well also submit a
+
+945
+00:40:59,700 --> 00:41:01,799
+transaction trying to steal the name RTM
+
+946
+00:41:01,799 --> 00:41:03,180
+from me and mapping it to some other
+
+947
+00:41:03,180 --> 00:41:05,400
+public key that they know the private
+
+948
+00:41:05,400 --> 00:41:09,240
+key for well all the block stack servers
+
+949
+00:41:09,240 --> 00:41:11,190
+are watching the Bitcoin chain there's
+
+950
+00:41:11,190 --> 00:41:12,839
+only one Bitcoin chain and only has a
+
+951
+00:41:12,839 --> 00:41:15,420
+one set of contents and so the block
+
+952
+00:41:15,420 --> 00:41:18,420
+stack servers as they you know sort of
+
+953
+00:41:18,420 --> 00:41:20,849
+look at successive transactions in the
+
+954
+00:41:20,849 --> 00:41:22,470
+Bitcoin chain are gonna see my
+
+955
+00:41:22,470 --> 00:41:26,609
+allocation first and then they're gonna
+
+956
+00:41:26,609 --> 00:41:28,200
+see this other person's allocation for
+
+957
+00:41:28,200 --> 00:41:29,880
+the same name and the rules going to be
+
+958
+00:41:29,880 --> 00:41:30,910
+well of a name is already Alec
+
+959
+00:41:30,910 --> 00:41:33,009
+you can't be allocated a second time and
+
+960
+00:41:33,009 --> 00:41:36,130
+the block stack servers will ignore this
+
+961
+00:41:36,130 --> 00:41:42,119
+attempted registration of a name so
+
+962
+00:41:42,119 --> 00:41:45,069
+what's being implemented here is a kind
+
+963
+00:41:45,069 --> 00:41:49,779
+of first-come first-serve scheme for
+
+964
+00:41:49,779 --> 00:41:51,730
+allocating names the first person to get
+
+965
+00:41:51,730 --> 00:41:54,420
+a allocation record into the blockchain
+
+966
+00:41:54,420 --> 00:41:59,349
+wins that name okay so as far as those
+
+967
+00:41:59,349 --> 00:42:01,450
+three properties the Zucco triangle
+
+968
+00:42:01,450 --> 00:42:04,150
+properties it's decentralized because
+
+969
+00:42:04,150 --> 00:42:06,099
+you know we can uh we believe that
+
+970
+00:42:06,099 --> 00:42:08,349
+bitcoin is be decentralized and there's
+
+971
+00:42:08,349 --> 00:42:10,509
+no sort of other entity deciding who
+
+972
+00:42:10,509 --> 00:42:13,180
+gets what's name it's really just this
+
+973
+00:42:13,180 --> 00:42:16,869
+first-come first-served scheme that was
+
+974
+00:42:16,869 --> 00:42:18,730
+decentralized the names can be anything
+
+975
+00:42:18,730 --> 00:42:21,069
+there's no any strings whatever so
+
+976
+00:42:21,069 --> 00:42:22,539
+they're perfectly reasonable to put
+
+977
+00:42:22,539 --> 00:42:24,990
+human readable names in here and
+
+978
+00:42:24,990 --> 00:42:26,619
+everybody's looking at the same
+
+979
+00:42:26,619 --> 00:42:28,900
+blockchain for any name they all see
+
+980
+00:42:28,900 --> 00:42:30,579
+they all agree on what the first
+
+981
+00:42:30,579 --> 00:42:33,369
+registration of that name is so it's
+
+982
+00:42:33,369 --> 00:42:37,150
+unique or globally meaningful as well so
+
+983
+00:42:37,150 --> 00:42:40,210
+block sac has managed to actually get
+
+984
+00:42:40,210 --> 00:42:42,279
+all three of these Zucco properties in
+
+985
+00:42:42,279 --> 00:42:44,019
+their naming system there's a question
+
+986
+00:42:44,019 --> 00:42:45,730
+does this mean that the block stack
+
+987
+00:42:45,730 --> 00:42:48,430
+servers have to scan the entire chain
+
+988
+00:42:48,430 --> 00:42:50,640
+from back to front for adding new names
+
+989
+00:42:50,640 --> 00:42:54,250
+yeah so in principle sure the state of
+
+990
+00:42:54,250 --> 00:42:59,529
+the name database is really the result
+
+991
+00:42:59,529 --> 00:43:01,180
+of interpreting the whole blockchain but
+
+992
+00:43:01,180 --> 00:43:02,529
+of course you know the block stack
+
+993
+00:43:02,529 --> 00:43:05,710
+servers will will cash you know cash the
+
+994
+00:43:05,710 --> 00:43:07,539
+latest state they've seen and as these
+
+995
+00:43:07,539 --> 00:43:09,910
+in a database so each block stacks are
+
+996
+00:43:09,910 --> 00:43:11,880
+you know maybe he's read this far and
+
+997
+00:43:11,880 --> 00:43:13,900
+Bitcoin blockchain and has a database
+
+998
+00:43:13,900 --> 00:43:16,779
+that has the current mapping for every
+
+999
+00:43:16,779 --> 00:43:19,779
+name seen in all the box before this and
+
+1000
+00:43:19,779 --> 00:43:21,640
+when they see a new block from Bitcoin
+
+1001
+00:43:21,640 --> 00:43:23,740
+they'll just look at the transactions
+
+1002
+00:43:23,740 --> 00:43:25,750
+and update their database incrementally
+
+1003
+00:43:25,750 --> 00:43:28,059
+to reflect these transactions so getting
+
+1004
+00:43:28,059 --> 00:43:29,589
+a new block stack server up to speed
+
+1005
+00:43:29,589 --> 00:43:31,960
+actually does take quite a long time and
+
+1006
+00:43:31,960 --> 00:43:34,059
+I think when some paper I read said it
+
+1007
+00:43:34,059 --> 00:43:38,170
+might take up to a couple of days um but
+
+1008
+00:43:38,170 --> 00:43:40,420
+once your block stack server is up to
+
+1009
+00:43:40,420 --> 00:43:41,859
+speed then it's all sort of incremental
+
+1010
+00:43:41,859 --> 00:43:43,960
+additions after that
+
+1011
+00:43:43,960 --> 00:43:47,390
+but you know there's the larger point is
+
+1012
+00:43:47,390 --> 00:43:48,950
+that it is indeed the case that block
+
+1013
+00:43:48,950 --> 00:43:52,040
+stack is kind of piggybacking on Bitcoin
+
+1014
+00:43:52,040 --> 00:43:54,920
+and you know you could easily argue that
+
+1015
+00:43:54,920 --> 00:43:57,230
+bitcoin is not very scalable ultimately
+
+1016
+00:43:57,230 --> 00:44:00,559
+or uses that too much electric power who
+
+1017
+00:44:00,559 --> 00:44:03,400
+knows what too slow takes a long time to
+
+1018
+00:44:03,400 --> 00:44:05,780
+reflect new transactions and the cities
+
+1019
+00:44:05,780 --> 00:44:07,790
+are all sort of somewhat undesirable
+
+1020
+00:44:07,790 --> 00:44:09,440
+properties that block stack is
+
+1021
+00:44:09,440 --> 00:44:11,690
+inheriting from Bitcoin but nevertheless
+
+1022
+00:44:11,690 --> 00:44:17,270
+you know it's not there's not aware of
+
+1023
+00:44:17,270 --> 00:44:21,380
+another way of getting all three of
+
+1024
+00:44:21,380 --> 00:44:23,960
+those Zuko's properties in a naming
+
+1025
+00:44:23,960 --> 00:44:27,349
+system so if you value them your options
+
+1026
+00:44:27,349 --> 00:44:30,349
+are not you know a lot of options other
+
+1027
+00:44:30,349 --> 00:44:35,839
+than this approach okay so we may ask
+
+1028
+00:44:35,839 --> 00:44:42,490
+ourselves whether this naming scheme
+
+1029
+00:44:42,490 --> 00:44:45,950
+this way of mapping names to public keys
+
+1030
+00:44:45,950 --> 00:44:49,329
+and places to find the data whether it's
+
+1031
+00:44:49,329 --> 00:44:51,290
+whether it really has properties that we
+
+1032
+00:44:51,290 --> 00:44:54,049
+actually like so let's go back over
+
+1033
+00:44:54,049 --> 00:45:00,230
+those three properties so one the the
+
+1034
+00:45:00,230 --> 00:45:03,710
+the names are unique everybody in this
+
+1035
+00:45:03,710 --> 00:45:07,280
+system agrees on what our TM means it's
+
+1036
+00:45:07,280 --> 00:45:09,170
+really that the names of global meaning
+
+1037
+00:45:09,170 --> 00:45:12,680
+so question is whether whether we care
+
+1038
+00:45:12,680 --> 00:45:13,730
+about this whether this is a good
+
+1039
+00:45:13,730 --> 00:45:20,480
+property so one you know one thing on
+
+1040
+00:45:20,480 --> 00:45:22,970
+the plus side for this is that it makes
+
+1041
+00:45:22,970 --> 00:45:27,309
+that having these names like this human
+
+1042
+00:45:28,059 --> 00:45:32,059
+you know if that having globally
+
+1043
+00:45:32,059 --> 00:45:34,190
+relevant names means that we can talk
+
+1044
+00:45:34,190 --> 00:45:35,750
+about names with each other I can email
+
+1045
+00:45:35,750 --> 00:45:37,640
+you a name and that name will have the
+
+1046
+00:45:37,640 --> 00:45:39,500
+same meaning for you as it does for me
+
+1047
+00:45:39,500 --> 00:45:41,059
+because we're both gonna look it up in
+
+1048
+00:45:41,059 --> 00:45:42,799
+the blockchain and get the same result
+
+1049
+00:45:42,799 --> 00:45:46,670
+and so that's nice it also means that I
+
+1050
+00:45:46,670 --> 00:45:49,549
+can look at names that are recorded
+
+1051
+00:45:49,549 --> 00:45:51,079
+somewhere like in an access control list
+
+1052
+00:45:51,079 --> 00:45:54,530
+and kind of understand know what they're
+
+1053
+00:45:54,530 --> 00:45:57,040
+going to me
+
+1054
+00:46:04,650 --> 00:46:09,009
+but some things that are maybe not so
+
+1055
+00:46:09,009 --> 00:46:12,670
+great about this is that if you have to
+
+1056
+00:46:12,670 --> 00:46:14,259
+choose your names from a single global
+
+1057
+00:46:14,259 --> 00:46:15,759
+pool because that's what we're doing
+
+1058
+00:46:15,759 --> 00:46:18,690
+here right the since there's just one
+
+1059
+00:46:18,690 --> 00:46:21,279
+naming system there's just one set of
+
+1060
+00:46:21,279 --> 00:46:26,799
+names it's gonna mean that it'll be
+
+1061
+00:46:26,799 --> 00:46:28,329
+actually hard to look at a name and
+
+1062
+00:46:28,329 --> 00:46:30,249
+decide if it's the name you want like my
+
+1063
+00:46:30,249 --> 00:46:31,869
+name would actually probably be as I
+
+1064
+00:46:31,869 --> 00:46:34,059
+mentioned before you know maybe you know
+
+1065
+00:46:34,059 --> 00:46:37,599
+our TM nine five five eight seven
+
+1066
+00:46:37,599 --> 00:46:39,880
+depending on how many our teams are so
+
+1067
+00:46:39,880 --> 00:46:41,740
+this may be my name it's actually very
+
+1068
+00:46:41,740 --> 00:46:44,200
+hard to look at that and decide is that
+
+1069
+00:46:44,200 --> 00:46:47,019
+the RTM that you really met and so that
+
+1070
+00:46:47,019 --> 00:46:53,009
+really undermines the human readable
+
+1071
+00:46:53,590 --> 00:46:56,510
+property that they have here
+
+1072
+00:46:56,510 --> 00:46:58,220
+the bigger the system is the kind of
+
+1073
+00:46:58,220 --> 00:47:00,020
+less valuable having human readable
+
+1074
+00:47:00,020 --> 00:47:02,150
+names is just people at MIT and maybe
+
+1075
+00:47:02,150 --> 00:47:04,280
+maybe there's only one Robert Morris at
+
+1076
+00:47:04,280 --> 00:47:05,930
+MIT although actually there's more than
+
+1077
+00:47:05,930 --> 00:47:10,310
+one but in other across the world the
+
+1078
+00:47:10,310 --> 00:47:13,310
+kind of justification for caring about
+
+1079
+00:47:13,310 --> 00:47:14,450
+what their names are human readable
+
+1080
+00:47:14,450 --> 00:47:19,520
+that's I guess is very slim it's also a
+
+1081
+00:47:19,520 --> 00:47:21,980
+human readable can be deceptive
+
+1082
+00:47:21,980 --> 00:47:24,890
+depending on what's going on so if you
+
+1083
+00:47:24,890 --> 00:47:27,940
+see a name that looks like you know RTM
+
+1084
+00:47:27,940 --> 00:47:34,220
+at MIT that edu if you see that name and
+
+1085
+00:47:34,220 --> 00:47:35,810
+block stack or something it's tempting
+
+1086
+00:47:35,810 --> 00:47:38,450
+to imagine that it might be connected to
+
+1087
+00:47:38,450 --> 00:47:40,790
+that email address all right because it
+
+1088
+00:47:40,790 --> 00:47:42,380
+looks as human readable it like looks
+
+1089
+00:47:42,380 --> 00:47:43,910
+like it has meaning that's the whole
+
+1090
+00:47:43,910 --> 00:47:45,560
+point of having human readable names is
+
+1091
+00:47:45,560 --> 00:47:47,870
+that they kind of suggest meaning to
+
+1092
+00:47:47,870 --> 00:47:50,060
+people these four blocks stack that's
+
+1093
+00:47:50,060 --> 00:47:52,550
+deeply misleading a block stack the
+
+1094
+00:47:52,550 --> 00:47:54,230
+names really don't mean anything it
+
+1095
+00:47:54,230 --> 00:47:56,810
+simply first-come first-serve so all we
+
+1096
+00:47:56,810 --> 00:47:59,480
+know all we can tell by seeing this name
+
+1097
+00:47:59,480 --> 00:48:01,430
+our team at MIT de ed you from block
+
+1098
+00:48:01,430 --> 00:48:04,670
+stack is that this is this name means
+
+1099
+00:48:04,670 --> 00:48:07,700
+the first person this name refers to the
+
+1100
+00:48:07,700 --> 00:48:09,320
+first person who registered this name
+
+1101
+00:48:09,320 --> 00:48:11,900
+that's all we know initially it might be
+
+1102
+00:48:11,900 --> 00:48:13,310
+me might be somebody else there's no
+
+1103
+00:48:13,310 --> 00:48:15,230
+reason to believe it's me or that it's
+
+1104
+00:48:15,230 --> 00:48:17,960
+associated with MIT or anything else all
+
+1105
+00:48:17,960 --> 00:48:20,030
+we know is that this name is owned by
+
+1106
+00:48:20,030 --> 00:48:24,160
+whoever registered at first now if I
+
+1107
+00:48:24,160 --> 00:48:27,650
+establish say secure email conversation
+
+1108
+00:48:27,650 --> 00:48:30,110
+with whoever owns this name you know
+
+1109
+00:48:30,110 --> 00:48:32,930
+using the key that flops that map's us
+
+1110
+00:48:32,930 --> 00:48:34,490
+to and I spend some time talking to them
+
+1111
+00:48:34,490 --> 00:48:35,870
+you know maybe I can eventually
+
+1112
+00:48:35,870 --> 00:48:38,630
+convinced myself that they're the person
+
+1113
+00:48:38,630 --> 00:48:40,820
+who I think they are but the name alone
+
+1114
+00:48:40,820 --> 00:48:43,010
+is looks like it's meaningful but
+
+1115
+00:48:43,010 --> 00:48:45,680
+probably is not in fact very meaningful
+
+1116
+00:48:45,680 --> 00:48:47,780
+so that's a real defect in human
+
+1117
+00:48:47,780 --> 00:48:52,780
+readable names it could be defective and
+
+1118
+00:48:53,110 --> 00:48:54,830
+you know related
+
+1119
+00:48:54,830 --> 00:48:59,270
+the block SEC naming scheme doesn't help
+
+1120
+00:48:59,270 --> 00:49:01,910
+me find if if I sort of know who I want
+
+1121
+00:49:01,910 --> 00:49:04,220
+to talk to block sacks not really
+
+1122
+00:49:04,220 --> 00:49:07,790
+helping me will fiying the name of the
+
+1123
+00:49:07,790 --> 00:49:09,680
+person I want to talk to you know I mean
+
+1124
+00:49:09,680 --> 00:49:11,750
+maybe you know you want to send email to
+
+1125
+00:49:11,750 --> 00:49:14,030
+Robert Morris you know gosh this is
+
+1126
+00:49:14,030 --> 00:49:16,430
+deeply unhelpful and it's the only thing
+
+1127
+00:49:16,430 --> 00:49:18,290
+in the block stack naming system these
+
+1128
+00:49:18,290 --> 00:49:21,800
+names that are like this so it's really
+
+1129
+00:49:21,800 --> 00:49:24,110
+not necessarily solving the problem
+
+1130
+00:49:24,110 --> 00:49:27,020
+people have which is I know I sort of
+
+1131
+00:49:27,020 --> 00:49:28,610
+know in my head who I want to talk to
+
+1132
+00:49:28,610 --> 00:49:30,890
+but I don't know their public key and I
+
+1133
+00:49:30,890 --> 00:49:32,510
+don't know their block stack name either
+
+1134
+00:49:32,510 --> 00:49:37,190
+how do I find their blocks technique so
+
+1135
+00:49:37,190 --> 00:49:39,560
+that's a sort of a defect in this system
+
+1136
+00:49:39,560 --> 00:49:41,150
+you have to really have to already know
+
+1137
+00:49:41,150 --> 00:49:42,920
+the name if you want to use blocks
+
+1138
+00:49:42,920 --> 00:49:45,260
+naming scheme but how do you find those
+
+1139
+00:49:45,260 --> 00:49:49,490
+names some other options that you could
+
+1140
+00:49:49,490 --> 00:49:52,400
+consider for naming I'm in a system the
+
+1141
+00:49:52,400 --> 00:49:55,400
+sort of larger decentralized system one
+
+1142
+00:49:55,400 --> 00:49:56,960
+is that we could just abandon names
+
+1143
+00:49:56,960 --> 00:49:59,270
+human readable names you know not try to
+
+1144
+00:49:59,270 --> 00:50:00,770
+get all three of those Zucco properties
+
+1145
+00:50:00,770 --> 00:50:03,890
+and just use public keys directly so
+
+1146
+00:50:03,890 --> 00:50:05,690
+that would mean if I want to interact
+
+1147
+00:50:05,690 --> 00:50:07,370
+with you I need to find your public keys
+
+1148
+00:50:07,370 --> 00:50:09,650
+somehow maybe you just send it to me
+
+1149
+00:50:09,650 --> 00:50:11,630
+maybe you tell me something over the
+
+1150
+00:50:11,630 --> 00:50:13,010
+phone I can use to get your public key
+
+1151
+00:50:13,010 --> 00:50:15,830
+maybe you send me a secure message or
+
+1152
+00:50:15,830 --> 00:50:17,030
+write on us with the paper or something
+
+1153
+00:50:17,030 --> 00:50:19,010
+so we could just use directly use public
+
+1154
+00:50:19,010 --> 00:50:21,020
+keys and then we wouldn't have to solve
+
+1155
+00:50:21,020 --> 00:50:22,250
+all these problems although of course
+
+1156
+00:50:22,250 --> 00:50:25,910
+they're awkward but maybe I can store
+
+1157
+00:50:25,910 --> 00:50:27,380
+the public keys I know about in my
+
+1158
+00:50:27,380 --> 00:50:29,900
+personal contact list and they'll be
+
+1159
+00:50:29,900 --> 00:50:31,190
+helpful be like telephone numbers of
+
+1160
+00:50:31,190 --> 00:50:32,260
+telephone numbers don't mean anything
+
+1161
+00:50:32,260 --> 00:50:35,090
+but once I know your phone number I can
+
+1162
+00:50:35,090 --> 00:50:37,100
+stick it in my contact list another
+
+1163
+00:50:37,100 --> 00:50:38,690
+possible approach would be to abandon
+
+1164
+00:50:38,690 --> 00:50:41,450
+the decentralized part and just try to
+
+1165
+00:50:41,450 --> 00:50:43,670
+cook up some central entity that would
+
+1166
+00:50:43,670 --> 00:50:46,370
+actually reliably verify identity that
+
+1167
+00:50:46,370 --> 00:50:49,040
+some centralized entity you know maybe
+
+1168
+00:50:49,040 --> 00:50:51,290
+the Social Security system that hands
+
+1169
+00:50:51,290 --> 00:50:54,200
+out Social Security numbers or you know
+
+1170
+00:50:54,200 --> 00:50:55,520
+whoever it is that hands out driver's
+
+1171
+00:50:55,520 --> 00:50:56,900
+license or something and kind of
+
+1172
+00:50:56,900 --> 00:51:01,220
+piggyback on their work to establish a
+
+1173
+00:51:01,220 --> 00:51:04,440
+centralized notion of you
+
+1174
+00:51:04,440 --> 00:51:09,750
+any kind of verified names that's
+
+1175
+00:51:09,750 --> 00:51:13,980
+actually remarkably difficult also but
+
+1176
+00:51:13,980 --> 00:51:15,960
+you know it's another avenue to think
+
+1177
+00:51:15,960 --> 00:51:18,270
+about anyway so block stack took this
+
+1178
+00:51:18,270 --> 00:51:21,470
+particular approach to try to get names
+
+1179
+00:51:21,470 --> 00:51:29,190
+all right um the let me just kind of
+
+1180
+00:51:29,190 --> 00:51:31,950
+outline the big picture of the pieces in
+
+1181
+00:51:31,950 --> 00:51:34,530
+block stack which is sort of a
+
+1182
+00:51:34,530 --> 00:51:36,359
+refinement of the decentralized
+
+1183
+00:51:36,359 --> 00:51:40,490
+application diagram that I showed before
+
+1184
+00:51:40,490 --> 00:51:42,420
+sort of at the bottom they have this
+
+1185
+00:51:42,420 --> 00:51:46,190
+Bitcoin system that's chugging along
+
+1186
+00:51:46,190 --> 00:51:52,380
+with Bitcoin blocks and the carry along
+
+1187
+00:51:52,380 --> 00:51:55,200
+kind of unknown to Bitcoin these blocks
+
+1188
+00:51:55,200 --> 00:51:57,750
+tech transactions there's a bunch of
+
+1189
+00:51:57,750 --> 00:52:02,180
+block stack naming system servers and
+
+1190
+00:52:02,180 --> 00:52:04,319
+it's not really clear whether they
+
+1191
+00:52:04,319 --> 00:52:07,410
+intend ordinary people to run them or
+
+1192
+00:52:07,410 --> 00:52:08,880
+that they would be a service in a way it
+
+1193
+00:52:08,880 --> 00:52:10,170
+makes the most sense for ordinary people
+
+1194
+00:52:10,170 --> 00:52:12,359
+to run them on their own laptops because
+
+1195
+00:52:12,359 --> 00:52:16,170
+you have to trust them but that may not
+
+1196
+00:52:16,170 --> 00:52:18,210
+be so great anyway these blocks like
+
+1197
+00:52:18,210 --> 00:52:20,670
+naming service servers read the
+
+1198
+00:52:20,670 --> 00:52:22,050
+blockchain and kind of accumulate a
+
+1199
+00:52:22,050 --> 00:52:27,510
+database these at least in the first
+
+1200
+00:52:27,510 --> 00:52:30,420
+instance what's in block what's in the
+
+1201
+00:52:30,420 --> 00:52:34,500
+Bitcoin blockchain is public keys and
+
+1202
+00:52:34,500 --> 00:52:39,020
+the hash the cryptographic hash of
+
+1203
+00:52:39,020 --> 00:52:41,640
+information describing where each user
+
+1204
+00:52:41,640 --> 00:52:46,319
+stores their data because you could
+
+1205
+00:52:46,319 --> 00:52:47,910
+store that information this is just you
+
+1206
+00:52:47,910 --> 00:52:51,180
+know Artyom stores is data in Amazon AWS
+
+1207
+00:52:51,180 --> 00:52:56,250
+or something but that's too big to sort
+
+1208
+00:52:56,250 --> 00:52:57,990
+of conveniently store Bitcoin and so
+
+1209
+00:52:57,990 --> 00:53:00,089
+there's this kind of intermediate layer
+
+1210
+00:53:00,089 --> 00:53:03,599
+called Atlas it was really it's only job
+
+1211
+00:53:03,599 --> 00:53:09,180
+is to map hashes of information that are
+
+1212
+00:53:09,180 --> 00:53:11,339
+stashed and Bitcoin into these own
+
+1213
+00:53:11,339 --> 00:53:13,819
+information
+
+1214
+00:53:15,320 --> 00:53:17,810
+one's own record per user and so that
+
+1215
+00:53:17,810 --> 00:53:21,460
+means that my you know if I have an RT M
+
+1216
+00:53:21,460 --> 00:53:24,410
+registration and box tack that holds
+
+1217
+00:53:24,410 --> 00:53:27,170
+with a hash my zone record this just has
+
+1218
+00:53:27,170 --> 00:53:30,320
+the name or the you know Internet
+
+1219
+00:53:30,320 --> 00:53:32,930
+address or something of where I store my
+
+1220
+00:53:32,930 --> 00:53:35,840
+data so it might be you know AWS slash
+
+1221
+00:53:35,840 --> 00:53:40,070
+know whatever identifier I used to
+
+1222
+00:53:40,070 --> 00:53:41,780
+uniquely identify the stuff that I store
+
+1223
+00:53:41,780 --> 00:53:46,060
+in AWS and this is really a reference to
+
+1224
+00:53:46,060 --> 00:53:48,670
+my where my storage sits where all my
+
+1225
+00:53:48,670 --> 00:53:57,470
+key value pairs are stored now the paper
+
+1226
+00:53:57,470 --> 00:53:59,450
+I think the papers vision is that you be
+
+1227
+00:53:59,450 --> 00:54:02,330
+able to have your zone record point to
+
+1228
+00:54:02,330 --> 00:54:04,460
+any cloud storage out there
+
+1229
+00:54:04,460 --> 00:54:06,890
+in fact the cloud storage system has to
+
+1230
+00:54:06,890 --> 00:54:09,800
+you know obey the block stack interface
+
+1231
+00:54:09,800 --> 00:54:11,090
+and so you can't just use in the
+
+1232
+00:54:11,090 --> 00:54:12,650
+existing cloud storage system so in
+
+1233
+00:54:12,650 --> 00:54:15,800
+practice these all point to block at the
+
+1234
+00:54:15,800 --> 00:54:18,260
+moment of these blocks tax on gaia
+
+1235
+00:54:18,260 --> 00:54:21,770
+servers they run this and these are just
+
+1236
+00:54:21,770 --> 00:54:23,840
+storage servers that know about
+
+1237
+00:54:23,840 --> 00:54:29,060
+different block stack users and store
+
+1238
+00:54:29,060 --> 00:54:31,670
+their key value pairs for them and that
+
+1239
+00:54:31,670 --> 00:54:33,050
+means if i want to read your data out of
+
+1240
+00:54:33,050 --> 00:54:34,850
+if i'm running in a block second
+
+1241
+00:54:34,850 --> 00:54:36,110
+application that wants to read your data
+
+1242
+00:54:36,110 --> 00:54:38,540
+i need to apply your name somehow i
+
+1243
+00:54:38,540 --> 00:54:41,480
+gotta find your name maybe you tell me
+
+1244
+00:54:41,480 --> 00:54:43,820
+your name over the phone i type your
+
+1245
+00:54:43,820 --> 00:54:45,320
+name into the application i'm using
+
+1246
+00:54:45,320 --> 00:54:48,560
+maybe it's a to do this manager and used
+
+1247
+00:54:48,560 --> 00:54:51,170
+to go out and find your to do list items
+
+1248
+00:54:51,170 --> 00:54:55,580
+to show me my app is gonna contact a
+
+1249
+00:54:55,580 --> 00:54:58,460
+block stack naming system server and ask
+
+1250
+00:54:58,460 --> 00:55:00,230
+it to translate your name it's been
+
+1251
+00:55:00,230 --> 00:55:03,200
+watching the blockchain it keeps a
+
+1252
+00:55:03,200 --> 00:55:06,650
+mapping it knows how to use the hash to
+
+1253
+00:55:06,650 --> 00:55:08,600
+find your zone record your zone record
+
+1254
+00:55:08,600 --> 00:55:10,730
+points to some data owned by you and
+
+1255
+00:55:10,730 --> 00:55:14,560
+Gaia and then my app fetches this data
+
+1256
+00:55:14,560 --> 00:55:18,530
+it needs to verify the data so all
+
+1257
+00:55:18,530 --> 00:55:21,020
+blocks active apps expect data to be
+
+1258
+00:55:21,020 --> 00:55:23,390
+signed by the owner in Gaia and the
+
+1259
+00:55:23,390 --> 00:55:25,280
+public key to check your signature on
+
+1260
+00:55:25,280 --> 00:55:27,230
+the data you know I can use your public
+
+1261
+00:55:27,230 --> 00:55:29,769
+key or public keys embedded and
+
+1262
+00:55:29,769 --> 00:55:32,900
+your record and Bitcoin and so I can use
+
+1263
+00:55:32,900 --> 00:55:36,140
+it to my app really can use it to check
+
+1264
+00:55:36,140 --> 00:55:37,609
+the signature here make sure that this
+
+1265
+00:55:37,609 --> 00:55:39,229
+is data that you actually produced and
+
+1266
+00:55:39,229 --> 00:55:41,900
+not something that an untrustworthy gaya
+
+1267
+00:55:41,900 --> 00:55:48,079
+server okay so that's sort of a basic
+
+1268
+00:55:48,079 --> 00:55:52,099
+outline of how this works it it turns
+
+1269
+00:55:52,099 --> 00:55:53,809
+out that sort of embedding their
+
+1270
+00:55:53,809 --> 00:55:55,369
+information on the Bitcoin blockchain is
+
+1271
+00:55:55,369 --> 00:56:00,130
+not as straightforward as I described
+
+1272
+00:56:00,130 --> 00:56:03,710
+they they have they need to take special
+
+1273
+00:56:03,710 --> 00:56:05,809
+efforts to detect Forks for example
+
+1274
+00:56:05,809 --> 00:56:07,729
+because they don't get to the blocks
+
+1275
+00:56:07,729 --> 00:56:09,619
+that name servers don't sort of get to
+
+1276
+00:56:09,619 --> 00:56:11,059
+realize directly that there's been a
+
+1277
+00:56:11,059 --> 00:56:13,190
+fork that to detect it I mean they means
+
+1278
+00:56:13,190 --> 00:56:14,569
+the detective cuz the fork might be part
+
+1279
+00:56:14,569 --> 00:56:20,930
+of an attack and you know the Bitcoin
+
+1280
+00:56:20,930 --> 00:56:24,470
+isn't filtering out bad records for them
+
+1281
+00:56:24,470 --> 00:56:26,029
+and so they have to do their own and
+
+1282
+00:56:26,029 --> 00:56:27,289
+force their own rules on the records
+
+1283
+00:56:27,289 --> 00:56:29,420
+they get out like ignoring duplicate
+
+1284
+00:56:29,420 --> 00:56:32,479
+registrations there's they also turns
+
+1285
+00:56:32,479 --> 00:56:34,489
+out need to chart they charge fees for
+
+1286
+00:56:34,489 --> 00:56:35,930
+registering a name and that means that
+
+1287
+00:56:35,930 --> 00:56:39,920
+the Bitcoin transaction that is the
+
+1288
+00:56:39,920 --> 00:56:42,650
+registration of a name has to pay some
+
+1289
+00:56:42,650 --> 00:56:44,479
+money to what's called a burn address
+
+1290
+00:56:44,479 --> 00:56:47,329
+pay some Bitcoin current bitcoins to a
+
+1291
+00:56:47,329 --> 00:56:49,369
+burn address in order to have the right
+
+1292
+00:56:49,369 --> 00:56:52,609
+to register that name and the block
+
+1293
+00:56:52,609 --> 00:56:53,989
+stack name service actually checked at
+
+1294
+00:56:53,989 --> 00:56:56,630
+each name registration transaction did
+
+1295
+00:56:56,630 --> 00:57:00,890
+pay enough Bitcoin to this burn address
+
+1296
+00:57:00,890 --> 00:57:02,719
+for which there's no private key so that
+
+1297
+00:57:02,719 --> 00:57:05,569
+money simply disappears and the reason
+
+1298
+00:57:05,569 --> 00:57:08,269
+they do this the reason why they require
+
+1299
+00:57:08,269 --> 00:57:10,460
+every name registration to waste some
+
+1300
+00:57:10,460 --> 00:57:13,969
+money is that otherwise it's too easy
+
+1301
+00:57:13,969 --> 00:57:16,819
+for bad people to just register lots and
+
+1302
+00:57:16,819 --> 00:57:19,130
+lots of names like certainly the
+
+1303
+00:57:19,130 --> 00:57:21,319
+experience with the domain naming system
+
+1304
+00:57:21,319 --> 00:57:22,880
+where for a while name registration was
+
+1305
+00:57:22,880 --> 00:57:24,920
+free those that people who just register
+
+1306
+00:57:24,920 --> 00:57:27,979
+you know every single you know one two
+
+1307
+00:57:27,979 --> 00:57:30,109
+and three letter combination that's
+
+1308
+00:57:30,109 --> 00:57:32,239
+possible and they wouldn't own all these
+
+1309
+00:57:32,239 --> 00:57:34,670
+names for free or somebody knowing that
+
+1310
+00:57:34,670 --> 00:57:37,369
+I would really like to own the name RTM
+
+1311
+00:57:37,369 --> 00:57:41,060
+might register before me
+
+1312
+00:57:41,060 --> 00:57:42,620
+and then if I wanted to use it I have to
+
+1313
+00:57:42,620 --> 00:57:44,690
+pay them so in order to try to deter
+
+1314
+00:57:44,690 --> 00:57:48,770
+that they have a they require fees and
+
+1315
+00:57:48,770 --> 00:57:50,420
+that's actually pulmo probably an
+
+1316
+00:57:50,420 --> 00:57:53,210
+important part of of the design since
+
+1317
+00:57:53,210 --> 00:57:55,070
+free stuff on the internet tends to be
+
+1318
+00:57:55,070 --> 00:57:55,610
+yeah
+
+1319
+00:57:55,610 --> 00:57:59,540
+tends to be abused or sort of drowned
+
+1320
+00:57:59,540 --> 00:58:07,460
+out in intentional spam all right one
+
+1321
+00:58:07,460 --> 00:58:08,900
+detail on this picture so I left out the
+
+1322
+00:58:08,900 --> 00:58:11,180
+claw in this picture we have the client
+
+1323
+00:58:11,180 --> 00:58:16,250
+machines running some app this is the
+
+1324
+00:58:16,250 --> 00:58:21,950
+client device now when the app needs to
+
+1325
+00:58:21,950 --> 00:58:26,270
+get out my data get at my data it needs
+
+1326
+00:58:26,270 --> 00:58:30,530
+to be able to decrypt it whenever it
+
+1327
+00:58:30,530 --> 00:58:32,330
+writes data into my guys storage my app
+
+1328
+00:58:32,330 --> 00:58:33,470
+needs to be able to encrypt it
+
+1329
+00:58:33,470 --> 00:58:36,620
+ultimately using my private key and when
+
+1330
+00:58:36,620 --> 00:58:38,000
+I fetch data back it nice to be able to
+
+1331
+00:58:38,000 --> 00:58:40,790
+decrypt it also ultimately one way or
+
+1332
+00:58:40,790 --> 00:58:42,470
+another using my private key so these
+
+1333
+00:58:42,470 --> 00:58:44,390
+applications need to get at private keys
+
+1334
+00:58:44,390 --> 00:58:46,160
+but private keys are super duper
+
+1335
+00:58:46,160 --> 00:58:50,900
+sensitive and whereas these apps are
+
+1336
+00:58:50,900 --> 00:58:52,790
+just whatever junk I downloaded from the
+
+1337
+00:58:52,790 --> 00:58:54,770
+block stack app store and possibly
+
+1338
+00:58:54,770 --> 00:58:57,140
+totally untrustworthy so we never want
+
+1339
+00:58:57,140 --> 00:58:59,540
+to give them a private key so what
+
+1340
+00:58:59,540 --> 00:59:00,890
+actually happens is that there's a
+
+1341
+00:59:00,890 --> 00:59:04,550
+separate program that I'm always running
+
+1342
+00:59:04,550 --> 00:59:12,380
+called the block stack browser and it's
+
+1343
+00:59:12,380 --> 00:59:14,970
+this program
+
+1344
+00:59:14,970 --> 00:59:17,760
+that knows my private key and so if the
+
+1345
+00:59:17,760 --> 00:59:19,830
+app wants to do stuff as me is really
+
+1346
+00:59:19,830 --> 00:59:22,140
+got to first do it through the block
+
+1347
+00:59:22,140 --> 00:59:25,110
+stack browser and in fact the way this
+
+1348
+00:59:25,110 --> 00:59:27,210
+place has so complicated in detail the
+
+1349
+00:59:27,210 --> 00:59:29,370
+block style browser essentially makes up
+
+1350
+00:59:29,370 --> 00:59:32,250
+kind of per app private key in this app
+
+1351
+00:59:32,250 --> 00:59:35,520
+uses just the per app private key and
+
+1352
+00:59:35,520 --> 00:59:38,010
+not my real sort of master private key
+
+1353
+00:59:38,010 --> 00:59:39,990
+so this app again doesn't get to know my
+
+1354
+00:59:39,990 --> 00:59:43,290
+real private key but this issue of not
+
+1355
+00:59:43,290 --> 00:59:45,860
+revealing sensitive key material to the
+
+1356
+00:59:45,860 --> 00:59:48,120
+these apps which may be indeed quite
+
+1357
+00:59:48,120 --> 00:59:51,750
+untrustworthy as an important detail and
+
+1358
+00:59:51,750 --> 00:59:53,760
+blocks that keeps my master private key
+
+1359
+00:59:53,760 --> 00:59:57,300
+secret now on the topic of private keys
+
+1360
+00:59:57,300 --> 01:00:00,740
+a weakness in essentially every system
+
+1361
+01:00:00,740 --> 01:00:03,990
+you know like Bitcoin itself and block
+
+1362
+01:00:03,990 --> 01:00:09,390
+stack and also is that users tend not to
+
+1363
+01:00:09,390 --> 01:00:11,310
+be as careful as they ought to be about
+
+1364
+01:00:11,310 --> 01:00:13,770
+private keys so am i you know if I'm
+
+1365
+01:00:13,770 --> 01:00:16,140
+gonna use block stack from my phone you
+
+1366
+01:00:16,140 --> 01:00:17,940
+know that means my phone has to know my
+
+1367
+01:00:17,940 --> 01:00:21,990
+private key if I leave my phone in the
+
+1368
+01:00:21,990 --> 01:00:23,150
+cafeteria
+
+1369
+01:00:23,150 --> 01:00:26,250
+then whoever finds it now has a device
+
+1370
+01:00:26,250 --> 01:00:28,710
+that has my private key in it and can do
+
+1371
+01:00:28,710 --> 01:00:30,450
+anything as me because as far as block
+
+1372
+01:00:30,450 --> 01:00:32,460
+attack is concerned they are me they
+
+1373
+01:00:32,460 --> 01:00:36,210
+know my private key users also tend to
+
+1374
+01:00:36,210 --> 01:00:40,560
+lose private keys you know I don't use
+
+1375
+01:00:40,560 --> 01:00:42,120
+the service for a little while you know
+
+1376
+01:00:42,120 --> 01:00:44,160
+I forget whatever passphrase it was for
+
+1377
+01:00:44,160 --> 01:00:45,660
+example that was protecting the private
+
+1378
+01:00:45,660 --> 01:00:48,300
+key or I put my private key on a USB
+
+1379
+01:00:48,300 --> 01:00:49,980
+someone key from somewhere for
+
+1380
+01:00:49,980 --> 01:00:52,500
+safekeeping and then lose the USB key so
+
+1381
+01:00:52,500 --> 01:00:56,100
+that's completely routine problem that
+
+1382
+01:00:56,100 --> 01:00:59,430
+users have and block attack actually
+
+1383
+01:00:59,430 --> 01:01:01,620
+does not really have an answer to these
+
+1384
+01:01:01,620 --> 01:01:04,470
+questions I'm a pretty much assume the
+
+1385
+01:01:04,470 --> 01:01:05,910
+users will be careful of their private
+
+1386
+01:01:05,910 --> 01:01:08,480
+keys and if you lose your private key
+
+1387
+01:01:08,480 --> 01:01:10,950
+blocks that can't get it back for you
+
+1388
+01:01:10,950 --> 01:01:13,020
+it's like it's in order to be super
+
+1389
+01:01:13,020 --> 01:01:14,550
+secure in order if you're not to have to
+
+1390
+01:01:14,550 --> 01:01:16,800
+trust block stack only your client knows
+
+1391
+01:01:16,800 --> 01:01:18,780
+your private key if you lose your client
+
+1392
+01:01:18,780 --> 01:01:22,510
+we forget your what are the
+
+1393
+01:01:22,510 --> 01:01:24,940
+phrases you're just completely out of
+
+1394
+01:01:24,940 --> 01:01:28,120
+luck and blocks that can't help you and
+
+1395
+01:01:28,120 --> 01:01:31,210
+so this is just a difficulty in real
+
+1396
+01:01:31,210 --> 01:01:32,770
+life people don't want to use systems
+
+1397
+01:01:32,770 --> 01:01:37,060
+that are that brittle and in real life
+
+1398
+01:01:37,060 --> 01:01:38,350
+what ends up happening is that even
+
+1399
+01:01:38,350 --> 01:01:40,420
+systems that have you know serious
+
+1400
+01:01:40,420 --> 01:01:42,910
+cryptography usually have some sort of
+
+1401
+01:01:42,910 --> 01:01:46,030
+key retrieval scheme whereby I can stir
+
+1402
+01:01:46,030 --> 01:01:47,770
+something I can tell a block stack maybe
+
+1403
+01:01:47,770 --> 01:01:51,010
+my mother's maiden name or you know they
+
+1404
+01:01:51,010 --> 01:01:53,380
+send me an SMS thing to my telephone or
+
+1405
+01:01:53,380 --> 01:01:55,480
+whatever some scheme I can use to
+
+1406
+01:01:55,480 --> 01:01:59,500
+recover my private key and those if you
+
+1407
+01:01:59,500 --> 01:02:02,440
+want to attack a system it's often the
+
+1408
+01:02:02,440 --> 01:02:04,830
+password recovery of the key recovery
+
+1409
+01:02:04,830 --> 01:02:06,880
+aspect of the system that's the easiest
+
+1410
+01:02:06,880 --> 01:02:08,560
+to attack I just call a block stack I
+
+1411
+01:02:08,560 --> 01:02:10,960
+said I said tell them you know I'm
+
+1412
+01:02:10,960 --> 01:02:13,600
+really I'm Robert Morris you got to
+
+1413
+01:02:13,600 --> 01:02:15,310
+believe me please you know we said
+
+1414
+01:02:15,310 --> 01:02:17,200
+Robert Morris it's key for me your
+
+1415
+01:02:17,200 --> 01:02:17,620
+password
+
+1416
+01:02:17,620 --> 01:02:20,500
+nah man tell me the new password and if
+
+1417
+01:02:20,500 --> 01:02:22,870
+I'm convincing enough you know and the
+
+1418
+01:02:22,870 --> 01:02:27,550
+system allows sets they're gonna
+
+1419
+01:02:27,550 --> 01:02:29,500
+let me have it and they're probably also
+
+1420
+01:02:29,500 --> 01:02:31,240
+presumably if it's an attacker really
+
+1421
+01:02:31,240 --> 01:02:32,620
+who is calling and pretending to be me
+
+1422
+01:02:32,620 --> 01:02:35,470
+they'll let the attacker reset the
+
+1423
+01:02:35,470 --> 01:02:38,110
+password of the key or whatever blocks
+
+1424
+01:02:38,110 --> 01:02:39,280
+that happens not to allow that because
+
+1425
+01:02:39,280 --> 01:02:41,680
+it's so obviously insecure but real
+
+1426
+01:02:41,680 --> 01:02:46,510
+world systems if they don't want their
+
+1427
+01:02:46,510 --> 01:02:49,060
+users to abandon them need to have a
+
+1428
+01:02:49,060 --> 01:02:50,800
+better plan and it's not clear how to
+
+1429
+01:02:50,800 --> 01:02:57,180
+make that better all right
+
+1430
+01:03:01,549 --> 01:03:07,839
+all right there's a couple of sort of
+
+1431
+01:03:08,890 --> 01:03:11,539
+issues I want to talk about that come up
+
+1432
+01:03:11,539 --> 01:03:14,749
+in the system for me the block stack is
+
+1433
+01:03:14,749 --> 01:03:17,689
+really a kind of source of questions to
+
+1434
+01:03:17,689 --> 01:03:21,619
+think about or even kind of things that
+
+1435
+01:03:21,619 --> 01:03:25,609
+are not really well you know suggestions
+
+1436
+01:03:25,609 --> 01:03:28,189
+for use for more things to work on you
+
+1437
+01:03:28,189 --> 01:03:29,899
+know block SEC I think black sex
+
+1438
+01:03:29,899 --> 01:03:31,579
+situation now is that you probably
+
+1439
+01:03:31,579 --> 01:03:34,189
+wouldn't actually want to use it to
+
+1440
+01:03:34,189 --> 01:03:38,140
+build a real system for real users but
+
+1441
+01:03:38,140 --> 01:03:40,459
+it's kind of trying to point the way to
+
+1442
+01:03:40,459 --> 01:03:42,409
+a system that might someday be if enough
+
+1443
+01:03:42,409 --> 01:03:44,059
+cleverness was put into it enough
+
+1444
+01:03:44,059 --> 01:03:45,679
+development was done on it might
+
+1445
+01:03:45,679 --> 01:03:47,959
+actually be a system that was both
+
+1446
+01:03:47,959 --> 01:03:50,749
+convenient for programmers and actually
+
+1447
+01:03:50,749 --> 01:03:52,749
+provided some real value for users but
+
+1448
+01:03:52,749 --> 01:03:54,739
+probably not there yet but its entrance
+
+1449
+01:03:54,739 --> 01:03:56,630
+to think about you know how it could be
+
+1450
+01:03:56,630 --> 01:03:58,759
+designed differently or better in order
+
+1451
+01:03:58,759 --> 01:04:00,619
+to kind of get it closer to something
+
+1452
+01:04:00,619 --> 01:04:05,749
+that were really useful so one question
+
+1453
+01:04:05,749 --> 01:04:07,189
+you might have especially in the context
+
+1454
+01:04:07,189 --> 01:04:08,719
+of a to for is whether block stack
+
+1455
+01:04:08,719 --> 01:04:10,789
+really needs to use Bitcoin like that
+
+1456
+01:04:10,789 --> 01:04:13,309
+points really not you know not that
+
+1457
+01:04:13,309 --> 01:04:18,499
+great the fees that you have to pay you
+
+1458
+01:04:18,499 --> 01:04:20,449
+know to register a name you know vary in
+
+1459
+01:04:20,449 --> 01:04:22,399
+value in Bitcoin by factors of you know
+
+1460
+01:04:22,399 --> 01:04:26,719
+100 almost every night overnight at
+
+1461
+01:04:26,719 --> 01:04:29,269
+times in addition people really down the
+
+1462
+01:04:29,269 --> 01:04:31,399
+way like the way Bitcoin you uses
+
+1463
+01:04:31,399 --> 01:04:34,579
+proof-of-work to burn up CPU in order to
+
+1464
+01:04:34,579 --> 01:04:37,069
+be secure so you know Bitcoin is not
+
+1465
+01:04:37,069 --> 01:04:39,889
+perfect although it's kind of an
+
+1466
+01:04:39,889 --> 01:04:40,969
+important part of the system otherwise
+
+1467
+01:04:40,969 --> 01:04:43,399
+they couldn't you know they it's not
+
+1468
+01:04:43,399 --> 01:04:44,599
+clear how they would do names without
+
+1469
+01:04:44,599 --> 01:04:46,909
+this whole Bitcoin tie-in and so one
+
+1470
+01:04:46,909 --> 01:04:49,309
+question you might have eight to four is
+
+1471
+01:04:49,309 --> 01:04:51,169
+whether I'm certificate transparency
+
+1472
+01:04:51,169 --> 01:04:54,529
+which is a you know we looked at it last
+
+1473
+01:04:54,529 --> 01:04:57,109
+week a certificate transparency does not
+
+1474
+01:04:57,109 --> 01:04:58,909
+have mining does not have proof of work
+
+1475
+01:04:58,909 --> 01:05:01,489
+and yet you know it's powerful enough to
+
+1476
+01:05:01,489 --> 01:05:04,369
+be helpful in a naming system and so
+
+1477
+01:05:04,369 --> 01:05:06,019
+question is whether said of Bitcoin
+
+1478
+01:05:06,019 --> 01:05:09,109
+whether box that could use something
+
+1479
+01:05:09,109 --> 01:05:12,380
+like certificate transparency not in
+
+1480
+01:05:12,380 --> 01:05:14,919
+order to
+
+1481
+01:05:14,930 --> 01:05:19,250
+enforce adequate rules about names and
+
+1482
+01:05:19,250 --> 01:05:21,210
+actually don't know the answer to that
+
+1483
+01:05:21,210 --> 01:05:26,550
+my guess is the answer's no my feeling
+
+1484
+01:05:26,550 --> 01:05:28,020
+is that while certificate transparency
+
+1485
+01:05:28,020 --> 01:05:32,910
+can reveal conflicts or conflicts really
+
+1486
+01:05:32,910 --> 01:05:35,160
+is a to people registering the same name
+
+1487
+01:05:35,160 --> 01:05:38,040
+like if you required everybody to submit
+
+1488
+01:05:38,040 --> 01:05:39,330
+their name registrations to a
+
+1489
+01:05:39,330 --> 01:05:41,880
+certificate transparency log yes indeed
+
+1490
+01:05:41,880 --> 01:05:43,530
+you would be able to see that two people
+
+1491
+01:05:43,530 --> 01:05:45,510
+had registered the same name but
+
+1492
+01:05:45,510 --> 01:05:47,430
+certificate transparency doesn't resolve
+
+1493
+01:05:47,430 --> 01:05:50,370
+ownership conflicts so if I register RT
+
+1494
+01:05:50,370 --> 01:05:51,720
+you know supposedly last year I
+
+1495
+01:05:51,720 --> 01:05:53,550
+registered RT M and I've been using it
+
+1496
+01:05:53,550 --> 01:05:55,740
+happily for the next year and then
+
+1497
+01:05:55,740 --> 01:05:59,940
+somebody else registers RT M today yeah
+
+1498
+01:05:59,940 --> 01:06:01,400
+you know they'll submit their
+
+1499
+01:06:01,400 --> 01:06:03,480
+registration to a certificate
+
+1500
+01:06:03,480 --> 01:06:06,780
+transparency log and so now maybe that
+
+1501
+01:06:06,780 --> 01:06:09,950
+will make my name unusable or something
+
+1502
+01:06:09,950 --> 01:06:12,240
+but it's not clear really who should own
+
+1503
+01:06:12,240 --> 01:06:13,470
+the name because certificate
+
+1504
+01:06:13,470 --> 01:06:15,420
+transparency doesn't have very powerful
+
+1505
+01:06:15,420 --> 01:06:19,350
+mechanisms for resolving these conflicts
+
+1506
+01:06:19,350 --> 01:06:21,780
+you might think that order would be
+
+1507
+01:06:21,780 --> 01:06:25,080
+enough but the same records and
+
+1508
+01:06:25,080 --> 01:06:26,670
+different certificate transparency logs
+
+1509
+01:06:26,670 --> 01:06:28,020
+can have different order because there's
+
+1510
+01:06:28,020 --> 01:06:29,700
+nothing forcing the different
+
+1511
+01:06:29,700 --> 01:06:33,330
+transparency logs to to have exactly the
+
+1512
+01:06:33,330 --> 01:06:37,260
+same order and if you want you know how
+
+1513
+01:06:37,260 --> 01:06:39,570
+come Bitcoin can enforce every replica
+
+1514
+01:06:39,570 --> 01:06:41,340
+of the blocks you'd add the same order I
+
+1515
+01:06:41,340 --> 01:06:43,170
+believe the answer to that really boils
+
+1516
+01:06:43,170 --> 01:06:46,410
+down to bitcoins mining bitcoins mining
+
+1517
+01:06:46,410 --> 01:06:49,130
+that resolves Forks it resolves
+
+1518
+01:06:49,130 --> 01:06:52,610
+deferring copies the blockchain and
+
+1519
+01:06:52,610 --> 01:06:54,630
+forces agreement and if you don't do
+
+1520
+01:06:54,630 --> 01:06:57,060
+mining at least you know or something
+
+1521
+01:06:57,060 --> 01:07:00,570
+like mining it's it's not that clear how
+
+1522
+01:07:00,570 --> 01:07:03,600
+to add a enforce agreement on the order
+
+1523
+01:07:03,600 --> 01:07:10,290
+of the records so in addition the fees
+
+1524
+01:07:10,290 --> 01:07:13,050
+the block stack charges are probably
+
+1525
+01:07:13,050 --> 01:07:15,470
+critical to avoid various kinds of spam
+
+1526
+01:07:15,470 --> 01:07:18,480
+in the naming system various kinds of
+
+1527
+01:07:18,480 --> 01:07:20,880
+abuse and you know block stack built on
+
+1528
+01:07:20,880 --> 01:07:22,320
+Bitcoin can sort of automatically
+
+1529
+01:07:22,320 --> 01:07:24,480
+require people to pay to register block
+
+1530
+01:07:24,480 --> 01:07:25,770
+stack built on certificate transparency
+
+1531
+01:07:25,770 --> 01:07:27,160
+you know
+
+1532
+01:07:27,160 --> 01:07:31,390
+there's no direct mechanism to require
+
+1533
+01:07:31,390 --> 01:07:36,820
+fees and in fact that I think the point
+
+1534
+01:07:36,820 --> 01:07:38,380
+here is actually quite a bit larger and
+
+1535
+01:07:38,380 --> 01:07:43,510
+that's that a lot of people talk about
+
+1536
+01:07:43,510 --> 01:07:45,070
+using blockchains for lots of stuff
+
+1537
+01:07:45,070 --> 01:07:48,670
+other than cryptocurrency but in fact it
+
+1538
+01:07:48,670 --> 01:07:51,010
+seems difficult to use blockchains open
+
+1539
+01:07:51,010 --> 01:07:53,640
+block chains with unrestricted access
+
+1540
+01:07:53,640 --> 01:07:57,220
+except when they're coupled with some
+
+1541
+01:07:57,220 --> 01:07:58,270
+kind of crypto car
+
+1542
+01:07:58,270 --> 01:08:01,540
+cryptocurrency again I don't know if
+
+1543
+01:08:01,540 --> 01:08:02,800
+that's true but it's certainly my
+
+1544
+01:08:02,800 --> 01:08:07,150
+impression all right so a big question
+
+1545
+01:08:07,150 --> 01:08:10,000
+with block stack is whether it's going
+
+1546
+01:08:10,000 --> 01:08:12,160
+to be convenient for programmers and to
+
+1547
+01:08:12,160 --> 01:08:15,010
+me the this questions absolutely
+
+1548
+01:08:15,010 --> 01:08:18,970
+critical because it's one of two very
+
+1549
+01:08:18,970 --> 01:08:20,620
+critical questions the other one is the
+
+1550
+01:08:20,620 --> 01:08:22,359
+other critical question is whether it
+
+1551
+01:08:22,359 --> 01:08:30,189
+makes users lives better the my
+
+1552
+01:08:30,189 --> 01:08:32,020
+perception at the moment is that indeed
+
+1553
+01:08:32,020 --> 01:08:33,670
+box AK is not particularly convenient
+
+1554
+01:08:33,670 --> 01:08:36,370
+for programmers I think I've used block
+
+1555
+01:08:36,370 --> 01:08:38,350
+stack a program block stack I've tried
+
+1556
+01:08:38,350 --> 01:08:41,950
+to build system to like it and my strong
+
+1557
+01:08:41,950 --> 01:08:44,020
+impression is that it's just a lot more
+
+1558
+01:08:44,020 --> 01:08:45,910
+difficult to build a web application on
+
+1559
+01:08:45,910 --> 01:08:48,270
+one of these decentralized platforms
+
+1560
+01:08:48,270 --> 01:08:51,069
+than it is on the ordinary platform and
+
+1561
+01:08:51,069 --> 01:08:52,840
+you know that's kind of damaging because
+
+1562
+01:08:52,840 --> 01:08:55,060
+if the website developers aren't on
+
+1563
+01:08:55,060 --> 01:08:57,430
+board then nobody's gonna get a lot of
+
+1564
+01:08:57,430 --> 01:09:00,010
+traction and if the website developers
+
+1565
+01:09:00,010 --> 01:09:03,160
+don't like you know I sort of feel that
+
+1566
+01:09:03,160 --> 01:09:05,830
+the system is difficult to program the
+
+1567
+01:09:05,830 --> 01:09:07,930
+only way that you're ever gonna get any
+
+1568
+01:09:07,930 --> 01:09:10,149
+traction is if the attraction to users
+
+1569
+01:09:10,149 --> 01:09:12,580
+is so strong that it that you know users
+
+1570
+01:09:12,580 --> 01:09:15,910
+demand decentralized applications and
+
+1571
+01:09:15,910 --> 01:09:18,149
+that might force programmers to use it
+
+1572
+01:09:18,149 --> 01:09:20,229
+but the programmers just speaking for
+
+1573
+01:09:20,229 --> 01:09:23,770
+themselves my guess is that the
+
+1574
+01:09:23,770 --> 01:09:25,450
+architecture in which basically all the
+
+1575
+01:09:25,450 --> 01:09:27,550
+code is sitting in the client and we
+
+1576
+01:09:27,550 --> 01:09:29,770
+don't have special you know website
+
+1577
+01:09:29,770 --> 01:09:33,460
+servers is just pretty painful it's hard
+
+1578
+01:09:33,460 --> 01:09:34,960
+to have data that's specific to the
+
+1579
+01:09:34,960 --> 01:09:37,180
+application because all data is owned by
+
+1580
+01:09:37,180 --> 01:09:40,000
+users it's hard to have indices or you
+
+1581
+01:09:40,000 --> 01:09:42,250
+know counts of likes or vote
+
+1582
+01:09:42,250 --> 01:09:44,380
+you know the kind of front page rankings
+
+1583
+01:09:44,380 --> 01:09:46,029
+as I mentioned for reddit or hacker news
+
+1584
+01:09:46,029 --> 01:09:47,710
+are difficult there's all kinds of stuff
+
+1585
+01:09:47,710 --> 01:09:51,490
+it's a pain if you don't have a notion a
+
+1586
+01:09:51,490 --> 01:09:53,080
+notion of the website itself with its
+
+1587
+01:09:53,080 --> 01:09:59,020
+own data this the access control is
+
+1588
+01:09:59,020 --> 01:10:01,990
+actually equally painful it's very easy
+
+1589
+01:10:01,990 --> 01:10:03,490
+to write the code and a traditional
+
+1590
+01:10:03,490 --> 01:10:05,020
+website to decide who gets to see what
+
+1591
+01:10:05,020 --> 01:10:07,600
+data in a decentralized system and
+
+1592
+01:10:07,600 --> 01:10:09,550
+really you only can be enforced using
+
+1593
+01:10:09,550 --> 01:10:11,490
+cryptographic access control or these
+
+1594
+01:10:11,490 --> 01:10:14,230
+that's the way it seems from the example
+
+1595
+01:10:14,230 --> 01:10:17,800
+a block stack and it just turns out for
+
+1596
+01:10:17,800 --> 01:10:20,050
+all except for very straightforward like
+
+1597
+01:10:20,050 --> 01:10:21,850
+one user using their own private data
+
+1598
+01:10:21,850 --> 01:10:24,010
+using cryptography to enforce access
+
+1599
+01:10:24,010 --> 01:10:28,800
+well it's just pretty painful
+
+1600
+01:10:29,430 --> 01:10:33,490
+so programmers might only be excited if
+
+1601
+01:10:33,490 --> 01:10:36,280
+users were excited so our users gonna be
+
+1602
+01:10:36,280 --> 01:10:37,810
+excited you know one way to look at that
+
+1603
+01:10:37,810 --> 01:10:41,110
+one way to ask that question is whether
+
+1604
+01:10:41,110 --> 01:10:42,940
+this kind of decentralized use your own
+
+1605
+01:10:42,940 --> 01:10:46,870
+storage is good for user privacy because
+
+1606
+01:10:46,870 --> 01:10:49,350
+that's one of the big pitches is that by
+
+1607
+01:10:49,350 --> 01:10:52,600
+storing data on storage services the
+
+1608
+01:10:52,600 --> 01:10:55,060
+users own and pay for you know maybe
+
+1609
+01:10:55,060 --> 01:10:56,890
+that'll keep the data more private more
+
+1610
+01:10:56,890 --> 01:10:59,080
+secure than storing their data on
+
+1611
+01:10:59,080 --> 01:11:02,800
+websites so that really am I asking is a
+
+1612
+01:11:02,800 --> 01:11:05,050
+better than trusting Facebook or Google
+
+1613
+01:11:05,050 --> 01:11:09,090
+to keep my data private both from
+
+1614
+01:11:09,090 --> 01:11:11,410
+Facebook employees and from other users
+
+1615
+01:11:11,410 --> 01:11:13,330
+of the site and from hackers you might
+
+1616
+01:11:13,330 --> 01:11:17,050
+try to break in and that's just a
+
+1617
+01:11:17,050 --> 01:11:20,140
+question right you know sort of depends
+
+1618
+01:11:20,140 --> 01:11:21,640
+on how much you trust Facebook the fact
+
+1619
+01:11:21,640 --> 01:11:23,230
+is that you're still storing your data
+
+1620
+01:11:23,230 --> 01:11:25,420
+out there in the cloud on some service
+
+1621
+01:11:25,420 --> 01:11:30,310
+just maybe not Facebook and you're still
+
+1622
+01:11:30,310 --> 01:11:33,610
+running software on your client that is
+
+1623
+01:11:33,610 --> 01:11:36,280
+presumably provided to you by Facebook
+
+1624
+01:11:36,280 --> 01:11:37,630
+so you're running Facebook software and
+
+1625
+01:11:37,630 --> 01:11:42,010
+your client you know it's so you're
+
+1626
+01:11:42,010 --> 01:11:44,020
+still kind of trusting this this this
+
+1627
+01:11:44,020 --> 01:11:46,150
+code that facebook gives you or wherever
+
+1628
+01:11:46,150 --> 01:11:49,390
+you get your code from and you know for
+
+1629
+01:11:49,390 --> 01:11:51,040
+the real hackers among us you can look
+
+1630
+01:11:51,040 --> 01:11:52,450
+at the code and convince yourself
+
+1631
+01:11:52,450 --> 01:11:53,770
+because you're running it on your own
+
+1632
+01:11:53,770 --> 01:11:54,990
+computer and can meet yourself
+
+1633
+01:11:54,990 --> 01:11:57,960
+okay but for the general public you know
+
+1634
+01:11:57,960 --> 01:11:59,550
+the difference between talking to
+
+1635
+01:11:59,550 --> 01:12:01,530
+Facebook's web software on their web
+
+1636
+01:12:01,530 --> 01:12:03,210
+server and my name's Facebook software
+
+1637
+01:12:03,210 --> 01:12:05,610
+and their own client may not seem very
+
+1638
+01:12:05,610 --> 01:12:08,550
+great and who knows maybe the Facebook
+
+1639
+01:12:08,550 --> 01:12:11,700
+app you're running is sort of sending
+
+1640
+01:12:11,700 --> 01:12:14,010
+Facebook information about what you're
+
+1641
+01:12:14,010 --> 01:12:16,680
+up to snooping on you there's a question
+
+1642
+01:12:16,680 --> 01:12:18,990
+about wise cryptographic access control
+
+1643
+01:12:18,990 --> 01:12:21,630
+painful for programmers um one way of
+
+1644
+01:12:21,630 --> 01:12:23,280
+looking at it is that the access control
+
+1645
+01:12:23,280 --> 01:12:26,190
+checks that you have to do in a sort of
+
+1646
+01:12:26,190 --> 01:12:27,180
+standard web site are very
+
+1647
+01:12:27,180 --> 01:12:28,950
+straightforward you just write a little
+
+1648
+01:12:28,950 --> 01:12:30,950
+bit of Python code or whatever it is to
+
+1649
+01:12:30,950 --> 01:12:33,330
+decide whether some user should be able
+
+1650
+01:12:33,330 --> 01:12:35,100
+to see some data and you can even
+
+1651
+01:12:35,100 --> 01:12:36,780
+compute using data that the user
+
+1652
+01:12:36,780 --> 01:12:39,390
+shouldn't see as long as you don't
+
+1653
+01:12:39,390 --> 01:12:40,370
+reveal it to the user
+
+1654
+01:12:40,370 --> 01:12:44,430
+whereas in anything but simple
+
+1655
+01:12:44,430 --> 01:12:50,480
+situations doing the cryptography to
+
+1656
+01:12:50,480 --> 01:12:53,310
+allow some users but not others to get
+
+1657
+01:12:53,310 --> 01:12:56,040
+out your data it just requires a lot
+
+1658
+01:12:56,040 --> 01:12:59,610
+more thought so you know suppose the MIT
+
+1659
+01:12:59,610 --> 01:13:02,190
+registrar maintains a list of all the
+
+1660
+01:13:02,190 --> 01:13:05,250
+people taking 8 to 4 and if so as a
+
+1661
+01:13:05,250 --> 01:13:08,430
+group so they maintain that list and I
+
+1662
+01:13:08,430 --> 01:13:10,260
+want to use it in order to govern the
+
+1663
+01:13:10,260 --> 01:13:14,180
+protections for some file stored in
+
+1664
+01:13:14,180 --> 01:13:16,200
+Krypton with cryptographic protection
+
+1665
+01:13:16,200 --> 01:13:18,660
+and block stack because that lists that
+
+1666
+01:13:18,660 --> 01:13:20,250
+group list of eight to four students may
+
+1667
+01:13:20,250 --> 01:13:24,150
+change you know the what I do for
+
+1668
+01:13:24,150 --> 01:13:27,950
+encryption may have to change too so I
+
+1669
+01:13:27,950 --> 01:13:31,470
+you know if I encrypt I could encrypt
+
+1670
+01:13:31,470 --> 01:13:34,110
+the data once with the key of each user
+
+1671
+01:13:34,110 --> 01:13:37,590
+in the a to four group list and that
+
+1672
+01:13:37,590 --> 01:13:39,870
+would work because they could just read
+
+1673
+01:13:39,870 --> 01:13:42,180
+the copy that was encrypted for them but
+
+1674
+01:13:42,180 --> 01:13:43,620
+then as users are added that the
+
+1675
+01:13:43,620 --> 01:13:45,840
+Registrar changes the list as or deletes
+
+1676
+01:13:45,840 --> 01:13:46,410
+users
+
+1677
+01:13:46,410 --> 01:13:48,750
+I need my software I needs to notice
+
+1678
+01:13:48,750 --> 01:13:52,290
+that that list has changed and busily go
+
+1679
+01:13:52,290 --> 01:13:55,230
+out and change the way stuff is
+
+1680
+01:13:55,230 --> 01:13:56,880
+encrypted we encrypt for the new users
+
+1681
+01:13:56,880 --> 01:13:59,010
+deleting two copies for the old users
+
+1682
+01:13:59,010 --> 01:14:01,350
+and that's just like a level of damage
+
+1683
+01:14:01,350 --> 01:14:03,390
+that or a level of kind of complexity
+
+1684
+01:14:03,390 --> 01:14:05,550
+that doesn't exist in current systems
+
+1685
+01:14:05,550 --> 01:14:09,440
+not necessarily they can't be done
+
+1686
+01:14:09,440 --> 01:14:11,520
+but it just does require a lot of
+
+1687
+01:14:11,520 --> 01:14:16,340
+machinery that is not ordinarily needed
+
+1688
+01:14:19,430 --> 01:14:27,860
+all right another sort of trust issue
+
+1689
+01:14:27,860 --> 01:14:30,210
+from the point of view of users is that
+
+1690
+01:14:30,210 --> 01:14:32,400
+they still have to trust their storage
+
+1691
+01:14:32,400 --> 01:14:36,120
+provider to preserve their data and they
+
+1692
+01:14:36,120 --> 01:14:37,380
+still have just trust their storage
+
+1693
+01:14:37,380 --> 01:14:38,970
+provider to always serve up the most
+
+1694
+01:14:38,970 --> 01:14:41,820
+recent copy right the cheating storage
+
+1695
+01:14:41,820 --> 01:14:44,070
+provider might try to cause trouble by
+
+1696
+01:14:44,070 --> 01:14:46,260
+serving up an old version so we lease in
+
+1697
+01:14:46,260 --> 01:14:48,410
+that block stack design you know you're
+
+1698
+01:14:48,410 --> 01:14:50,850
+really trusting your storage server this
+
+1699
+01:14:50,850 --> 01:14:52,650
+central service is from your point of
+
+1700
+01:14:52,650 --> 01:14:54,180
+view to do the right thing with your
+
+1701
+01:14:54,180 --> 01:14:57,060
+data to preserve it to back it up to
+
+1702
+01:14:57,060 --> 01:14:58,560
+produce it when asked for to produce the
+
+1703
+01:14:58,560 --> 01:15:01,260
+right version when asked for and it is a
+
+1704
+01:15:01,260 --> 01:15:03,900
+bit of a question for just ordinary
+
+1705
+01:15:03,900 --> 01:15:07,830
+people that if you're trusting Amazon
+
+1706
+01:15:07,830 --> 01:15:11,190
+AWS to store your data correctly and not
+
+1707
+01:15:11,190 --> 01:15:14,250
+lose it it's not that much bigger of a
+
+1708
+01:15:14,250 --> 01:15:16,620
+step to trust Amazon itself to run the
+
+1709
+01:15:16,620 --> 01:15:19,140
+website and you know we can argue about
+
+1710
+01:15:19,140 --> 01:15:21,120
+with it that's really exactly true but I
+
+1711
+01:15:21,120 --> 01:15:23,250
+think you know from a high-level point
+
+1712
+01:15:23,250 --> 01:15:25,320
+of view from most people most ordinary
+
+1713
+01:15:25,320 --> 01:15:28,170
+people it's really a pretty pretty small
+
+1714
+01:15:28,170 --> 01:15:30,210
+distinction and you would have to
+
+1715
+01:15:30,210 --> 01:15:31,470
+overcome that in order to persuade
+
+1716
+01:15:31,470 --> 01:15:35,460
+people that boy you know the block stack
+
+1717
+01:15:35,460 --> 01:15:38,940
+approach of using Amazon as a storage
+
+1718
+01:15:38,940 --> 01:15:41,430
+service is better than the standard way
+
+1719
+01:15:41,430 --> 01:15:45,930
+of using Amazon as a website another
+
+1720
+01:15:45,930 --> 01:15:47,280
+question from users point of view
+
+1721
+01:15:47,280 --> 01:15:49,260
+another pitch for why that decentralized
+
+1722
+01:15:49,260 --> 01:15:51,450
+architecture might be better for users
+
+1723
+01:15:51,450 --> 01:15:53,430
+is that it gives them more control over
+
+1724
+01:15:53,430 --> 01:15:56,640
+over you know not privacy but just sort
+
+1725
+01:15:56,640 --> 01:15:58,440
+of what applications they use with their
+
+1726
+01:15:58,440 --> 01:16:00,210
+data so if you want to switch
+
+1727
+01:16:00,210 --> 01:16:02,430
+applications but still use the same data
+
+1728
+01:16:02,430 --> 01:16:04,800
+like change photo editing apps like I
+
+1729
+01:16:04,800 --> 01:16:07,380
+mentioned in principle that should be
+
+1730
+01:16:07,380 --> 01:16:10,110
+easier with this sort of decentralized
+
+1731
+01:16:10,110 --> 01:16:14,280
+app architecture because the you know
+
+1732
+01:16:14,280 --> 01:16:16,130
+the again the data is not owned by the
+
+1733
+01:16:16,130 --> 01:16:18,870
+application website if you want to use
+
+1734
+01:16:18,870 --> 01:16:20,370
+the same data in multiple different
+
+1735
+01:16:20,370 --> 01:16:21,750
+applications like I want to
+
+1736
+01:16:21,750 --> 01:16:24,020
+a calendar app but use the same data
+
+1737
+01:16:24,020 --> 01:16:27,000
+from my email app that also is you know
+
+1738
+01:16:27,000 --> 01:16:29,220
+relatively convenient with the
+
+1739
+01:16:29,220 --> 01:16:31,200
+decentralized scheme because the data is
+
+1740
+01:16:31,200 --> 01:16:32,550
+sort of again independent from the
+
+1741
+01:16:32,550 --> 01:16:37,320
+applications you know maybe users want
+
+1742
+01:16:37,320 --> 01:16:39,300
+this maybe they don't probably not at
+
+1743
+01:16:39,300 --> 01:16:42,420
+the top of anybody's list and there's an
+
+1744
+01:16:42,420 --> 01:16:44,010
+additional problem that in order even
+
+1745
+01:16:44,010 --> 01:16:46,890
+for that vision to work there has to be
+
+1746
+01:16:46,890 --> 01:16:49,680
+a lot of standardization of formats of
+
+1747
+01:16:49,680 --> 01:16:53,580
+files so you know the calendar file my
+
+1748
+01:16:53,580 --> 01:16:54,840
+calendar program has to store its
+
+1749
+01:16:54,840 --> 01:16:57,780
+calendar data in a format that my email
+
+1750
+01:16:57,780 --> 01:17:00,060
+program can understand otherwise that
+
+1751
+01:17:00,060 --> 01:17:01,470
+doesn't work and if I'm gonna switch
+
+1752
+01:17:01,470 --> 01:17:04,710
+email applications well my old email
+
+1753
+01:17:04,710 --> 01:17:06,390
+application better have been storing my
+
+1754
+01:17:06,390 --> 01:17:08,190
+email in a format that my new email
+
+1755
+01:17:08,190 --> 01:17:11,100
+application can understand otherwise
+
+1756
+01:17:11,100 --> 01:17:14,640
+this vision of decentralized apps me
+
+1757
+01:17:14,640 --> 01:17:17,190
+easy to switch among can't be made to
+
+1758
+01:17:17,190 --> 01:17:22,530
+come true a final issue that worries me
+
+1759
+01:17:22,530 --> 01:17:24,510
+about this whole thing is that it's not
+
+1760
+01:17:24,510 --> 01:17:25,890
+clear that users are going to be willing
+
+1761
+01:17:25,890 --> 01:17:28,800
+to pay for their own storage if people
+
+1762
+01:17:28,800 --> 01:17:29,580
+aren't willing to pay for that I'm
+
+1763
+01:17:29,580 --> 01:17:31,910
+storage then this whole arrangement is
+
+1764
+01:17:31,910 --> 01:17:34,230
+pretty unattractive because a lot of the
+
+1765
+01:17:34,230 --> 01:17:36,510
+point was to sort of give the users more
+
+1766
+01:17:36,510 --> 01:17:39,450
+responsibility over their own storing
+
+1767
+01:17:39,450 --> 01:17:43,500
+their own stuff users of I think or so
+
+1768
+01:17:43,500 --> 01:17:47,310
+used free advertise advertisements
+
+1769
+01:17:47,310 --> 01:17:50,130
+supported services that they just might
+
+1770
+01:17:50,130 --> 01:17:52,830
+not be willing to get on board with with
+
+1771
+01:17:52,830 --> 01:17:54,920
+paying for internet stuff
+
+1772
+01:17:54,920 --> 01:17:59,970
+alright nevertheless I feel like this
+
+1773
+01:17:59,970 --> 01:18:02,130
+whole area is you know well worth
+
+1774
+01:18:02,130 --> 01:18:04,890
+keeping an eye on maybe even worth sort
+
+1775
+01:18:04,890 --> 01:18:06,810
+of working on different pieces of it to
+
+1776
+01:18:06,810 --> 01:18:08,730
+be are interested in looking for
+
+1777
+01:18:08,730 --> 01:18:12,360
+research problems and well I don't
+
+1778
+01:18:12,360 --> 01:18:13,920
+really believe it right now for the
+
+1779
+01:18:13,920 --> 01:18:17,310
+reasons that I outlined I think it's
+
+1780
+01:18:17,310 --> 01:18:19,530
+absolutely worth pursuing because
+
+1781
+01:18:19,530 --> 01:18:23,430
+someday if like definitely the way this
+
+1782
+01:18:23,430 --> 01:18:25,290
+these kinds of decentralized systems
+
+1783
+01:18:25,290 --> 01:18:28,530
+work has been getting better and may
+
+1784
+01:18:28,530 --> 01:18:30,420
+eventually be good enough that that
+
+1785
+01:18:30,420 --> 01:18:33,210
+there's serious competition for
+
+1786
+01:18:33,210 --> 01:18:35,940
+existing website architectures and I
+
+1787
+01:18:35,940 --> 01:18:38,130
+would just love it if if such serious
+
+1788
+01:18:38,130 --> 01:18:41,100
+competition like that were to arise all
+
+1789
+01:18:41,100 --> 01:18:42,530
+right
+
+1790
+01:18:42,530 --> 01:18:45,450
+that's all I have to say next Tuesday
+
+1791
+01:18:45,450 --> 01:18:47,969
+the last class amazing meeting is going
+
+1792
+01:18:47,969 --> 01:18:50,070
+to be project presentation so I'll get
+
+1793
+01:18:50,070 --> 01:18:52,830
+to hear what what everybody who hasn't
+
+1794
+01:18:52,830 --> 01:18:56,090
+been doing lab four has been up to
+
+1795
+01:18:56,090 --> 01:19:01,010
+please ask me questions if you have
+

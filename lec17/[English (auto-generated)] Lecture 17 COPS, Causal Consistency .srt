@@ -540,7 +540,7 @@ and let's just assume that the data is
 
 136
 00:06:37,350 --> 00:06:41,490
-charted two ways in each of them so he's
+sharded two ways in each of them so he's
 
 137
 00:06:41,490 --> 00:06:43,560
@@ -1580,7 +1580,7 @@ and to writes for it you know to clients
 
 396
 00:18:32,420 --> 00:18:35,120
-launch rates for K so when client writes
+launch writes for K so when client writes
 
 397
 00:18:35,120 --> 00:18:36,950
@@ -1704,7 +1704,7 @@ so why not wall clock time and the idea
 
 427
 00:20:01,520 --> 00:20:04,310
-is that when a what a client generates a
+is that when a what a client genewrites a
 
 428
 00:20:04,310 --> 00:20:07,490
@@ -1712,7 +1712,7 @@ put either it or the shard server the
 
 429
 00:20:07,490 --> 00:20:09,620
-local chart server talks to will look at
+local shard server talks to will look at
 
 430
 00:20:09,620 --> 00:20:12,250
@@ -2312,7 +2312,7 @@ problem of what to do about concurrent
 
 579
 00:27:27,899 --> 00:27:32,639
-rates to the same key it's actually even
+writes to the same key it's actually even
 
 580
 00:27:32,639 --> 00:27:35,879
@@ -2320,7 +2320,7 @@ worse the possibility that concurrent
 
 581
 00:27:35,879 --> 00:27:38,609
-rates might carry might both carry
+writes might carry might both carry
 
 582
 00:27:38,609 --> 00:27:40,700
@@ -2372,7 +2372,7 @@ the what the paper uses is the last
 
 594
 00:28:28,679 --> 00:28:30,570
-Raider wins that is datacenter 3 he's
+writer wins that is datacenter 3 he's
 
 595
 00:28:30,570 --> 00:28:32,580
@@ -2412,7 +2412,7 @@ pants that stampin and that's it so it's
 
 604
 00:28:51,750 --> 00:28:58,700
-using this last Raider wins policy and
+using this last writer wins policy and
 
 605
 00:28:58,700 --> 00:29:03,860
@@ -2464,7 +2464,7 @@ have it had value 12
 
 617
 00:29:35,070 --> 00:29:37,950
-so in that case last Raider wins is
+so in that case last writer wins is
 
 618
 00:29:37,950 --> 00:29:39,600
@@ -2776,19 +2776,19 @@ operator not just put and get but also a
 
 695
 00:33:21,200 --> 00:33:24,580
-sink operator that clients can use and
+sync operator that clients can use and
 
 696
 00:33:24,580 --> 00:33:29,299
-the sink operator will do will be the
+the sync operator will do will be the
 
 697
 00:33:29,299 --> 00:33:34,339
-key and a version number and what sink
+key and a version number and what sync
 
 698
 00:33:34,339 --> 00:33:36,259
-does when a client calls it is sink
+does when a client calls it is sync
 
 699
 00:33:36,259 --> 00:33:40,159
@@ -2828,7 +2828,7 @@ clients to know what version numbers to
 
 708
 00:34:02,169 --> 00:34:06,799
-to pass the sink we're gonna change the
+to pass the sync we're gonna change the
 
 709
 00:34:06,799 --> 00:34:08,659
@@ -2844,7 +2844,7 @@ of the of this updated K you could call
 
 712
 00:34:21,260 --> 00:34:23,449
-this this sink is asking that acting is
+this this sync is asking that acting is
 
 713
 00:34:23,449 --> 00:34:28,129
@@ -2944,7 +2944,7 @@ my photo yet so then the programmer is
 
 737
 00:35:43,010 --> 00:35:48,590
-gonna say sync and you're gonna sink the
+gonna say sync and you're gonna sync the
 
 738
 00:35:48,590 --> 00:35:51,920
@@ -3024,7 +3024,7 @@ because it's this put that adds the
 
 757
 00:36:48,290 --> 00:36:50,300
-footage of the list if client wanted
+putage of the list if client wanted
 
 758
 00:36:50,300 --> 00:36:51,770
@@ -3040,7 +3040,7 @@ this code works write had already called
 
 761
 00:36:56,210 --> 00:36:58,580
-sink and sink doesn't return until the
+sync and sync doesn't return until the
 
 762
 00:36:58,580 --> 00:37:01,460
@@ -3060,7 +3060,7 @@ well the photos in the list that means
 
 766
 00:37:09,200 --> 00:37:11,240
-this whoever added the footage to the
+this whoever added the putage to the
 
 767
 00:37:11,240 --> 00:37:16,160
@@ -3100,7 +3100,7 @@ the programmer you know has to think aha
 
 776
 00:37:40,520 --> 00:37:43,790
-I need a sink here I need to put sink
+I need a sync here I need to put sync
 
 777
 00:37:43,790 --> 00:37:45,770
@@ -3140,7 +3140,7 @@ know verify that indeed the code
 
 786
 00:38:03,580 --> 00:38:05,900
-modified the list called sink before
+modified the list called sync before
 
 787
 00:38:05,900 --> 00:38:08,390
@@ -3152,7 +3152,7 @@ quite a bit of thought
 
 789
 00:38:11,190 --> 00:38:13,410
-with this is all about the sink cause
+with this is all about the sync cause
 
 790
 00:38:13,410 --> 00:38:15,090
@@ -3164,7 +3164,7 @@ that this completely finishes before
 
 792
 00:38:17,790 --> 00:38:22,830
-this happens the readers so that sink
+this happens the readers so that sync
 
 793
 00:38:22,830 --> 00:38:24,600
@@ -3184,7 +3184,7 @@ this example but it is true that if the
 
 797
 00:38:31,590 --> 00:38:34,140
-writer did put a put then sink and then
+writer did put a put then sync and then
 
 798
 00:38:34,140 --> 00:38:36,390
@@ -3204,7 +3204,7 @@ guarantees you get out of this out of
 
 802
 00:38:43,560 --> 00:38:46,110
-this sink scheme these barriers is that
+this sync scheme these barriers is that
 
 803
 00:38:46,110 --> 00:38:49,320
@@ -3240,7 +3240,7 @@ mainly at if one data center goes down
 
 811
 00:39:07,080 --> 00:39:09,420
-that means the sink blocks until the
+that means the sync blocks until the
 
 812
 00:39:09,420 --> 00:39:10,590
@@ -3248,7 +3248,7 @@ other data centers brought up
 
 813
 00:39:10,590 --> 00:39:12,870
-that's absolutely write so you're
+that's absolutely right so you're
 
 814
 00:39:12,870 --> 00:39:16,680
@@ -3260,7 +3260,7 @@ great scheme alright this is sort of a
 
 816
 00:39:19,050 --> 00:39:21,450
-straw man on the way the cops this sink
+straw man on the way the cops this sync
 
 817
 00:39:21,450 --> 00:39:24,630
@@ -3280,7 +3280,7 @@ problem will you know whatever data
 
 821
 00:39:31,920 --> 00:39:33,240
-centers down will the sink block forever
+centers down will the sync block forever
 
 822
 00:39:33,240 --> 00:39:37,080
@@ -3292,11 +3292,11 @@ consult a quorum of data center so that
 
 824
 00:39:41,480 --> 00:39:45,450
-this a sink will only wait for you know
+this a sync will only wait for you know
 
 825
 00:39:45,450 --> 00:39:48,930
-say a majority year of data centers to
+say a majority of data centers to
 
 826
 00:39:48,930 --> 00:39:50,580
@@ -3340,7 +3340,7 @@ and Cassandra and they use quorums to
 
 836
 00:40:21,720 --> 00:40:28,140
-avoid the wall talks pop okay okay so
+avoid the fault tolerance problem okay okay so
 
 837
 00:40:28,140 --> 00:40:30,900
@@ -3388,7 +3388,7 @@ reason why you can maybe convince
 
 848
 00:40:53,369 --> 00:40:55,849
-yourself that the rate performance is
+yourself that the write performance is
 
 849
 00:40:55,849 --> 00:40:58,829
@@ -3396,7 +3396,7 @@ not a disaster is that after all the
 
 850
 00:40:58,829 --> 00:41:01,230
-Facebook memcache D paper has to send
+Facebook memcacheD paper has to send
 
 851
 00:41:01,230 --> 00:41:02,910
@@ -3412,11 +3412,11 @@ multiple data centers and clients talk
 
 854
 00:41:07,050 --> 00:41:08,760
-to all of them but the rates have to all
+to all of them but the writes have to all
 
 855
 00:41:08,760 --> 00:41:11,430
-be sent to the my sequel databases at
+be sent to the mysql databases at
 
 856
 00:41:11,430 --> 00:41:13,490
@@ -3516,7 +3516,7 @@ we're going to tell the readers or tell
 
 880
 00:42:08,970 --> 00:42:16,010
-the other data centers and a simple
+the other data centers and a simple way to
 
 881
 00:42:16,010 --> 00:42:21,040
@@ -3568,7 +3568,7 @@ client does it write does it put to its
 
 893
 00:42:56,300 --> 00:42:59,000
-local shard and that's chart that shard
+local shard and that's shard that shard
 
 894
 00:42:59,000 --> 00:43:00,680
@@ -3668,7 +3668,7 @@ the write to a first and then the write
 
 918
 00:44:04,160 --> 00:44:06,200
-to be to each of the t's data centers
+b to each of the t's data centers
 
 919
 00:44:06,200 --> 00:44:08,060
@@ -3680,7 +3680,7 @@ sent to a kind of single log receiving
 
 921
 00:44:11,870 --> 00:44:15,410
-server which plays out the rates one at
+server which plays out the writes one at
 
 922
 00:44:15,410 --> 00:44:19,550
@@ -3708,7 +3708,7 @@ we're no longer we now eliminate the
 
 928
 00:44:31,550 --> 00:44:33,380
-sinks the clients can go back to this
+syncs the clients can go back to this
 
 929
 00:44:33,380 --> 00:44:38,860
@@ -3836,7 +3836,7 @@ being fast enough to process all these
 
 960
 00:45:57,980 --> 00:46:01,880
-rates and so cops does not follow this
+writes and so cops does not follow this
 
 961
 00:46:01,880 --> 00:46:06,760
@@ -3856,7 +3856,7 @@ can at least from the clients point of
 
 965
 00:46:17,120 --> 00:46:18,770
-view process rates and reads purely
+view process writes and reads purely
 
 966
 00:46:18,770 --> 00:46:20,600
@@ -3872,7 +3872,7 @@ to get order we want a forward we like
 
 969
 00:46:25,610 --> 00:46:28,040
-the fact that these rates are being
+the fact that these writes are being
 
 970
 00:46:28,040 --> 00:46:31,490
@@ -3892,7 +3892,7 @@ order information to other data centers
 
 974
 00:46:39,290 --> 00:46:41,440
-without having to funnel all our rates
+without having to funnel all our writes
 
 975
 00:46:41,440 --> 00:46:45,590
@@ -4100,7 +4100,7 @@ seemed X version 2 and Y version 4
 
 1026
 00:49:37,210 --> 00:49:39,040
-before doing the foot so anybody else
+before doing the put so anybody else
 
 1027
 00:49:39,040 --> 00:49:41,800
@@ -4108,7 +4108,7 @@ who reads this version of Z had also
 
 1028
 00:49:41,800 --> 00:49:44,140
-better be seeing X&Y with the Beasties
+better be seeing X&Y with the latest
 
 1029
 00:49:44,140 --> 00:49:48,670
@@ -4224,7 +4224,7 @@ non-transactional cops okay so the
 
 1057
 00:51:25,819 --> 00:51:27,559
-clients are community this context and
+clients are communicating this context and
 
 1058
 00:51:27,559 --> 00:51:29,300
@@ -4244,7 +4244,7 @@ man straw man 2 was sort of forced by
 
 1062
 00:51:39,980 --> 00:51:41,359
-sink instead of doing that we're not
+sync instead of doing that we're not
 
 1063
 00:51:41,359 --> 00:51:43,549
@@ -4280,7 +4280,7 @@ and dependency and it writes it as
 
 1071
 00:52:12,010 --> 00:52:14,779
-supposing this foot produces Z version
+supposing this put produces Z version
 
 1072
 00:52:14,779 --> 00:52:20,539
@@ -4332,7 +4332,7 @@ to the local shard server what does that
 
 1084
 00:53:02,000 --> 00:53:08,450
-actually cause cops to do well eats cops
+actually cause cops to do well each cops
 
 1085
 00:53:08,450 --> 00:53:12,289
@@ -4408,7 +4408,7 @@ these dependencies
 
 1103
 00:54:13,090 --> 00:54:19,960
-XV 2 + a YB 4 write and this is sent
+X V2 + a Y  V4 write and this is sent
 
 1104
 00:54:19,960 --> 00:54:22,630
@@ -4568,7 +4568,7 @@ that correspond to version 2 of
 
 1143
 00:56:17,620 --> 00:56:20,260
-extraversion for Y and that KC has to
+x and version 4  for Y and that key has to
 
 1144
 00:56:20,260 --> 00:56:22,150
@@ -4756,7 +4756,7 @@ down even mere slowness can be
 
 1190
 00:58:29,710 --> 00:58:31,840
-irritating Z mate you have to wait for X
+irritating Z may you have to wait for X
 
 1191
 00:58:31,840 --> 00:58:34,570
@@ -4768,7 +4768,7 @@ already showed up and has arrived at
 
 1193
 00:58:38,110 --> 00:58:38,980
-this charts
+this shard server
 
 1194
 00:58:38,980 --> 00:58:41,290
@@ -4776,7 +4776,7 @@ but it itself had dependencies maybe on
 
 1195
 00:58:41,290 --> 00:58:43,630
-key a and so this chart server can't
+key a and so this shard server can't
 
 1196
 00:58:43,630 --> 00:58:45,970
@@ -5052,7 +5052,7 @@ wait for writes to complete there's none
 
 1264
 01:02:14,300 --> 01:02:16,220
-of this sink business and also the
+of this sync business and also the
 
 1265
 01:02:16,220 --> 01:02:19,280
