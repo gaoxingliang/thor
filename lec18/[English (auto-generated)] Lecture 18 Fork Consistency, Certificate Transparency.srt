@@ -44,7 +44,7 @@ rafters that way you know you just
 
 12
 00:00:34,440 --> 00:00:36,059
-assume at the RAF's tiers do what
+assume at the raft peers do what
 
 13
 00:00:36,059 --> 00:00:40,800
@@ -320,7 +320,7 @@ would sort of know what it was I wanted
 
 81
 00:03:47,040 --> 00:03:49,859
-to talk to name Li gmail.com my browser
+to talk to name gmail.com my browser
 
 82
 00:03:49,859 --> 00:03:51,780
@@ -408,7 +408,7 @@ address of the real gmail.com server
 
 103
 00:04:49,889 --> 00:04:52,110
-would provide the email address of ma of
+would provide the email address of
 
 104
 00:04:52,110 --> 00:04:54,510
@@ -552,7 +552,7 @@ you're using when you use HTTPS links um
 
 139
 00:06:20,990 --> 00:06:24,120
-and here the game was that Gmail comm
+and here the game was that Gmail.com
 
 140
 00:06:24,120 --> 00:06:28,880
@@ -668,11 +668,11 @@ authority would provide a certificate
 
 168
 00:07:39,350 --> 00:07:40,840
-back to gee
+back to gmail.com
 
 169
 00:07:40,840 --> 00:07:43,090
-komm which basically what a certificate
+which basically what a certificate
 
 170
 00:07:43,090 --> 00:07:50,010
@@ -772,7 +772,7 @@ in the certificate that the random
 
 194
 00:08:57,790 --> 00:08:59,200
-number is ran and remember was really
+number was really
 
 195
 00:08:59,200 --> 00:09:02,680
@@ -888,7 +888,7 @@ certificate authority to give you a
 
 223
 00:10:03,450 --> 00:10:06,660
-certificate associating gmail comm with
+certificate associating gmail.com with
 
 224
 00:10:06,660 --> 00:10:10,890
@@ -976,7 +976,7 @@ and not hand out certificates to random
 
 245
 00:10:53,490 --> 00:10:57,600
-people for gmail comp but it that turns
+people for gmail.com but it that turns
 
 246
 00:10:57,600 --> 00:11:00,210
@@ -996,7 +996,7 @@ request comes from Google but you know
 
 250
 00:11:06,450 --> 00:11:09,780
-for just XCOM that's very hard to have a
+for just X.COM that's very hard to have a
 
 251
 00:11:09,780 --> 00:11:11,670
@@ -1012,7 +1012,7 @@ came from the person who really does own
 
 254
 00:11:16,200 --> 00:11:20,700
-the DMS name XCOM all right a worse
+the DMS name X.COM all right a worse
 
 255
 00:11:20,700 --> 00:11:23,640
@@ -1188,7 +1188,7 @@ man-in-the-middle attacks and did
 
 298
 00:13:02,760 --> 00:13:05,550
-Mountain Man the middle attacks today's
+Man in the middle attacks today's
 
 299
 00:13:05,550 --> 00:13:07,740
@@ -1228,7 +1228,7 @@ signature over the certificate by the
 
 308
 00:13:23,520 --> 00:13:25,740
-sir tip using by the certificate
+using by the certificate
 
 309
 00:13:25,740 --> 00:13:27,690
@@ -1296,7 +1296,7 @@ certificates so that when a browser
 
 325
 00:14:07,950 --> 00:14:09,840
-you know browser Comcast websites web
+you know browser come access websites web
 
 326
 00:14:09,840 --> 00:14:11,370
@@ -1460,7 +1460,7 @@ step it can towards a database of the
 
 366
 00:15:54,520 --> 00:15:59,710
-holid trustworthy certificates so now
+hold trustworthy certificates so now
 
 367
 00:15:59,710 --> 00:16:02,050
@@ -1668,7 +1668,7 @@ they're gonna ask someone of the
 
 418
 00:18:12,659 --> 00:18:15,539
-hundreds of CAS for a certificate when
+hundreds of CAs for a certificate when
 
 419
 00:18:15,539 --> 00:18:18,299
@@ -1712,7 +1712,7 @@ a sort
 
 429
 00:18:43,179 --> 00:18:46,570
-Transparency vlog server there's gonna
+Transparency log server there's gonna
 
 430
 00:18:46,570 --> 00:18:48,599
@@ -1804,7 +1804,7 @@ server see is this certificate in the
 
 452
 00:19:42,940 --> 00:19:46,389
-log there's difficut log servers gonna
+log there's certificate log servers gonna
 
 453
 00:19:46,389 --> 00:19:48,339
@@ -1892,7 +1892,7 @@ monitor periodically also talks to the
 
 474
 00:20:44,290 --> 00:20:47,410
-certificate log servers an asset please
+certificate log servers and ask please
 
 475
 00:20:47,410 --> 00:20:49,150
@@ -2304,7 +2304,7 @@ certificate to a browser claimants in
 
 577
 00:25:29,400 --> 00:25:31,020
-the long and maybe in the log at that
+the log and maybe in the log at that
 
 578
 00:25:31,020 --> 00:25:34,140
@@ -2540,7 +2540,7 @@ cryptographic hash summarizes the
 
 636
 00:28:19,409 --> 00:28:23,039
-countenance of the log and the way
+contents of the log and the way
 
 637
 00:28:23,039 --> 00:28:25,649
@@ -2556,7 +2556,7 @@ hash always hashing together pairs of
 
 640
 00:28:30,630 --> 00:28:35,940
-numbers at the zeroeth level so I'm
+numbers at the zero-th level so I'm
 
 641
 00:28:35,940 --> 00:28:38,730
@@ -2784,11 +2784,11 @@ the third reading today sort of outlined
 
 697
 00:31:23,429 --> 00:31:25,110
-how to
+how to extend the log
 
 698
 00:31:25,110 --> 00:31:27,210
-and the law how to add records to the
+and how to add records to the
 
 699
 00:31:27,210 --> 00:31:32,790
@@ -2808,7 +2808,7 @@ impractical but makes it easier to
 
 703
 00:31:39,090 --> 00:31:41,190
-explain Naumann so that means that as
+explain so that means that as
 
 704
 00:31:41,190 --> 00:31:43,230
@@ -2864,7 +2864,7 @@ this is the new tree head for the new
 
 717
 00:32:26,370 --> 00:32:28,950
-expanded law and so that means as time
+expanded log and so that means as time
 
 718
 00:32:28,950 --> 00:32:33,000
@@ -2928,7 +2928,7 @@ servers to prove certain things about
 
 733
 00:33:16,410 --> 00:33:18,840
-the logs that they can about the log
+the logs that they can by the log
 
 734
 00:33:18,840 --> 00:33:21,059
@@ -2948,11 +2948,11 @@ is what I'll call a proof of inclusion
 
 738
 00:33:33,510 --> 00:33:39,030
-and this is what a
+and this is what a browser
 
 739
 00:33:40,050 --> 00:33:42,540
-NEADS when it when it wants to find out
+needs when it when it wants to find out
 
 740
 00:33:42,540 --> 00:33:44,880
@@ -2964,7 +2964,7 @@ given by a web server if that
 
 742
 00:33:46,320 --> 00:33:49,290
-certificate is really in the law it's
+certificate is really in the log it's
 
 743
 00:33:49,290 --> 00:33:54,180
@@ -3204,7 +3204,7 @@ that sits under that sign tree head is
 
 802
 00:36:35,450 --> 00:36:39,890
-the two LM in log a B for particular
+the two element in log a b for particular
 
 803
 00:36:39,890 --> 00:36:44,050
@@ -3272,7 +3272,7 @@ server can return is simply the proof
 
 819
 00:37:38,060 --> 00:37:42,710
-for a is a in the log is simply eizan in
+for a is a in the log is simply a's position in
 
 820
 00:37:42,710 --> 00:37:50,950
@@ -3332,7 +3332,7 @@ see if the result is the same as the
 
 834
 00:38:27,750 --> 00:38:29,760
-sine tree head that it happens and if it
+sign tree head that it happens and if it
 
 835
 00:38:29,760 --> 00:38:34,290
@@ -3524,7 +3524,7 @@ hash of X that the clients asking about
 
 882
 00:40:52,740 --> 00:40:55,710
-produces that same sign tree hit well we
+produces that same sign tree head well we
 
 883
 00:40:55,710 --> 00:40:57,090
@@ -3696,7 +3696,7 @@ assuming that the sign tree had the
 
 925
 00:42:55,200 --> 00:42:57,590
-theum
+the um the browser head
 
 926
 00:42:58,099 --> 00:43:04,489
@@ -3804,7 +3804,7 @@ to attack it and you know you want the
 
 952
 00:44:10,039 --> 00:44:11,269
-browser student be able to use all the
+browser still be able to use all the
 
 953
 00:44:11,269 --> 00:44:13,960
@@ -3912,7 +3912,7 @@ is kind of off on one fork and then this
 
 979
 00:45:26,380 --> 00:45:28,630
-vlog we're cooking up especially to
+log we're cooking up especially to
 
 980
 00:45:28,630 --> 00:45:31,480
@@ -4024,7 +4024,7 @@ from the sign tree heads this is the
 
 1007
 00:46:48,279 --> 00:46:51,299
-militia service showing two monitors
+malicious service showing two monitors
 
 1008
 00:46:51,299 --> 00:46:53,739
@@ -4032,7 +4032,7 @@ if only the browsers and monitors could
 
 1009
 00:46:53,739 --> 00:46:56,859
-compare notes they would maybe instantly
+compare nodes they would maybe instantly
 
 1010
 00:46:56,859 --> 00:46:58,329
@@ -4156,7 +4156,7 @@ all right okay so the question is given
 
 1040
 00:48:21,359 --> 00:48:25,430
-to sign tree heads how do we decide if
+two sign tree heads how do we decide if
 
 1041
 00:48:25,430 --> 00:48:27,660
@@ -4184,7 +4184,7 @@ sign tree head one was the legitimate so
 
 1047
 00:48:46,140 --> 00:48:47,970
-he had a vlog at this point of then some
+he had a log at this point of then some
 
 1048
 00:48:47,970 --> 00:48:50,070
@@ -4196,7 +4196,7 @@ tree head 3 becomes the correct head of
 
 1050
 00:48:54,150 --> 00:48:55,800
-the law and then signed tree head for
+the log and then signed tree head for
 
 1051
 00:48:55,800 --> 00:48:59,820
@@ -4276,11 +4276,11 @@ the
 
 1070
 00:49:52,080 --> 00:49:56,610
-la consistency proof
+log consistency proof
 
 1071
 00:49:58,430 --> 00:50:00,490
-you
+um
 
 1072
 00:50:05,749 --> 00:50:08,069
@@ -4292,7 +4292,7 @@ sign tree heads H 1 and H 2 and we're
 
 1074
 00:50:12,299 --> 00:50:22,619
-asking is h 1s log prefix really it's
+asking is H1's log prefix really it's
 
 1075
 00:50:22,619 --> 00:50:24,659
@@ -4376,7 +4376,7 @@ next sign tree head I know we get this
 
 1095
 00:51:34,999 --> 00:51:42,209
-kind of tree of life sign tree heads all
+kind of tree of sign tree heads all
 
 1096
 00:51:42,209 --> 00:51:45,509
@@ -4424,7 +4424,7 @@ that with some other thing until we get
 
 1107
 00:52:06,719 --> 00:52:10,830
-to the point where we find H 2 and with
+to the point where we find H 2 and with that
 
 1108
 00:52:10,830 --> 00:52:14,940
@@ -4448,7 +4448,7 @@ produce is this sequence of other the
 
 1113
 00:52:31,860 --> 00:52:34,440
-other side of each of the Hat sign tree
+other side of each of the head sign tree
 
 1114
 00:52:34,440 --> 00:52:39,200
@@ -4532,7 +4532,7 @@ the hashes this sort of repeated hash of
 
 1134
 00:53:47,220 --> 00:53:50,910
-h1 to equal H to H do really encompass
+h1 to equal H2 to H2 do really encompass
 
 1135
 00:53:50,910 --> 00:53:53,880
@@ -4572,7 +4572,7 @@ browsers and monitors
 
 1144
 00:54:25,160 --> 00:54:28,560
-well Luke browsers and monitors
+well browsers and monitors
 
 1145
 00:54:28,560 --> 00:54:30,090
@@ -4752,7 +4752,7 @@ eventually somebody else
 
 1189
 00:56:36,180 --> 00:56:38,099
-we'll pull that sign tray head out of
+we'll pull that sign tree head out of
 
 1190
 00:56:38,099 --> 00:56:41,039
@@ -4776,7 +4776,7 @@ produce the proof and I'm since they're
 
 1195
 00:56:49,859 --> 00:56:52,049
-signed since the scientist or signed by
+signed since the sign tree by
 
 1196
 00:56:52,049 --> 00:56:55,230
@@ -4848,7 +4848,7 @@ sends it a signed tree you know makes
 
 1213
 00:57:52,319 --> 00:57:53,579
-signed RIA that's different from
+signed tree that's different from
 
 1214
 00:57:53,579 --> 00:57:56,150
@@ -4948,7 +4948,7 @@ new log with a bunch of new stuff on it
 
 1238
 00:58:47,910 --> 00:58:49,930
-and here is the sign tree
+and here is the sign tree head
 
 1239
 00:58:49,930 --> 00:58:52,809
@@ -4956,7 +4956,7 @@ of the current log why don't you switch
 
 1240
 00:58:52,809 --> 00:58:54,880
-my to use that as your sign tree hit and
+my to use that as your sign tree head and
 
 1241
 00:58:54,880 --> 00:58:59,170
@@ -5060,7 +5060,7 @@ that we're looking for it's actually
 
 1266
 01:00:03,279 --> 01:00:12,010
-called for consistency and with any
+called fork consistency and with any
 
 1267
 01:00:12,010 --> 01:00:14,500
@@ -5068,7 +5068,7 @@ first two is that if the browser's been
 
 1268
 01:00:14,500 --> 01:00:16,480
-forked onto a different fork from other
+forked into a different fork from other
 
 1269
 01:00:16,480 --> 01:00:18,970
@@ -5192,7 +5192,7 @@ eventually be caught by the gossip
 
 1299
 01:01:37,120 --> 01:01:40,060
-protocol whereas if the blog server
+protocol whereas if the log server
 
 1300
 01:01:40,060 --> 01:01:43,960
@@ -5216,7 +5216,7 @@ and the log server will not be able to
 
 1305
 01:01:52,930 --> 01:01:55,240
-produce it because deed the log
+produce it because indeed the log
 
 1306
 01:01:55,240 --> 01:01:57,070
@@ -5236,11 +5236,11 @@ okay okay so the system these these log
 
 1310
 01:02:11,600 --> 01:02:13,400
-consistency proofs provide for
+consistency proofs provide fork
 
 1311
 01:02:13,400 --> 01:02:15,980
-consistency and for consistency plus
+consistency and fork consistency plus
 
 1312
 01:02:15,980 --> 01:02:20,540
@@ -5248,7 +5248,7 @@ gossiping and that requiring this log
 
 1313
 01:02:20,540 --> 01:02:23,390
-consistency proves for the science found
+consistency proves for the sign tree heads found
 
 1314
 01:02:23,390 --> 01:02:24,230
@@ -5640,7 +5640,7 @@ yeah so I guess a certificate a
 
 1411
 01:06:56,849 --> 01:06:58,470
-certificate transparency law could
+certificate transparency log could
 
 1412
 01:06:58,470 --> 01:07:02,099
@@ -5836,7 +5836,7 @@ delete them from the list of acceptable
 
 1460
 01:08:53,640 --> 01:09:02,600
-klog servers okay but these are you know
+log servers okay but these are you know
 
 1461
 01:09:02,600 --> 01:09:06,240
@@ -6176,7 +6176,7 @@ equivocation it's an important kind of
 
 1545
 01:12:43,870 --> 01:12:46,570
-attack another property this for
+attack another property this fork
 
 1546
 01:12:46,570 --> 01:12:48,160
@@ -6196,7 +6196,7 @@ forces the malicious server once it has
 
 1550
 01:12:55,780 --> 01:12:57,670
-formed somebody to keep them on that
+forked somebody to keep them on that
 
 1551
 01:12:57,670 --> 01:13:00,460
@@ -6212,7 +6212,7 @@ trick is the notion of gossiping in
 
 1554
 01:13:06,940 --> 01:13:08,710
-order to detect for because it's
+order to detect fork because it's
 
 1555
 01:13:08,710 --> 01:13:10,600
