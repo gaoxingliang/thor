@@ -1,7 +1,7 @@
 import pysrt
 import glob
 
-srt_files = glob.glob('./*/*.srt')
+srt_files = glob.glob('en.srt')
 
 for f in srt_files:
     subs = pysrt.open(f)
